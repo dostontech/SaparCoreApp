@@ -67,6 +67,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Screenshots & Audit Dumps (Keep repository clean)
+/*.png
+/ibox_*.png
+/sapar_*.png
+/shift_*.png
+/tc_inv_*.png
+/test_*.png
+/sale_*.png
+/module_screenshots/
+/module_screenshots_uz/
+/module_audit_screenshots/
+/implementation_plan*
+/walkthrough.md
+/module_audit_report.json
+/generateClientPdf.js
+/*.pdf
+/sapar_vs_ibox_complete_comparison.html
+/qa-skills/
+
 # Testing & Subagent Artifacts
 .playwright-mcp/
 test-results/
