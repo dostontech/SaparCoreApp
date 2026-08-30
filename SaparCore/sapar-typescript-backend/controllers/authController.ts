@@ -91,9 +91,9 @@ export async function register(req: Request, res: Response): Promise<void> {
       token: generateToken(user.id),
       user,
     });
-  } catch (err) {
-    console.error('register error', err);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err: any) {
+    console.error('register error:', err);
+    res.status(500).json({ message: 'Server error', error: err?.message || String(err) });
   }
 }
 
