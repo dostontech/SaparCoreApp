@@ -84,7 +84,7 @@ const AdminLogin: React.FC = () => {
       let slug = "";
       if (parts.length >= 4 && parts[1] === "app") {
         slug = parts[0];
-      } else if (parts.length === 3 && parts[0] !== "app" && parts[0] !== "www" && parts[0] !== "localhost") {
+      } else if (parts.length === 3 && parts[0] !== "app" && parts[0] !== "www" && parts[0] !== "api" && parts[0] !== "localhost") {
         slug = parts[0];
       }
 
