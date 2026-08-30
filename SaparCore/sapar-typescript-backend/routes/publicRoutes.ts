@@ -281,7 +281,7 @@ router.get('/tenant/resolve', limiter, async (req: Request, res: Response): Prom
         city: true,
         state: true,
         country: true,
-        taxNumber: true,
+        taxRegime: true,
         publicBaseUrl: true,
       },
     });
