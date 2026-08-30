@@ -9,7 +9,7 @@ databases:
   - name: sapar-postgres
     databaseName: sapar
     user: sapar
-    plan: starter # or standard for high throughput
+    plan: starter
     region: frankfurt # Low latency to Uzbekistan (or singapore)
     postgresMajorVersion: "16"
 
@@ -52,8 +52,6 @@ services:
   - type: web
     name: sapar-frontend
     runtime: static
-    plan: free
-    region: frankfurt
     rootDir: SaparCore/sapar-typescript-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
