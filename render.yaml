@@ -23,7 +23,7 @@ services:
     plan: free
     region: frankfurt
     rootDir: SaparCore/sapar-typescript-backend
-    buildCommand: npm install && npx prisma generate
+    buildCommand: npm install --legacy-peer-deps && npx prisma generate
     startCommand: node server.js
     healthCheckPath: /api/healthz
     envVars:
@@ -55,7 +55,7 @@ services:
     name: sapar-frontend
     runtime: static
     rootDir: SaparCore/sapar-typescript-frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run build
     staticPublishPath: dist
     routes:
       - type: rewrite
