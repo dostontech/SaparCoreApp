@@ -655,6 +655,7 @@ const getNavItems = (visibility: ModuleVisibility, t: any, mode: WorkspaceMode =
                     to: "/admin",
                     title: t("nav.mainDashboard", "Asosiy ERP Paneli"),
                     slug: "dashboard",
+                    exact: true,
                 },
                 ...(visibility.pos
                     ? [
@@ -1449,9 +1450,10 @@ const NavItem: React.FC<NavItemProps> = ({
     user,
 }) => {
     const { pathname } = useLocation();
-    const isMainActive = item.exact
-        ? pathname === item.to
-        : pathname === item.to || pathname.startsWith(`${item.to}/`);
+    const isRootAdmin = item.to === "/admin" || item.to === "/admin/" || item.to === "/admin/dashboard";
+    const isMainActive = item.exact || isRootAdmin
+        ? (pathname === item.to || (isRootAdmin && (pathname === "/admin" || pathname === "/admin/")))
+        : (pathname === item.to || (item.to !== "/admin" && pathname.startsWith(`${item.to}/`)));
     const isAddActive = item.addPath ? pathname === item.addPath : false;
 
     if (!canView(item.slug, permissions, user)) return null;
@@ -1460,16 +1462,16 @@ const NavItem: React.FC<NavItemProps> = ({
         <div className="flex items-center group relative mb-0.5">
             <NavLink
                 to={item.to}
-                end={item.exact}
+                end={item.exact || isRootAdmin}
                 onClick={() => {
-                    if (item.to === "/admin" || item.to === "/admin/" || item.to === "/admin/dashboard") {
+                    if (isRootAdmin) {
                         localStorage.setItem("sapar_workspace_mode", "all");
                         window.dispatchEvent(new CustomEvent("sapar-workspace-change", { detail: "all" }));
                     }
                 }}
                 className={({ isActive }) =>
                     `flex items-center w-full px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 ${
-                        isActive || isMainActive
+                        (item.exact || isRootAdmin ? isActive : (isActive || isMainActive))
                             ? "bg-teal-700 text-white shadow-xs font-bold"
                             : "text-slate-700 hover:bg-slate-200/70 hover:text-slate-900"
                     }`
