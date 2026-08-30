@@ -27,6 +27,8 @@ services:
     startCommand: node server.js
     healthCheckPath: /api/healthz
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -60,6 +62,8 @@ services:
         source: /*
         destination: /index.html
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: VITE_DEMO_MODE
         value: "false"
       - key: VITE_API_BASE_URL
