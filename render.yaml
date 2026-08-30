@@ -66,8 +66,3 @@ services:
         value: "20"
       - key: VITE_DEMO_MODE
         value: "false"
-      - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: sapar-api
-          property: host

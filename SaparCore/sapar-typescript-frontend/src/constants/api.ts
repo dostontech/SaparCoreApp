@@ -1,4 +1,20 @@
 let rawBase = (import.meta.env.VITE_API_BASE_URL || "").trim();
+
+// If rawBase is a bare service name like "sapar-api" from Render blueprint, resolve to onrender.com
+if (rawBase === "sapar-api" || rawBase === "https://sapar-api" || rawBase === "http://sapar-api") {
+  rawBase = "https://sapar-api.onrender.com";
+}
+
+// Auto-detect production API URL based on current frontend hostname
+if (typeof window !== "undefined") {
+  const host = window.location.hostname;
+  if (host.endsWith("sapar.uz")) {
+    rawBase = "https://api.sapar.uz";
+  } else if (host.endsWith("onrender.com") && (!rawBase || rawBase.includes("sapar-api") || !rawBase.includes("."))) {
+    rawBase = "https://sapar-api.onrender.com";
+  }
+}
+
 if (rawBase && !rawBase.startsWith("http://") && !rawBase.startsWith("https://")) {
   rawBase = `https://${rawBase}`;
 }
