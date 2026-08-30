@@ -1,6 +1,6 @@
 # =============================================================================
 # SAPAR ERP — Render.com Blueprint Infrastructure as Code (render.yaml)
-# Deploy fullstack stack: PostgreSQL 16 + Node.js API + React Frontend SPA
+# 100% Free Tier Configuration (No Credit Card Required)
 # =============================================================================
 
 version: "1"
@@ -9,7 +9,7 @@ databases:
   - name: sapar-postgres
     databaseName: sapar
     user: sapar
-    plan: starter
+    plan: free
     region: frankfurt # Low latency to Uzbekistan (or singapore)
     postgresMajorVersion: "16"
 
@@ -20,7 +20,7 @@ services:
   - type: web
     name: sapar-api
     runtime: node
-    plan: starter
+    plan: free
     region: frankfurt
     rootDir: SaparCore/sapar-typescript-backend
     buildCommand: npm install && npx prisma generate
