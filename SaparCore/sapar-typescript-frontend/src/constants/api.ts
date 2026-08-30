@@ -1,5 +1,10 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-const API_BASE_URL = `${BASE_URL}/api`;
+let rawBase = (import.meta.env.VITE_API_BASE_URL || "").trim();
+if (rawBase && !rawBase.startsWith("http://") && !rawBase.startsWith("https://")) {
+  rawBase = `https://${rawBase}`;
+}
+rawBase = rawBase.replace(/\/+$/, "");
+const BASE_URL = rawBase;
+const API_BASE_URL = BASE_URL ? `${BASE_URL}/api` : "/api";
 const Constants = {
   API_BASE_URL,
   BASE_URL,

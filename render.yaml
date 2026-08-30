@@ -49,9 +49,8 @@ services:
   # ---------------------------------------------------------------------------
   # 2. Frontend Static Site (React 19 + Vite SPA)
   # ---------------------------------------------------------------------------
-  - type: web
+  - type: static
     name: sapar-frontend
-    runtime: static
     rootDir: SaparCore/sapar-typescript-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
