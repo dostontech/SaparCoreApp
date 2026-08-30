@@ -151,6 +151,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Sapar API Docs',
   swaggerOptions: { persistAuthorization: true },
 }));
+app.get(['/api-docs', '/docs'], (_req, res) => res.redirect('/api/docs/'));
 app.get('/api/docs.json', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
