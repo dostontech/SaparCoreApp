@@ -1303,19 +1303,31 @@ function resolveSidebarPath(pathname: string): string {
     return pathname;
 }
 
+const isRouteMatch = (itemTo: string, pathname: string, exact?: boolean): boolean => {
+    const isRootAdmin = itemTo === "/admin" || itemTo === "/admin/" || itemTo === "/admin/dashboard";
+    if (isRootAdmin) {
+        return pathname === "/admin" || pathname === "/admin/" || pathname === "/admin/dashboard";
+    }
+    if (exact) {
+        return pathname === itemTo;
+    }
+    return pathname === itemTo || pathname.startsWith(`${itemTo}/`);
+};
+
 const findActiveMenuPath = (
     items: NavItemType[],
     pathname: string
 ): string[] => {
     for (const item of items) {
         if (item.type === "link") {
-            const isMatch = item.exact
-                ? pathname === item.to
-                : pathname === item.to || pathname.startsWith(`${item.to}/`);
-            if (isMatch) return [item.to];
+            if (isRouteMatch(item.to, pathname, item.exact)) {
+                return [item.to];
+            }
         } else if (item.type === "collapsible") {
             const childPath = findActiveMenuPath(item.children, pathname);
-            if (childPath.length > 0) return [item.id, ...childPath];
+            if (childPath.length > 0) {
+                return [item.id, ...childPath];
+            }
         }
     }
     return [];
@@ -1352,11 +1364,9 @@ const NavItem: React.FC<NavItemProps> = ({
     user,
 }) => {
     const { pathname } = useLocation();
-    const isRootAdmin = item.to === "/admin" || item.to === "/admin/" || item.to === "/admin/dashboard";
-    const isActive = isRootAdmin
-        ? (pathname === "/admin" || pathname === "/admin/" || pathname === "/admin/dashboard")
-        : (item.exact ? pathname === item.to : (pathname === item.to || pathname.startsWith(`${item.to}/`)));
+    const isActive = isRouteMatch(item.to, pathname, item.exact);
     const isAddActive = item.addPath ? pathname === item.addPath : false;
+    const isRootAdmin = item.to === "/admin" || item.to === "/admin/" || item.to === "/admin/dashboard";
 
     if (!canView(item.slug, permissions, user)) return null;
 
@@ -1370,14 +1380,16 @@ const NavItem: React.FC<NavItemProps> = ({
                         window.dispatchEvent(new CustomEvent("sapar-workspace-change", { detail: "all" }));
                     }
                 }}
-                className={`flex items-center w-full px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 ${
+                className={`flex items-center w-full px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 relative ${
                     isActive
                         ? "bg-teal-700 text-white shadow-xs font-bold"
-                        : "text-slate-700 hover:bg-slate-200/70 hover:text-slate-900"
+                        : "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
                 }`}
             >
                 {item.icon && (
-                    <span className="shrink-0">{item.icon}</span>
+                    <span className={`shrink-0 ${isActive ? "text-white" : "text-slate-500 group-hover:text-slate-800"}`}>
+                        {item.icon}
+                    </span>
                 )}
                 <span
                     className={`ml-2.5 transition-opacity duration-200 whitespace-nowrap truncate ${
@@ -1386,11 +1398,15 @@ const NavItem: React.FC<NavItemProps> = ({
                 >
                     {item.title}
                 </span>
+                {isActive && (
+                    <span className="absolute right-2 w-1.5 h-1.5 rounded-full bg-emerald-300" />
+                )}
             </Link>
 
             {item.addPath && isSidebarOpen && (
                 <Link
                     to={item.addPath}
+                    title="Yangi qoʻshish"
                     className={`absolute right-1 p-1 rounded-lg transition-colors ${
                         isAddActive
                             ? "bg-teal-800 text-white"
@@ -1433,14 +1449,18 @@ const CollapsibleNavItem: React.FC<CollapsibleNavItemProps> = ({
             <button
                 type="button"
                 onClick={() => onToggle(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 ${
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 cursor-pointer ${
                     isParentOfActive
-                        ? "bg-slate-200/80 text-teal-900 font-bold"
+                        ? "bg-teal-50/80 text-teal-950 font-bold border border-teal-200/70"
                         : "text-slate-700 hover:bg-slate-200/60 hover:text-slate-900"
                 }`}
             >
                 <div className="flex items-center truncate">
-                    {item.icon && <span className="shrink-0">{item.icon}</span>}
+                    {item.icon && (
+                        <span className={`shrink-0 ${isParentOfActive ? "text-teal-700" : "text-slate-500"}`}>
+                            {item.icon}
+                        </span>
+                    )}
                     <span
                         className={`ml-2.5 transition-opacity duration-200 whitespace-nowrap truncate ${
                             isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -1460,7 +1480,7 @@ const CollapsibleNavItem: React.FC<CollapsibleNavItemProps> = ({
             </button>
 
             {isSubMenuOpen && isSidebarOpen && (
-                <div className="pl-3.5 mt-0.5 space-y-0.5 border-l-2 border-slate-200 ml-3">
+                <div className="pl-3.5 mt-0.5 space-y-0.5 border-l-2 border-teal-200/80 ml-3.5">
                     {item.children.map((child) => (
                         child.type === "link" ? (
                             <NavItem
@@ -1585,36 +1605,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         () => findActiveMenuPath(navItems, resolveSidebarPath(pathname)),
         [pathname, navItems]
     );
-    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-
     useEffect(() => {
-        const newOpenState: Record<string, boolean> = {};
-        activePath.forEach((id) => {
-            newOpenState[id] = true;
-        });
-        setOpenMenus(newOpenState);
+        if (activePath.length > 0) {
+            setOpenMenus((prev) => {
+                const next = { ...prev };
+                activePath.forEach((id) => {
+                    next[id] = true;
+                });
+                return next;
+            });
+        }
     }, [activePath]);
 
     const handleToggle = (id: string) => {
-        setOpenMenus((prev) => {
-            const isCurrentlyOpen = !!prev[id];
-            if (isCurrentlyOpen) {
-                const path = findPathToId(navItems, id);
-                const parentPath = path.slice(0, -1);
-                const newOpenState: Record<string, boolean> = {};
-                parentPath.forEach((pathId) => {
-                    newOpenState[pathId] = true;
-                });
-                return newOpenState;
-            } else {
-                const pathToOpen = findPathToId(navItems, id);
-                const newOpenState: Record<string, boolean> = {};
-                pathToOpen.forEach((pathId) => {
-                    newOpenState[pathId] = true;
-                });
-                return newOpenState;
-            }
-        });
+        setOpenMenus((prev) => ({
+            ...prev,
+            [id]: !prev[id],
+        }));
     };
 
     const filterNavItems = useMemo(() => {
@@ -1782,9 +1789,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                                     <p
                                         key={index}
                                         className={`${
-                                            index > 0 ? "mt-4 pt-2" : ""
-                                        } mb-1 px-2 text-[10px] font-bold text-slate-400 uppercase ${
-                                            index > 0 ? "border-t border-slate-200" : ""
+                                            index > 0 ? "mt-4 pt-3" : "mt-1"
+                                        } mb-1.5 px-2 text-[10px] font-extrabold text-slate-400 uppercase ${
+                                            index > 0 ? "border-t border-slate-200/80" : ""
                                         } tracking-wider transition-opacity duration-300 ease-in-out ${
                                             isOpen ? "opacity-100" : "hidden"
                                         }`}
