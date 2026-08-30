@@ -20,6 +20,8 @@ const AppRoutes = () => {
             <Route path="/admin/register" element={<AdminRegister />} />
             <Route path="/login" element={<AdminLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/w/:tenantSlug" element={<AdminLogin />} />
+            <Route path="/w/:tenantSlug/login" element={<AdminLogin />} />
             <Route path="/setup" element={<SetupOrganizationInfo />} />
             <Route path="/sso" element={<SsoLanding />} />
             <Route path="/invoice/:token" element={<PublicInvoiceViewer />} />

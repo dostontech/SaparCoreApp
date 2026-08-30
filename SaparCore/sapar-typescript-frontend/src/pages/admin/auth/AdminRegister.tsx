@@ -405,7 +405,7 @@ export const AdminRegister: React.FC = () => {
               </label>
               <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:ring-2 focus-within:ring-teal-600 focus-within:bg-white transition text-xs">
                 <span className="px-3 py-2.5 text-slate-400 bg-slate-100/70 border-r border-slate-200 font-mono">
-                  https://
+                  https://app.sapar.uz/w/
                 </span>
                 <input
                   type="text"
@@ -415,9 +415,6 @@ export const AdminRegister: React.FC = () => {
                   placeholder="kompaniya-nomi"
                   className="flex-1 px-3 py-2.5 bg-transparent text-xs text-slate-800 font-mono focus:outline-none placeholder-slate-400"
                 />
-                <span className="px-3 py-2.5 text-slate-500 bg-slate-100/70 border-l border-slate-200 font-mono">
-                  .sapar.uz
-                </span>
               </div>
             </div>
 

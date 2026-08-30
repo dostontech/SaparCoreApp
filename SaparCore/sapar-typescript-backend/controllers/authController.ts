@@ -78,7 +78,7 @@ export async function register(req: Request, res: Response): Promise<void> {
             pincode: '100000',
             userId: user.id,
             taxRegime: 'VAT_GENERIC',
-            publicBaseUrl: subdomain ? `https://${subdomain.toLowerCase().trim()}.sapar.uz` : null,
+            publicBaseUrl: subdomain ? `https://app.sapar.uz/w/${subdomain.toLowerCase().trim()}` : null,
           },
         });
       } catch (compErr) {

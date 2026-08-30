@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { toast } from "sonner";
@@ -70,7 +70,8 @@ const AdminLogin: React.FC = () => {
   const [isCreatingQr, setIsCreatingQr] = useState<boolean>(false);
   const qrPollTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Dynamic Multi-Tenant Workspace State (e.g. rizobay.app.sapar.uz)
+  // Dynamic Multi-Tenant Workspace State (supports both /w/monews and monews.sapar.uz)
+  const { tenantSlug } = useParams<{ tenantSlug?: string }>();
   const [tenantWorkspace, setTenantWorkspace] = useState<{
     companyName: string;
     siteLogo?: string | null;
@@ -78,28 +79,28 @@ const AdminLogin: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    const host = window.location.hostname;
-    const parts = host.split(".");
-    if (parts.length >= 3) {
-      let slug = "";
+    let slug = tenantSlug?.toLowerCase().trim();
+    if (!slug) {
+      const host = window.location.hostname;
+      const parts = host.split(".");
       if (parts.length >= 4 && parts[1] === "app") {
         slug = parts[0];
       } else if (parts.length === 3 && parts[0] !== "app" && parts[0] !== "www" && parts[0] !== "api" && parts[0] !== "localhost") {
         slug = parts[0];
       }
-
-      if (slug && slug !== "app" && slug !== "www") {
-        axios
-          .get(`${Constants.API_URL}/public/tenant/resolve?slug=${slug}`)
-          .then((res) => {
-            if (res.data?.success && res.data?.data) {
-              setTenantWorkspace(res.data.data);
-            }
-          })
-          .catch(() => {});
-      }
     }
-  }, []);
+
+    if (slug && slug !== "app" && slug !== "www" && slug !== "api") {
+      axios
+        .get(`${Constants.API_URL}/public/tenant/resolve?slug=${slug}`)
+        .then((res) => {
+          if (res.data?.success && res.data?.data) {
+            setTenantWorkspace(res.data.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [tenantSlug]);
 
   // Redirect if already authenticated
   useEffect(() => {
