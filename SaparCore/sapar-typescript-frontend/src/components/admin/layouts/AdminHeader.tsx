@@ -109,6 +109,9 @@ const getPageInfoFromPath = (pathname: string, t: any): { title: string; section
   if (pathname.startsWith('/admin/users') || pathname.startsWith('/admin/roles')) {
     return { title: t('nav.users', 'Foydalanuvchilar va Rollar'), section: t('nav.settings', 'Maʼmuriyat') };
   }
+  if (pathname.startsWith('/admin/settings/profile') || pathname.startsWith('/admin/settings/account-settings')) {
+    return { title: t('nav.accountSettings', 'Profil va Hisob Sozlamalari'), section: t('nav.settings', 'Sozlamalar') };
+  }
   if (pathname.startsWith('/admin/settings/subscription-plans')) {
     return { title: t('nav.subscriptionPlans', 'Obuna va Tariflar'), section: t('nav.settings', 'Sozlamalar') };
   }

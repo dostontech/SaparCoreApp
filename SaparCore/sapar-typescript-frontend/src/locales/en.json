@@ -76,7 +76,16 @@
     "tin": "TIN / INN",
     "pinfl": "PINFL / Personal ID",
     "currency": "Currency",
-    "som": "UZS"
+    "som": "UZS",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "gender": "Gender",
+    "dateOfBirth": "Date of Birth",
+    "country": "Country",
+    "state": "Region / State",
+    "city": "City / District",
+    "pincode": "Postal Code (Pincode)",
+    "savedSuccess": "Saved successfully"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -144,11 +153,18 @@
     "users": "Users Management",
     "roles": "Roles & Permissions",
     "activityLog": "Audit Trail & Logs",
-    "ediSettings": "E-IMZO & E-Faktura Settings",
-    "companySettings": "Company Profile",
+    "ediSettings": "E-IMZO & E-Invoice Settings",
+    "companySettings": "Company Details",
+    "accountSettings": "Profile & Account Settings",
     "localization": "Currency & Localization",
     "paymentGateways": "Payme, Click & Bank Import",
-    "subscriptionPlans": "Subscriptions & Provisioning"
+    "subscriptionPlans": "Subscription & Plans"
+  },
+  "settings": {
+    "generalInfo": "General Information",
+    "addressInfo": "Address & Regional Details",
+    "uploadPhoto": "Upload New Photo",
+    "backupTitle": "Company Data Backup"
   },
   "pos": {
     "title": "SAPAR POS — Cashier Terminal",

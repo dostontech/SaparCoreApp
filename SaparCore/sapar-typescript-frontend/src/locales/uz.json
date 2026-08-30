@@ -76,7 +76,16 @@
     "tin": "STIR (INN)",
     "pinfl": "JShShIR (PINFL)",
     "currency": "Valyuta",
-    "som": "soʻm"
+    "som": "soʻm",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "gender": "Jinsi",
+    "dateOfBirth": "Tugʻilgan sana",
+    "country": "Davlat",
+    "state": "Viloyat / Shahar",
+    "city": "Shahar / Tuman",
+    "pincode": "Pochta indeksi (Pincode)",
+    "savedSuccess": "Muvaffaqiyatli saqlandi"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -146,9 +155,16 @@
     "activityLog": "Audit jurnali",
     "ediSettings": "E-IMZO & E-Faktura sozlamalari",
     "companySettings": "Korxona rekvizitlari",
+    "accountSettings": "Profil va Hisob Sozlamalari",
     "localization": "Valyuta va Lokalizatsiya",
     "paymentGateways": "Payme, Click & Bank Import",
     "subscriptionPlans": "Obuna va Tariflar"
+  },
+  "settings": {
+    "generalInfo": "Asosiy Shaxsiy Maʼlumotlar",
+    "addressInfo": "Manzil va Hudud Rekvizitlari",
+    "uploadPhoto": "Yangi Rasm Yuklash",
+    "backupTitle": "Maʼlumotlar Zaxira Nusxasi (Backup)"
   },
   "pos": {
     "title": "SAPAR POS — Kassa Terminali",

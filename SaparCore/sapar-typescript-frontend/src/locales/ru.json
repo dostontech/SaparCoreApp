@@ -76,7 +76,16 @@
     "tin": "ИНН (STIR)",
     "pinfl": "ПИНФЛ (JShShIR)",
     "currency": "Валюта",
-    "som": "сум"
+    "som": "сум",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "gender": "Пол",
+    "dateOfBirth": "Дата рождения",
+    "country": "Страна",
+    "state": "Область / Регион",
+    "city": "Город / Район",
+    "pincode": "Почтовый индекс",
+    "savedSuccess": "Успешно сохранено"
   },
   "nav": {
     "dashboard": "Панель управления",
@@ -146,9 +155,16 @@
     "activityLog": "Журнал аудита",
     "ediSettings": "Настройки Э-ИМЗО & Э-Фактура",
     "companySettings": "Реквизиты компании",
+    "accountSettings": "Настройки профиля и аккаунта",
     "localization": "Валюта и Локализация",
     "paymentGateways": "Payme, Click & Импорт выписок",
     "subscriptionPlans": "Тарифы и Подписки"
+  },
+  "settings": {
+    "generalInfo": "Основные личные данные",
+    "addressInfo": "Адрес и региональные реквизиты",
+    "uploadPhoto": "Загрузить новое фото",
+    "backupTitle": "Резервная копия данных (Backup)"
   },
   "pos": {
     "title": "SAPAR POS — Кассовый Терминал",
