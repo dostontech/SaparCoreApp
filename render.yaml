@@ -55,7 +55,7 @@ services:
     name: sapar-frontend
     runtime: static
     rootDir: SaparCore/sapar-typescript-frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: npm run build
     staticPublishPath: dist
     routes:
       - type: rewrite
