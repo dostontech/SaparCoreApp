@@ -24,15 +24,25 @@ services:
     region: frankfurt
     rootDir: SaparCore/sapar-typescript-backend
     buildCommand: npm install --legacy-peer-deps && npx prisma generate
-    startCommand: npx prisma db push --accept-data-loss && node server.js
+    startCommand: node --max-old-space-size=380 server.js
     healthCheckPath: /api/healthz
     envVars:
       - key: NODE_VERSION
         value: "20"
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=380"
       - key: PORT
         value: 3001
+      - key: MIGRATE_ON_BOOT
+        value: "false"
+      - key: SEED_ON_BOOT
+        value: "false"
+      - key: BACKFILL_ON_BOOT
+        value: "false"
+      - key: GEO_ON_BOOT
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: sapar-postgres
@@ -45,8 +55,6 @@ services:
         value: "*" # Set to your frontend domain in production
       - key: LOG_LEVEL
         value: info
-      - key: SEED_ON_BOOT
-        value: "true"
 
   # ---------------------------------------------------------------------------
   # 2. Frontend Static Site (React 19 + Vite SPA)
