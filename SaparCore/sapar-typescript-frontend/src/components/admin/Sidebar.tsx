@@ -638,116 +638,18 @@ const getNavItems = (visibility: ModuleVisibility, t: any, mode: WorkspaceMode =
         { type: "header", title: t("common.main", "Boshqaruv"), slug: "dashboard" },
         {
             type: "link" as const,
+            to: "/admin",
+            icon: <Home size={16} />,
+            title: t("nav.mainDashboard", "Asosiy ERP Paneli"),
+            slug: "dashboard",
+            exact: true,
+        },
+        {
+            type: "link" as const,
             to: "/admin/business-loans",
             icon: <Sparkles size={16} className="text-amber-500" />,
             title: t("nav.businessLoans", "Biznes Krediti (Bank Finanslash)"),
             slug: "dashboard",
-        },
-        {
-            type: "collapsible" as const,
-            id: "dashboards",
-            icon: <Home size={16} />,
-            title: t("nav.dashboards", "Boshqaruv Panellari"),
-            slug: "dashboard",
-            children: [
-                {
-                    type: "link" as const,
-                    to: "/admin",
-                    title: t("nav.mainDashboard", "Asosiy ERP Paneli"),
-                    slug: "dashboard",
-                    exact: true,
-                },
-                ...(visibility.pos
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/pos",
-                              title: t("nav.posDashboard", "POS & Kassa"),
-                              slug: "invoices",
-                          },
-                      ]
-                    : []),
-                ...(visibility.sales
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/sales",
-                              title: t("nav.salesDashboard", "Savdo & Tushum"),
-                              slug: "invoices",
-                          },
-                      ]
-                    : []),
-                ...(visibility.accounting
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/finance",
-                              title: t("nav.financeDashboard", "Moliya & Buxgalteriya"),
-                              slug: "accounting",
-                          },
-                      ]
-                    : []),
-                ...(visibility.inventory
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/inventory",
-                              title: t("nav.inventoryDashboard", "Ombor & Sklad"),
-                              slug: "products",
-                          },
-                      ]
-                    : []),
-                ...(visibility.crm
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/crm",
-                              title: t("nav.crmDashboard", "CRM & Bitimlar"),
-                              slug: "contacts",
-                          },
-                      ]
-                    : []),
-                ...(visibility.purchases
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/procurement",
-                              title: t("nav.procurementDashboard", "Xaridlar & Taʼminot"),
-                              slug: "purchases",
-                          },
-                      ]
-                    : []),
-                ...(visibility.projects
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/projects",
-                              title: t("nav.projectsDashboard", "Loyihalar & Vazifalar"),
-                              slug: "dashboard",
-                          },
-                      ]
-                    : []),
-                ...(visibility.payroll
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/hrm",
-                              title: t("nav.hrmDashboard", "HRM & Xodimlar"),
-                              slug: "manage-users",
-                          },
-                      ]
-                    : []),
-                ...(visibility.helpdesk
-                    ? [
-                          {
-                              type: "link" as const,
-                              to: "/admin/dashboard/support",
-                              title: t("nav.supportDashboard", "Mijozlar Yordami"),
-                              slug: "dashboard",
-                          },
-                      ]
-                    : []),
-            ],
         },
 
 
