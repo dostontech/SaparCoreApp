@@ -11,10 +11,10 @@ const router = Router();
 // express-rate-limit is already in package.json (used by publicRoutes too).
 // ---------------------------------------------------------------------------
 
-/** Login: 10 attempts per 15 minutes per IP */
+/** Login: 100 attempts per 15 minutes per IP */
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,
+  max: 100,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: {
@@ -23,10 +23,10 @@ const loginLimiter = rateLimit({
   },
 });
 
-/** Register: 5 new accounts per hour per IP */
+/** Register: 100 new accounts per hour per IP */
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5,
+  max: 100,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: {
