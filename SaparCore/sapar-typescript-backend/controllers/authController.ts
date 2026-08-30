@@ -7,6 +7,7 @@ import { prisma } from '../lib/prisma';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateToken } from '../utils/generateToken';
 import { ensureRole, DEFAULT_ROLE_BY_USER_TYPE, OWNER_ROLE_NAME } from '../lib/defaultRoles';
+import { registerRenderCustomDomain } from '../lib/renderDomainManager';
 
 function badInput(res: Response, errors: ReturnType<typeof validationResult>): void {
   res.status(400).json({
@@ -66,6 +67,9 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     if (companyName) {
       try {
+        const cleanSubdomain = subdomain?.toLowerCase().trim();
+        const tenantUrl = cleanSubdomain ? `https://${cleanSubdomain}.sapar.uz` : null;
+
         await prisma.companySettings.create({
           data: {
             companyName: companyName.trim(),
@@ -78,9 +82,16 @@ export async function register(req: Request, res: Response): Promise<void> {
             pincode: '100000',
             userId: user.id,
             taxRegime: 'VAT_GENERIC',
-            publicBaseUrl: subdomain ? `https://app.sapar.uz/w/${subdomain.toLowerCase().trim()}` : null,
+            publicBaseUrl: tenantUrl,
           },
         });
+
+        // Automatically provision custom subdomain on Render
+        if (cleanSubdomain) {
+          registerRenderCustomDomain(cleanSubdomain).catch((err) => {
+            console.warn('register: async Render custom domain provisioning notice', err);
+          });
+        }
       } catch (compErr) {
         console.warn('register: create companySettings warning', compErr);
       }
