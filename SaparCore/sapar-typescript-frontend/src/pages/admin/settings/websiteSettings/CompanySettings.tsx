@@ -488,61 +488,57 @@ const CompanySettings: React.FC = () => {
                             onChange={(e) => setCompanyFormData(prev => ({ ...prev, taxRegime: e.target.value }))}
                             helper="Applying a country pack sets this automatically."
                             options={[
-                                { value: 'NONE', label: 'No tax' },
-                                { value: 'GST_INDIA', label: 'India GST' },
-                                { value: 'VAT_UK', label: 'UK VAT' },
-                                { value: 'VAT_EU', label: 'EU VAT' },
-                                { value: 'GST_AU', label: 'Australia GST' },
-                                { value: 'GST_NZ', label: 'New Zealand GST' },
-                                { value: 'US_SALES_TAX', label: 'US Sales Tax' },
-                                { value: 'VAT_GENERIC', label: 'VAT (generic)' },
+                                { value: 'VAT_GENERIC', label: 'QQS 12% (Umumbelgilangan soliq rejimi)' },
+                                { value: 'NONE', label: 'Aylanmadan olinadigan soliq 4% (Soddalashtirilgan)' },
+                                { value: 'UZ_PROFIT', label: 'Foyda soligʻi 15% (IT Park / Eksport 0%)' },
+                                { value: 'UZ_EXEMPT', label: 'Imtiyozli / Soliqsiz rejim (0%)' },
                             ]}
                         />
                         <FormField
-                            label="GSTIN (India)"
+                            label="STIR / ИНН (9 xonali yuridik shaxs kodi)"
                             id="gstin"
                             name="gstin"
                             type="text"
-                            placeholder="e.g. 27AAAAA0000A1Z5"
+                            placeholder="Masalan: 305123456"
                             value={companyFormData.gstin ?? ''}
                             onChange={handleInputChange}
                         />
                         <FormField
-                            label="VAT Number (UK / EU)"
+                            label="JShShIR / ПИНФЛ (14 xonali jismoniy shaxs / YaTT)"
                             id="vatNumber"
                             name="vatNumber"
                             type="text"
-                            placeholder="e.g. GB123456789 / DE123456789"
+                            placeholder="Masalan: 31201901234567"
                             value={companyFormData.vatNumber ?? ''}
                             onChange={handleInputChange}
                         />
                         <FormField
-                            label="ABN (Australia)"
+                            label="IFUT / ОКЭД (5 xonali faoliyat turi)"
                             id="abn"
                             name="abn"
                             type="text"
-                            placeholder="e.g. 51824753556"
+                            placeholder="Masalan: 62010 (Dasturiy taʼminot)"
                             value={companyFormData.abn ?? ''}
                             onChange={handleInputChange}
                         />
                         <FormField
-                            label="GST Number (New Zealand)"
+                            label="Asosiy Bank MFO (5 xonali)"
                             id="nzGstNumber"
                             name="nzGstNumber"
                             type="text"
-                            placeholder="e.g. 123-456-789"
+                            placeholder="Masalan: 00401 (Ipak Yoʻli Bank)"
                             value={companyFormData.nzGstNumber ?? ''}
                             onChange={handleInputChange}
                         />
 
-                        {/* EU options — relevant when the tax regime is EU VAT */}
+                        {/* E-IMZO & E-Faktura Integratsiya Holati */}
                         <div className="col-span-1 md:col-span-2 flex items-start justify-between gap-4 border-t border-border pt-4 mt-2">
                             <div>
                                 <label htmlFor="ossRegistered" className="block text-sm font-medium text-heading">
-                                    Registered for EU OSS
+                                    E-IMZO & Didox / Soliq E-Faktura Integratsiyasi
                                 </label>
                                 <p className="text-xs text-body mt-1">
-                                    Charge the destination member-state VAT rate on B2C cross-border sales and report via the OSS return.
+                                    Hisob-faktura, shartnoma va ishonchnomalarni milliy E-IMZO elektron raqamli imzo (ERI) bilan avtomatik imzolash va Soliq tizimiga yuborish.
                                 </p>
                             </div>
                             <Switch
@@ -554,10 +550,10 @@ const CompanySettings: React.FC = () => {
                         <div className="col-span-1 md:col-span-2 flex items-start justify-between gap-4">
                             <div>
                                 <label htmlFor="viesValidationEnabled" className="block text-sm font-medium text-heading">
-                                    Validate EU VAT numbers online via VIES
+                                    Soliq MXIK / IKPU Avtomatik Tekshiruvi
                                 </label>
                                 <p className="text-xs text-body mt-1">
-                                    Off by default. When on, Sapar contacts the EU VIES service to verify VAT numbers; it fails open (never blocks a save) and stays fully offline when off.
+                                    Tovarlar va xizmatlar sotilganda Davlat Soliq Qoʻmitasi tasniflagichidagi 17 xonali MXIK kodlari toʻgʻriligini real vaqt rejimida tekshirish.
                                 </p>
                             </div>
                             <Switch

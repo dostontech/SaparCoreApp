@@ -161,7 +161,7 @@ const QuotationTemplate: React.FC<InvoiceDetailsProps> = ({ quotationDeta, lineF
                     <h3 className="font-semibold mb-2">Bank Details</h3>
                     <p className="text-sm text-gray-600">Bank : {quotationDeta?.bank?.bankName}</p>
                     <p className="text-sm text-gray-600">Account # : {quotationDeta?.bank?.accountNumber}</p>
-                    <p className="text-sm text-gray-600">IFSC : {quotationDeta?.bank?.IFSCCode}</p>
+                    <p className="text-sm text-gray-600">MFO : {quotationDeta?.bank?.IFSCCode}</p>
                     <p className="text-sm text-gray-600">BRANCH : {quotationDeta?.bank?.branchName}</p>
                 </div>
                 {quotationDeta?.signature?.image && (

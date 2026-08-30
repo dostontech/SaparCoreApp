@@ -222,7 +222,7 @@ const InvoiceTemplateA: React.FC<InvoiceDetailsProps> = ({ invoiceData, lineFiel
                         {invoiceData?.bank?.accountHoldername && <p className="text-sm text-gray-600">Account Holder : {invoiceData.bank.accountHoldername}</p>}
                         {invoiceData?.bank?.bankName && <p className="text-sm text-gray-600">Bank : {invoiceData.bank.bankName}</p>}
                         {invoiceData?.bank?.accountNumber && <p className="text-sm text-gray-600">Account # : {invoiceData.bank.accountNumber}</p>}
-                        {invoiceData?.bank?.IFSCCode && <p className="text-sm text-gray-600">IFSC : {invoiceData.bank.IFSCCode}</p>}
+                        {invoiceData?.bank?.IFSCCode && <p className="text-sm text-gray-600">MFO : {invoiceData.bank.IFSCCode}</p>}
                         {invoiceData?.bank?.branchName && <p className="text-sm text-gray-600">BRANCH : {invoiceData.bank.branchName}</p>}
                     </div>
                 )}

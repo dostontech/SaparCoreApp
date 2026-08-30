@@ -389,8 +389,8 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customerData = null }) => {
                         <InputField id="bankAccountHolder" label="Account Holder" value={formData.accountHolderName} onChange={e => handleFormChange('accountHolderName', e.target.value)} placeholder="Enter Account Holder Name" error={formErrors.accountHolderName} />
                     </div>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
-                        <InputField id="bankAccountNumber" label="Account Number" value={formData.accountNumber} onChange={e => handleFormChange('accountNumber', e.target.value)} placeholder="Enter Account Number" error={formErrors.accountNumber} />
-                        <InputField id="bankIfsc" label="IFSC" value={formData.IFSC} onChange={e => handleFormChange('IFSC', e.target.value)} placeholder="Enter IFSC Code" error={formErrors.IFSC} />
+                        <InputField id="bankAccountNumber" label="Hisob-kitob raqami (20 xonali)" value={formData.accountNumber} onChange={e => handleFormChange('accountNumber', e.target.value)} placeholder="Masalan: 20208000900123456001" error={formErrors.accountNumber} />
+                        <InputField id="bankIfsc" label="Bank MFO (5 xonali)" value={formData.IFSC} onChange={e => handleFormChange('IFSC', e.target.value)} placeholder="Masalan: 00401 (Ipak Yoʻli)" error={formErrors.IFSC} />
                     </div>
                 </section>
 

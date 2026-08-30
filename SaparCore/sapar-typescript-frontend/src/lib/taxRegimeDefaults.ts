@@ -7,21 +7,18 @@ export interface StarterRate {
 }
 
 export const STARTER_RATES: Record<TaxRegime, StarterRate[]> = {
-    GST_INDIA: [
-        { name: 'CGST 2.5%', rate: 2.5, taxKind: 'CGST' },
-        { name: 'CGST 9%', rate: 9, taxKind: 'CGST' },
-        { name: 'CGST 14%', rate: 14, taxKind: 'CGST' },
-        { name: 'SGST 2.5%', rate: 2.5, taxKind: 'SGST' },
-        { name: 'SGST 9%', rate: 9, taxKind: 'SGST' },
-        { name: 'SGST 14%', rate: 14, taxKind: 'SGST' },
-        { name: 'IGST 5%', rate: 5, taxKind: 'IGST' },
-        { name: 'IGST 18%', rate: 18, taxKind: 'IGST' },
-        { name: 'IGST 28%', rate: 28, taxKind: 'IGST' },
-    ],
     VAT_GENERIC: [
-        { name: 'VAT 5%', rate: 5, taxKind: 'VAT' },
-        { name: 'VAT 20%', rate: 20, taxKind: 'VAT' },
+        { name: 'QQS 12% (Standart stavka)', rate: 12, taxKind: 'VAT' },
+        { name: 'QQS 0% (Eksport va xalqaro tashuvlar)', rate: 0, taxKind: 'VAT' },
+        { name: 'QQS Imtiyozli (Soliqdan ozod)', rate: 0, taxKind: 'VAT' },
     ],
-    US_SALES_TAX: [],
-    NONE: [],
+    GST_INDIA: [
+        { name: 'QQS 12%', rate: 12, taxKind: 'VAT' },
+    ],
+    US_SALES_TAX: [
+        { name: 'Aylanmadan olinadigan soliq 4%', rate: 4, taxKind: 'SALES_TAX' },
+    ],
+    NONE: [
+        { name: 'Soliqsiz (0%)', rate: 0, taxKind: null },
+    ],
 };

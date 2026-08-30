@@ -30,17 +30,11 @@ const PAY_RUNS_URL = `${Constants.API_BASE_URL}/admin/payroll/runs`;
 interface TaxYearOption { label: string; value: string; }
 
 function generateTaxYears(count = 5): TaxYearOption[] {
-    const today = new Date();
-    const currentTaxYearStart =
-        today >= new Date(today.getFullYear(), 3, 6)
-            ? today.getFullYear()
-            : today.getFullYear() - 1;
+    const currentYear = new Date().getFullYear();
     const years: TaxYearOption[] = [];
     for (let i = 0; i < count; i++) {
-        const startYear = currentTaxYearStart - i;
-        const endYear = startYear + 1;
-        const label = `${startYear}/${String(endYear).slice(2)}`;
-        years.push({ label, value: label });
+        const yearStr = String(currentYear - i);
+        years.push({ label: `${yearStr}-yil`, value: yearStr });
     }
     return years;
 }
@@ -48,8 +42,8 @@ function generateTaxYears(count = 5): TaxYearOption[] {
 const TAX_YEARS = generateTaxYears(5);
 
 const MONTH_NAMES = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'Yanvar (01)', 'Fevral (02)', 'Mart (03)', 'Aprel (04)', 'May (05)', 'Iyun (06)',
+    'Iyul (07)', 'Avgust (08)', 'Sentabr (09)', 'Oktabr (10)', 'Noyabr (11)', 'Dekabr (12)',
 ];
 
 // ── Status badge ──────────────────────────────────────────────────────────────

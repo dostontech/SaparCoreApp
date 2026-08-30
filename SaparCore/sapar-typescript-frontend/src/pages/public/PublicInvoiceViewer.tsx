@@ -185,7 +185,7 @@ export default function PublicInvoiceViewer() {
           {data.bank.accountHoldername && <div className="text-gray-600">Account Holder : {data.bank.accountHoldername}</div>}
           {data.bank.bankName && <div className="text-gray-600">Bank : {data.bank.bankName}</div>}
           {data.bank.accountNumber && <div className="text-gray-600">Account # : {data.bank.accountNumber}</div>}
-          {data.bank.IFSCCode && <div className="text-gray-600">IFSC : {data.bank.IFSCCode}</div>}
+          {data.bank.IFSCCode && <div className="text-gray-600">MFO : {data.bank.IFSCCode}</div>}
           {data.bank.branchName && <div className="text-gray-600">Branch : {data.bank.branchName}</div>}
         </div>
       )}

@@ -164,7 +164,7 @@ const InvoiceTemplateA5Landscape: React.FC<InvoiceDetailsProps> = ({ invoiceData
                             {invoiceData?.bank?.accountHoldername && <>Holder: {invoiceData.bank.accountHoldername} · </>}
                             {invoiceData?.bank?.bankName && <>Bank: {invoiceData.bank.bankName} · </>}
                             {invoiceData?.bank?.accountNumber && <>A/C: {invoiceData.bank.accountNumber} · </>}
-                            {invoiceData?.bank?.IFSCCode && <>IFSC: {invoiceData.bank.IFSCCode} · </>}
+                            {invoiceData?.bank?.IFSCCode && <>MFO: {invoiceData.bank.IFSCCode} · </>}
                             {invoiceData?.bank?.branchName && <>Branch: {invoiceData.bank.branchName}</>}
                         </p>
                     )}
