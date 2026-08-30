@@ -190,10 +190,10 @@ const PORT = process.env.PORT || 3001;
 (async function bootstrap() {
   if (process.env.MIGRATE_ON_BOOT !== 'false') {
     try {
-      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-      logger.info('[boot] migrations applied.');
+      execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+      logger.info('[boot] database schema synced via prisma db push.');
     } catch (err) {
-      logger.warn({ err }, '[boot] migrate deploy failed (non-fatal — schema may already be current)');
+      logger.warn({ err }, '[boot] db push failed (non-fatal — schema may already be current)');
     }
   }
 
