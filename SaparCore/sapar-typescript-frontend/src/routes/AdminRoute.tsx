@@ -456,6 +456,7 @@ const AdminRoute = () => {
                     <Route path="/accounting/reports" element={<><Seo title="Moliyaviy Hisobotlar Markazi" /><AllReportsHub /></>} />
                     {/* Financial Statements (slice F.2 & Uzbekistan 21-son BHMS State Reports) */}
                     <Route path="/accounting/reports/uz-financial-statements" element={<><Seo title="1/2-Shakl Davlat Moliyaviy Hisobotlari" /><UzbekistanFinancialReportsPage /></>} />
+                    <Route path="/accounting/reports/uz-financial-reports" element={<><Seo title="1/2-Shakl Davlat Moliyaviy Hisobotlari" /><UzbekistanFinancialReportsPage /></>} />
                     <Route path="/accounting/bhms-chart-of-accounts" element={<><Seo title="21-son BHMS Hisoblar Rejasi" /><BhmsChartOfAccountsPage /></>} />
                     <Route path="/accounting/reports/profit-loss" element={<><Seo title="P&L" /><ProfitLossReport /></>} />
                     <Route path="/accounting/reports/balance-sheet" element={<><Seo title="Balance Sheet" /><BalanceSheetReport /></>} />
