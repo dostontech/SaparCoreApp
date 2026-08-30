@@ -147,10 +147,16 @@ export const AdminRegister: React.FC = () => {
         "setupStatus",
         JSON.stringify({ new_register: false, company_settings: false })
       );
-      setStatus({ new_register: false, company_settings: false });
-
+      const targetSubdomain = formData.subdomain || slugify(formData.companyName);
       toast.success("Muvaffaqiyatli roʻyxatdan oʻtdingiz!");
-      navigate("/admin");
+
+      const currentHost = window.location.hostname;
+      if (currentHost.includes("sapar.uz") && targetSubdomain) {
+        // Seamlessly transfer session to company subdomain portal
+        window.location.href = `https://${targetSubdomain}.sapar.uz/admin`;
+      } else {
+        navigate("/admin");
+      }
     } catch (error: any) {
       const msg =
         error.response?.data?.message ||
