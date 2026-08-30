@@ -298,9 +298,9 @@ router.get('/tenant/resolve', limiter, async (req: Request, res: Response): Prom
         siteLogo: resolveSiteLogo(company.siteLogo, buildBaseUrl(req)),
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('tenant resolve error:', err);
-    res.status(500).json({ success: false, message: 'Failed to resolve tenant' });
+    res.status(500).json({ success: false, message: 'Failed to resolve tenant', error: err?.message || String(err) });
   }
 });
 
