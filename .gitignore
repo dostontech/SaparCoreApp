@@ -86,6 +86,20 @@ lerna-debug.log*
 /sapar_vs_ibox_complete_comparison.html
 /qa-skills/
 
+# Internal Development Plans, Agents & Scripts (Keep Local Only)
+/MASTER_FEATURE_WALKTHROUGH.md
+/MODULE_AUDIT_REPORT.md
+/PITCH_DECK_VS_1C_DIDOX_DOCCO.md
+/TODO_ROADMAP.md
+/SAPAR_API_REFERENCE.md
+/AGENTS.md
+/skills-lock.json
+/.agents/
+/scripts/
+/SAPAR_ERP_Postman_Collection.json
+/SAPAR_ERP_Postman_Environment.json
+/sapar_api_documentation.html
+
 # Testing & Subagent Artifacts
 .playwright-mcp/
 test-results/
