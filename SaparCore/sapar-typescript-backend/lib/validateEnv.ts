@@ -35,32 +35,29 @@ interface EnvRule {
 const REQUIRED_VARS: EnvRule[] = [
   {
     key: 'JWT_SECRET',
-    minLength: 32,
+    minLength: 16,
     description: 'JWT signing secret — generate with: openssl rand -hex 32',
   },
   {
     key: 'DATABASE_URL',
     description: 'PostgreSQL connection string',
   },
-  {
-    key: 'POSTGRES_PASSWORD',
-    productionOnly: true,
-    minLength: 8,
-    description: 'PostgreSQL password — must be a strong unique value',
-  },
 ];
 
 const RECOMMENDED_VARS: EnvRule[] = [
   {
+    key: 'POSTGRES_PASSWORD',
+    minLength: 8,
+    description: 'PostgreSQL password (required for bare Docker/local compose)',
+  },
+  {
     key: 'AI_ENCRYPTION_KEY',
-    minLength: 32,
-    productionOnly: true,
-    description: 'AES-256-GCM key for BYOK provider keys — generate with: openssl rand -hex 32',
+    minLength: 16,
+    description: 'AES-256-GCM key for BYOK provider keys',
   },
   {
     key: 'CORS_ORIGIN',
-    productionOnly: true,
-    description: 'Comma-separated list of allowed CORS origins, e.g. https://app.sapar.uz',
+    description: 'Allowed CORS origins, e.g. * or https://app.sapar.uz',
   },
   {
     key: 'SMTP_HOST',

@@ -91,11 +91,9 @@ app.use(helmet({
 // ---------------------------------------------------------------------------
 const corsOrigin = process.env.CORS_ORIGIN;
 app.use(cors({
-  origin: corsOrigin
-    ? corsOrigin.split(',').map(o => o.trim())  // support comma-separated list
-    : (process.env.NODE_ENV === 'production'
-        ? [] // deny all when CORS_ORIGIN unset in prod — forces explicit config
-        : true),  // allow all in dev
+  origin: corsOrigin && corsOrigin !== '*'
+    ? corsOrigin.split(',').map(o => o.trim())
+    : true,
   credentials: true,
 }));
 app.use(express.json());
