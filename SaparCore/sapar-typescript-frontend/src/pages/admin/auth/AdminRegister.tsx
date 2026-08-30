@@ -149,14 +149,7 @@ export const AdminRegister: React.FC = () => {
       );
       const targetSubdomain = formData.subdomain || slugify(formData.companyName);
       toast.success("Muvaffaqiyatli roʻyxatdan oʻtdingiz!");
-
-      const currentHost = window.location.hostname;
-      if (currentHost.includes("sapar.uz") && targetSubdomain) {
-        // Seamlessly transfer session to company subdomain portal
-        window.location.href = `https://${targetSubdomain}.sapar.uz/admin`;
-      } else {
-        navigate("/admin");
-      }
+      navigate("/admin/dashboard");
     } catch (error: any) {
       const msg =
         error.response?.data?.message ||
