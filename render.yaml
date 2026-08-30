@@ -1,0 +1,71 @@
+# =============================================================================
+# SAPAR ERP — Render.com Blueprint Infrastructure as Code (render.yaml)
+# Deploy fullstack stack: PostgreSQL 16 + Node.js API + React Frontend SPA
+# =============================================================================
+
+version: "1"
+
+databases:
+  - name: sapar-postgres
+    databaseName: sapar
+    user: sapar
+    plan: starter # or standard for high throughput
+    region: frankfurt # Low latency to Uzbekistan (or singapore)
+    postgresMajorVersion: "16"
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. Backend Web Service (Node.js + Express + Prisma ORM)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: sapar-api
+    runtime: node
+    plan: starter
+    region: frankfurt
+    rootDir: SaparCore/sapar-typescript-backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: node server.js
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sapar-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: AI_ENCRYPTION_KEY
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*" # Set to your frontend domain in production
+      - key: LOG_LEVEL
+        value: info
+      - key: SEED_ON_BOOT
+        value: "true"
+
+  # ---------------------------------------------------------------------------
+  # 2. Frontend Static Site (React 19 + Vite SPA)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: sapar-frontend
+    runtime: static
+    plan: free
+    region: frankfurt
+    rootDir: SaparCore/sapar-typescript-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_DEMO_MODE
+        value: "false"
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: sapar-api
+          property: host

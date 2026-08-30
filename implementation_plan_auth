@@ -1,0 +1,140 @@
+# Uzbekistan Native Multi-Factor Authentication (Phone SMS, E-IMZO USB Flash Drive & Mobile Token)
+
+## Overview & Architecture
+
+We will modernize SAPAR ERP's authentication system to support Uzbekistan national identity standards and modern corporate security practices:
+1. **Phone Number Authentication (+998 XX XXX-XX-XX)**:
+   - Login via **Phone + Password** or **Phone + SMS OTP** (One-Time Password via Eskiz.uz / PlayMobile / SMS.uz).
+   - Phone auto-masking and instant account linking.
+2. **E-IMZO USB Flash Drive / E-Token / `.pfx` Certificate Login**:
+   - 1-click login using physical USB e-tokens (e-Kalit) or `.pfx` certificates from a flash drive via the local E-IMZO browser agent (`127.0.0.1:64443`).
+   - Server-side cryptographic challenge-response verification matching user STIR (TIN) / JShShIR (PINFL).
+3. **Mobile Token / QR-Code Login (E-IMZO Mobile App)**:
+   - Scan dynamic QR code with the official **E-IMZO Mobile App** on iOS/Android or tap to approve on mobile.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User / Accountant
+    participant UI as SAPAR Frontend
+    participant Agent as E-IMZO Client (127.0.0.1:64443)
+    participant API as SAPAR Backend
+    participant SMS as Uzbekistan SMS Gateway
+    participant DB as PostgreSQL (Prisma)
+
+    alt 1. Phone + SMS OTP Login
+        User->>UI: Enter +998 (90) 123-45-67
+        UI->>API: POST /api/auth/phone/send-otp
+        API->>DB: Store hashed OTP with 2-min expiry
+        API->>SMS: Dispatch 6-digit SMS code
+        SMS-->>User: SMS: "SAPAR: Sizning tasdiqlash kodingiz: 849201"
+        User->>UI: Enter OTP (849201)
+        UI->>API: POST /api/auth/phone/verify-otp
+        API->>DB: Validate OTP & Fetch User
+        API-->>UI: Issue JWT session token + User Profile
+    else 2. E-IMZO Flash Drive / USB Token Login
+        User->>UI: Select "E-IMZO (USB / Flash)" tab
+        UI->>Agent: List installed certificates & USB keys
+        Agent-->>UI: Return list of certificates (STIR, PINFL, Org Name)
+        User->>UI: Pick Certificate & Enter PIN
+        UI->>API: GET /api/auth/eimzo/challenge
+        API-->>UI: Issue random cryptographic nonce
+        UI->>Agent: Sign nonce (PKCS#7)
+        Agent-->>UI: Return PKCS#7 signed base64 payload
+        UI->>API: POST /api/auth/eimzo/verify-signature
+        API->>DB: Verify signature, extract STIR/PINFL, link user
+        API-->>UI: Issue JWT session token + User Profile
+    else 3. Mobile QR Code Login
+        User->>UI: Select "QR Code (Mobile Token)" tab
+        UI->>API: POST /api/auth/qr/generate-session
+        API-->>UI: Return qrSessionToken & Dynamic QR Code
+        User->>API: Scan QR with E-IMZO Mobile App & Confirm
+        UI->>API: Long-poll / WebSocket for approval
+        API-->>UI: Authorized! Issue JWT session token
+    end
+```
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> - **Uzbekistan Phone Uniqueness**: Existing user records with duplicate or empty phone numbers will need migration defaults.
+> - **SMS Provider Credentials**: For production SMS dispatch, API keys from Eskiz.uz (`api.eskiz.uz`), PlayMobile, or SMS.uz will be configured in `.env` (a mock development driver will be included for local testing).
+> - **E-IMZO Agent**: Hardware USB keys and `.pfx` certificates require the official E-IMZO browser client running on port `64443` (standard across all Uzbekistan accounting workstations).
+
+---
+
+## Proposed Changes
+
+### 1. Database Schema & Models (`sapar-typescript-backend/prisma/schema.prisma`)
+
+#### [MODIFY] [schema.prisma](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-backend/prisma/schema.prisma)
+- Update `User` model:
+  - Add `@unique` index on `phone` (standardized E.164: `+998901234567`).
+  - Add `stir` (Company STIR / TIN, 9 digits) and `pinfl` (Personal PINFL, 14 digits) fields for E-IMZO certificate matching.
+  - Add `eimzoSerial` for bound hardware token serial numbers.
+- Add new models:
+  - `OtpVerification`: `id`, `phone`, `codeHash`, `expiresAt`, `attempts`, `isUsed`, `createdAt`.
+  - `QrAuthSession`: `id`, `sessionToken`, `status` (`PENDING`, `APPROVED`, `EXPIRED`), `userId`, `createdAt`, `expiresAt`.
+
+---
+
+### 2. Backend Controllers & Services (`sapar-typescript-backend/`)
+
+#### [NEW] [smsService.ts](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-backend/services/smsService.ts)
+- Uzbekistan SMS Gateway connector (Eskiz.uz REST API / PlayMobile SMPP / Local Mock Driver).
+- Templated SMS messages in Uzbek Latin: `"SAPAR ERP: Tizimga kirish kodi: {CODE}. Kodni hech kimga bermang."`
+
+#### [NEW] [eimzoAuthService.ts](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-backend/services/eimzoAuthService.ts)
+- Nonce generation and cryptographic challenge-response verification.
+- PKCS#7 digital signature parser extracting certificate Subject DN, STIR/TIN, PINFL, and expiration validity.
+
+#### [NEW] [uzAuthRoutes.ts](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-backend/routes/uzAuthRoutes.ts)
+- `POST /api/auth/phone/login`: Password-based login by phone.
+- `POST /api/auth/phone/send-otp`: Request SMS OTP.
+- `POST /api/auth/phone/verify-otp`: Validate SMS OTP and authenticate.
+- `GET /api/auth/eimzo/challenge`: Issue cryptographic nonce for hardware token.
+- `POST /api/auth/eimzo/verify`: Validate PKCS#7 signature and issue JWT session.
+- `POST /api/auth/qr/create`: Generate dynamic QR session.
+- `GET /api/auth/qr/status/:sessionId`: Poll QR approval from mobile app.
+
+---
+
+### 3. Frontend Authentication Redesign (`sapar-typescript-frontend/`)
+
+#### [NEW] [EimzoClient.ts](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-frontend/src/services/EimzoClient.ts)
+- Lightweight client library communicating directly with local E-IMZO agent (`http://127.0.0.1:64443` or WebSocket).
+- Lists all connected USB e-tokens, smart cards, and disk `.pfx` keys.
+- Signs payloads with selected certificate.
+
+#### [MODIFY] [AdminLogin.tsx](file:///c:/Users/Doston/Downloads/SAPAR/SaparCore/sapar-typescript-frontend/src/pages/admin/auth/AdminLogin.tsx)
+- Transform the login interface into a modern, multi-tab modal:
+  1. **Tab 1: Telefon / Email (SMS OTP yoki Parol)**:
+     - Phone mask input (`+998 __ ___-__-__`) with 1-click switch between SMS Code and Password.
+     - 6-digit auto-advancing OTP input box with resend timer (`01:59`).
+  2. **Tab 2: E-IMZO (USB Flash / E-Kalit / .PFX)**:
+     - Auto-detects connected USB flash drive / e-token certificates.
+     - Displays Certificate Owner Name, STIR, Organization, and Expiry.
+     - 1-click certificate password prompt and instant cryptographic sign-in.
+  3. **Tab 3: E-IMZO QR Kod (Mobil Ilova)**:
+     - Live dynamic QR code scannable with E-IMZO Mobile on phone.
+- Styled in SAPAR Brand Teal (`#028090` / `#0B2B33`) replacing legacy purple.
+
+---
+
+## Verification Plan
+
+### Automated & Unit Tests
+- Backend test suite validating:
+  - Phone normalization (`901234567` -> `+998901234567`).
+  - OTP expiry and brute-force attempt limits (max 3 tries).
+  - PKCS#7 signature verification and STIR matching.
+
+### Manual Browser Verification
+1. **Phone SMS Flow**:
+   - Input phone `+998 90 123 45 67` -> receive OTP -> enter code -> verify instant login.
+2. **E-IMZO USB Flash Flow**:
+   - Connect USB e-token / `.pfx` -> select certificate from dropdown -> enter PIN -> verify instant signature authentication.
+3. **QR Code Flow**:
+   - Generate dynamic QR code -> verify expiration timer and status resolution.

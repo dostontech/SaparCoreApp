@@ -1,0 +1,30 @@
+# ==========================================
+# SAPAR Core — Git Ignore Configuration
+# ==========================================
+
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+docker/.env
+docker/.env.*
+!docker/.env.example
+*.local
+
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+out/
+
+# Database dumps
+*.sql
+*.sql.gz
+*.dump
+backups/
+
+# Logs
+logs/
+*.log

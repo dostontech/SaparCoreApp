@@ -1,0 +1,55 @@
+================================================================================
+                          SAPAR ENTERPRISE SOFTWARE LICENSE
+               Copyright (c) 2026 SAPAR ERP Technologies. All Rights Reserved.
+               Republic of Uzbekistan Intellectual Property Law (ZRU-42)
+================================================================================
+
+PROPRIETARY SOURCE-AVAILABLE & EVALUATION LICENSE
+
+IMPORTANT — READ CAREFULLY: This software and associated documentation files
+(the "Software") are the proprietary intellectual property of SAPAR ERP Technologies
+and its authors. The source code is made publicly available strictly for evaluation,
+code review, audit, security analysis, and competition assessment (including the
+President Tech Award of the Republic of Uzbekistan).
+
+1. PERMITTED USES
+Subject to the terms of this License, you are granted a non-exclusive, non-transferable,
+royalty-free right to:
+  (a) Inspect, compile, test, and run the Software for non-commercial evaluation,
+      personal research, and technical review purposes.
+  (b) Demonstrate the capabilities of the Software to accredited investors, judges,
+      and academic/governmental evaluation committees.
+
+2. PROHIBITED USES (COMMERCIAL RESTRICTIONS)
+You may NOT, without prior written authorization from SAPAR ERP Technologies:
+  (a) Use, deploy, host, or sub-license the Software or any portion thereof for any
+      commercial purposes, SaaS offering, or revenue-generating activity.
+  (b) Remove, alter, obscure, or delete any copyright notices, watermarks, metadata,
+      author signatures, or proprietary markings present in the source files, UI,
+      APIs, or compiled binaries.
+  (c) Distribute modified versions of the Software under another brand, entity,
+      or product name (white-labeling/plagiarism).
+  (d) Reverse engineer, decompile, or incorporate proprietary algorithms (including
+      E-IMZO cryptography modules, Didox/Soliq tax generators, and BHMS 21 accounting
+      engines) into competing commercial software.
+
+3. INTELLECTUAL PROPERTY & WATERMARKS
+All title, ownership rights, patents, trademarks, and intellectual property rights in
+and to the Software remain exclusively with SAPAR ERP Technologies. The Software
+contains embedded digital signatures, telemetry identifiers, and watermarks. Any
+unauthorized commercial distribution will be prosecuted under civil and criminal
+statutes of the Republic of Uzbekistan and international copyright treaties (WIPO /
+Berne Convention).
+
+4. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+================================================================================
+For commercial enterprise licensing, custom deployment, or investment inquiries:
+Official Website: https://sapar.uz
+Contact Email:    contact@sapar.uz | buildforward33@gmail.com
+Tashkent, Republic of Uzbekistan
+================================================================================

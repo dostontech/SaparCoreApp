@@ -1,0 +1,25 @@
+{
+    "name": "Sapar — O‘zbekiston Biznesi Uchun Yagona Platforma",
+    "short_name": "Sapar",
+    "description": "Buxgalteriya, EDO, Soliq, CRM, HR va Bank integratsiyasi bitta tizimda.",
+    "start_url": "/",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/assets/web-app-manifest-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/web-app-manifest-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "theme_color": "#0B2B33",
+    "background_color": "#0B2B33",
+    "display": "standalone",
+    "orientation": "portrait"
+}

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPAR ERP — Qurilish Mollari Doʻkoni va Savdo Bazasi Uchun Toʻliq Qoʻllanma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #028090;
+      --primary-dark: #004e5a;
+      --primary-light: #e6f6f8;
+      --accent: #02c39a;
+      --navy: #0b2b33;
+      --dark: #101c24;
+      --text: #334155;
+      --text-light: #64748b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        font-size: 12pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+      .hero {
+        background: #028090 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 20px 80px;
+    }
+
+    /* Hero Header */
+    .hero {
+      background: linear-gradient(135deg, #0b2b33 0%, #028090 60%, #02c39a 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 48px 40px;
+      margin-bottom: 35px;
+      box-shadow: 0 20px 40px -15px rgba(2, 128, 144, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(2, 195, 154, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 16px;
+      opacity: 0.92;
+      max-width: 780px;
+      line-height: 1.6;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 13.5px;
+    }
+
+    .hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    /* Table of Contents */
+    .toc {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 35px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px 24px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .toc-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    .toc-num {
+      width: 24px;
+      height: 24px;
+      background: #e2e8f0;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step-badge {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      font-weight: 800;
+      font-size: 18px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(2, 128, 144, 0.3);
+    }
+
+    .section-header h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.3;
+    }
+
+    .section-header p {
+      color: var(--text-light);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    /* Workflow Steps & Highlights */
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      padding: 16px 18px;
+      border-radius: 12px;
+    }
+
+    .step-item-num {
+      background: #e2e8f0;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content strong {
+      display: block;
+      color: var(--navy);
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Screenshots Viewers */
+    .screenshot-box {
+      margin: 22px 0 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      background: #0f172a;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .screenshot-header {
+      background: #1e293b;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94a3b8;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .screenshot-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .screenshot-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      background: #f1f5f9;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text-light);
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    /* Alert / Pro Tips */
+    .tip-box {
+      background: #f0fdfa;
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    .tip-box strong {
+      color: #0f766e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .warning-box {
+      background: #fffbeb;
+      border-left: 4px solid var(--warning);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    .warning-box strong {
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    /* Table Styles */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13.5px;
+    }
+
+    .data-table th {
+      background: #f1f5f9;
+      color: var(--navy);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .data-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* Action Checklist */
+    .checklist {
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .checklist li::before {
+      content: '✔';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background: #dcfce7;
+      color: #15803d;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(11, 43, 51, 0.4);
+      z-index: 100;
+      transition: all 0.2s ease;
+    }
+
+    .print-btn:hover {
+      background: var(--primary);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn no-print" onclick="window.print()">
+    🖨️ PDF sifatida chop etish / Saqlash
+  </button>
+
+  <div class="container">
+
+    <!-- HERO HEADER -->
+    <header class="hero">
+      <div class="badge-pill">🏢 Oʻzbekiston Biznesi Uchun Amaliy Qoʻllanma</div>
+      <h1>Qurilish Mollari Doʻkoni va Savdo Bazasi Uchun SAPAR ERP Toʻliq Yoʻriqnomasi</h1>
+      <p>
+        Sement, armatura, gʻisht, boʻyoq, gipsokarton va santexnika mahsulotlari savdosi bilan shugʻullanuvchi doʻkonlar hamda ulgurji savdo bazalari uchun barcha biznes jarayonlarini (Kassa, Ombor, Didox E-Faktura, Nasiya, Ish haqi va Soliq) 100% raqamlashtirish boʻyicha qadamma-qadam amaliy yoʻriqnoma.
+      </p>
+      <div class="hero-meta">
+        <span>📍 Standart: Oʻzbekiston Respublikasi Soliq Kodeksi</span>
+        <span>💰 Valyuta: Oʻzbekiston soʻmi (UZS)</span>
+        <span>🛡️ Soliq: QQS 12% / Aylanma soligʻi 4%</span>
+        <span>🔑 Tizim: SAPAR ERP Core v2.9</span>
+      </div>
+    </header>
+
+    <!-- TABLE OF CONTENTS -->
+    <nav class="toc no-print">
+      <h3>📑 Mundarija va Bosqichlar</h3>
+      <div class="toc-grid">
+        <a href="#step1" class="toc-item"><span class="toc-num">1</span> Tashkilot va Kompaniya Rekvizitlarini Sozlash</a>
+        <a href="#step2" class="toc-item"><span class="toc-num">2</span> Koʻp Omborli Tizimni Yaratish (Ochiq/Yopiq Ombor)</a>
+        <a href="#step3" class="toc-item"><span class="toc-num">3</span> Qurilish Mollari Katalogi va MXIK Kodlari</a>
+        <a href="#step4" class="toc-item"><span class="toc-num">4</span> Zavodlardan Xarid va Kirim Qilish (Tannarx)</a>
+        <a href="#step5" class="toc-item"><span class="toc-num">5</span> Chakana Savdo va Kassa (POS Terminali)</a>
+        <a href="#step6" class="toc-item"><span class="toc-num">6</span> Ulgurji (Optom) Sotuv va E-Faktura (Didox)</a>
+        <a href="#step7" class="toc-item"><span class="toc-num">7</span> Ustalar va Doimiy Mijozlar Nasiya Tizimi</a>
+        <a href="#step8" class="toc-item"><span class="toc-num">8</span> Xodimlar Ish Haqi va Oylik Soliqlar (HRM)</a>
+        <a href="#step9" class="toc-item"><span class="toc-num">9</span> Bank, Kassa va Moliyaviy Natijalar (P&L)</a>
+        <a href="#step10" class="toc-item"><span class="toc-num">10</span> Davlat Soliq Qoʻmitasi (Soliq) Hisobotlari</a>
+        <a href="#daily" class="toc-item"><span class="toc-num">★</span> Doʻkonning Kunlik Ish Tartibi (Cheklist)</a>
+      </div>
+    </nav>
+
+    <!-- STEP 1: ORGANIZATION SETTINGS -->
+    <section id="step1" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">01</div>
+        <div>
+          <h2>1-Qadam: Tashkilot va Rekvizitlarni Kiritish</h2>
+          <p>Kompaniya STIR, bank hisob raqami, MFO, QQS guvohnomasi va doʻkon rekvizitlarini sozlash</p>
+        </div>
+      </div>
+
+      <p>
+        Tizimda ishlashni boshlashdan oldin barcha rasmiy hujjatlar, hisob-fakturalar va kassa cheklarida toʻgʻri maʼlumotlar chiqishi uchun korxona profilini toʻldiring:
+      </p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-item-num">1.1</div>
+          <div class="step-content">
+            <strong>Sozlamalar &rarr; Kompaniya Sozlamalari boʻlimiga kiring</strong>
+            <p>Kompaniya nomi (masalan: <em>"Stroy Market Baraka" MCHJ</em>), STIR (9 xonali ИНН), manzil va telefon raqamlarini kiriting.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">1.2</div>
+          <div class="step-content">
+            <strong>Bank va Moliya Hisoblarini Kiritish</strong>
+            <p>Milliy valyutadagi 20 xonali asosiy hisob raqam (<code>20208000...</code>), bank MFOsi va bank nomini kiriting.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">1.3</div>
+          <div class="step-content">
+            <strong>Soliq Rejimini Tanlash</strong>
+            <p>QQS toʻlovchisi boʻlsangiz — <strong>12% QQS</strong> stavkasini standart qilib belgilang. Agar Aylanmadan olinadigan soliq toʻlovchisi boʻlsangiz — <strong>4%</strong> stavkani tanlang.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/settings/company-settings</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/31_kompaniya_sozlamalari.png" alt="Kompaniya Sozlamalari">
+        <div class="screenshot-caption">
+          📌 1-rasm: Kompaniya va doʻkon rekvizitlarini kiritish oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: MULTI-WAREHOUSE -->
+    <section id="step2" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">02</div>
+        <div>
+          <h2>2-Qadam: Qurilish Doʻkoni Uchun Koʻp Omborli Tizimni Yaratish</h2>
+          <p>Ochiq maydon, yopiq ombor va savdo zali qoldiqlarini alohida boshqarish</p>
+        </div>
+      </div>
+
+      <p>
+        Qurilish mollari savdosida tovarlar har xil joylarda saqlanadi. Masalan: armatura va gʻisht ochiq maydonda, sement va quruq qorishmalar yopiq quruq omborda, boʻyoq va instrumentlar savdo zalida turadi.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ombor Nomi</th>
+            <th>Turi</th>
+            <th>Saqlanadigan Mahsulotlar</th>
+            <th>Masʼul Shaxs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Asosiy Savdo Zali</strong></td>
+            <td>Retail / Doʻkon</td>
+            <td>Boʻyoqlar, kafel, santexnika, mix, bolt, elektr jihozlar</td>
+            <td>Bosh kassir / Sotuvchi</td>
+          </tr>
+          <tr>
+            <td><strong>Yopiq Quruq Ombor</strong></td>
+            <td>Yopiq Ombor</td>
+            <td>Sement, rotband, gipsokarton, izolyatsiya materiallari</td>
+            <td>Ombor mudiri 1</td>
+          </tr>
+          <tr>
+            <td><strong>Ochiq Maydon Ombori</strong></td>
+            <td>Ochiq Baza</td>
+            <td>Armatura, shlakoblok, gʻisht, qum, shagʻal, yogʻoch</td>
+            <td>Ombor mudiri 2</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <strong>💡 Tavsiya: Omborlararo Koʻchirish (Transfer)</strong>
+        Asosiy yopiq ombordan savdo zaliga tovar olib chiqilganda tizimda <em>"Omborlararo koʻchirish"</em> hujjati rasmiylashtiriladi. Bu orqali savdo zalidagi qoldiq har doim aniq boʻladi.
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/inventory</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/15_ombor_qoldiqlar_inventarizatsiya.png" alt="Ombor va Qoldiqlar">
+        <div class="screenshot-caption">
+          📌 2-rasm: Koʻp omborli qoldiqlar va inventarizatsiya oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: PRODUCTS & MXIK -->
+    <section id="step3" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">03</div>
+        <div>
+          <h2>3-Qadam: Mahsulotlar Katalogi va MXIK / IKPU Kodlari</h2>
+          <p>Oʻlchov birliklari (qop, tonna, dona, metr), shtrix-kodlar va Soliq MXIK kodlarini biriktirish</p>
+        </div>
+      </div>
+
+      <p>
+        Qurilish mollari har xil oʻlchov birliklarida sotiladi. SAPAR tizimida har bir mahsulot uchun toʻgʻri parametrlar oʻrnatiladi:
+      </p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-item-num">3.1</div>
+          <div class="step-content">
+            <strong>Oʻlchov Birliklarini Sozlash (Birliklar boʻlimi)</strong>
+            <p><code>dona</code>, <code>qop (50 kg)</code>, <code>tonna</code>, <code>metr</code>, <code>kv.metr (m²)</code>, <code>litr</code>, <code>rulon</code> birliklarini kiriting.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">3.2</div>
+          <div class="step-content">
+            <strong>MXIK / IKPU Kodlarini Biriktirish (Majburiy)</strong>
+            <p>Didox va Soliq tizimida chek urilganda xatolik boʻlmasligi uchun Soliq qoʻmitasining rasmiy MXIK kodlari biriktiriladi (masalan, Sement M500 uchun MXIK kodi: <code>02601001001000000</code>).</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">3.3</div>
+          <div class="step-content">
+            <strong>Minimal Qoldiq va Ogohlantirish (Reorder Point)</strong>
+            <p>Sement 50 qopdan kam qolsa yoki Armatura 2 tonnadan kamaysa, tizim avtomatik ravishda <em>"Qoldiq kamaydi"</em> signali beradi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/products</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/14_mahsulotlar_xizmatlar_katalogi.png" alt="Mahsulotlar Katalogi">
+        <div class="screenshot-caption">
+          📌 3-rasm: Mahsulotlar katalogi, MXIK kodlari va narxlar boshqaruvi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: PURCHASING & FIFO -->
+    <section id="step4" class="section-card page-break">
+      <div class="section-header">
+        <div class="step-badge">04</div>
+        <div>
+          <h2>4-Qadam: Zavodlardan Xarid va Kirim Qilish (FIFO Tannarx)</h2>
+          <p>Xarid buyurtmasi, yetkazib beruvchilar hisob-fakturasi va avtomatlashtirilgan FIFO tannarx hisobi</p>
+        </div>
+      </div>
+
+      <p>
+        Qurilish bozorida mahsulot narxi tez-tez oʻzgaradi (masalan, armatura narxi metall birjasiga qarab har hafta oʻzgarishi mumkin). SAPAR tizimi <strong>FIFO (First-In, First-Out)</strong> usulida har bir partiya tannarxini alohida hisoblab boradi:
+      </p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-item-num">4.1</div>
+          <div class="step-content">
+            <strong>Xarid Buyurtmasi Yaratish (Purchase Order)</strong>
+            <p>Bekobod metallurgiya zavodiga yoki Sement zavodiga rasmiy xarid buyurtmasini shakllantiring va PDF/E-IMZO orqali yuboring.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">4.2</div>
+          <div class="step-content">
+            <strong>Tovarni Omborga Qabul Qilish (Kirim Hujjati)</strong>
+            <p>Yuk kelganda omborga kirim qilinadi. Tizim avtomatik ravishda oʻrtacha tannarxni va jami xarid summasini qayd etadi.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">4.3</div>
+          <div class="step-content">
+            <strong>Yetkazib Beruvchi Bilan Hisob-kitob (Akt Sverki)</strong>
+            <p>Taʼminotchi oldidagi qarzlar, qilingan bank toʻlovlari va oʻzaro hisob-kitob solishtirma dalolatnomasi (Akt sverki) 1 tugma bilan avtomatik shakllanadi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/purchases</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/11_xaridlar_xarajatlar.png" alt="Xaridlar va Kirim">
+        <div class="screenshot-caption">
+          📌 4-rasm: Xaridlar va taʼminotchilar roʻyxati oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5: RETAIL POS -->
+    <section id="step5" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">05</div>
+        <div>
+          <h2>5-Qadam: Chakana Savdo va Kassa (Sensorli POS Terminali)</h2>
+          <p>Tezkor shtrix-kod skaneri, aralash toʻlov (Naqd + Humo/Uzcard + Nasiya) va kassa smenasi</p>
+        </div>
+      </div>
+
+      <p>
+        Doʻkonga kelgan xaridorlar uchun tezkor xizmat koʻrsatish terminali:
+      </p>
+
+      <ul class="checklist">
+        <li><strong>Tezkor Shtrix-kod Skanerlash:</strong> Har qanday 1D/2D shtrix-kod skaneri bilan mos keladi.</li>
+        <li><strong>Aralash Toʻlov (Split Payment):</strong> Xaridor xarid summasining yarmini naqd pulda, qolgan qismini Uzcard yoki Humo kartasida toʻlashi mumkin.</li>
+        <li><strong>Nasiyaga Berish:</strong> Doimiy mijoz boʻlsa, toʻlov turini <em>"Kredit / Nasiya"</em> deb tanlab, toʻgʻridan-toʻgʻri uning balansiga yozib qoʻyish mumkin.</li>
+        <li><strong>Kassa Smenasi (X va Z Hisobotlar):</strong> Kun boshida kassa ochiladi, kun oxirida naqd pul va karta tushumlari boʻyicha Z-hisobot olinadi.</li>
+      </ul>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /pos</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/16_kassa_pos_terminali.png" alt="Sensorli POS Kassa Terminali">
+        <div class="screenshot-caption">
+          📌 5-rasm: Sensorli POS kassa terminali oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 6: WHOLESALE & DIDOX -->
+    <section id="step6" class="section-card page-break">
+      <div class="section-header">
+        <div class="step-badge">06</div>
+        <div>
+          <h2>6-Qadam: Ulgurji (Optom) Savdo va Didox E-Faktura</h2>
+          <p>Qurilish kompaniyalariga tijorat taklifi, yukxati (TTN), E-Faktura va E-IMZO raqamli imzo</p>
+        </div>
+      </div>
+
+      <p>
+        Katta obyektlar, qurilish brigadalari va korxonalarga ulgurji sotish jarayoni:
+      </p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-item-num">6.1</div>
+          <div class="step-content">
+            <strong>Tijorat Taklifi (Kompaniya narxnomasi)</strong>
+            <p>Qurilish firmasining soʻrovi boʻyicha rasmiy narx taklifi tuziladi va mijozga havola yoki PDF orqali yuboriladi.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">6.2</div>
+          <div class="step-content">
+            <strong>Tovarni Yetkazib Berish Yukxati (TTN)</strong>
+            <p>Haydovchi yoki yuk mashinasiga rasmiy yukxati chiqarib beriladi (mashina raqami, haydovchi ismi va yuk roʻyxati bilan).</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">6.3</div>
+          <div class="step-content">
+            <strong>Didox / Soliq E-Faktura va E-IMZO Imzolash</strong>
+            <p>Hisob-faktura toʻgʻridan-toʻgʻri E-IMZO USB fleshka orqali imzolanadi va Didox/Soliq orqali xaridorning kabinetiga yuboriladi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/invoices</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/07_hisob_fakturalar.png" alt="Hisob-fakturalar">
+        <div class="screenshot-caption">
+          📌 6-rasm: Sotuv hisob-fakturalari va E-Faktura holatlari oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 7: DEBTORS & CRM -->
+    <section id="step7" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">07</div>
+        <div>
+          <h2>7-Qadam: Ustalar va Doimiy Mijozlar Nasiya Tizimi</h2>
+          <p>Mijozlar balansi, qarz limiti, toʻlov eslatmalari va avtomatik Akt sverki</p>
+        </div>
+      </div>
+
+      <p>
+        Qurilish doʻkonlarida savdoning 40-60% qismi doimiy ustalar va pudratchilarga nasiyaga beriladi. Nasiyani nazoratsiz qoldirish biznesni bankrotlikka olib keladi:
+      </p>
+
+      <ul class="checklist">
+        <li><strong>Mijoz Boshiga Qarz Limiti:</strong> Har bir ustaga maksimal ruxsat etilgan qarz miqdori belgilanadi (masalan: 10,000,000 soʻm). Limit oshganda kassa unga yangi tovar berishni bloklaydi.</li>
+        <li><strong>Qarz Muddati Nazorati (Aging Report):</strong> Qarzlar 0-30 kun, 30-60 kun va 90+ kunga ajratilib, kechikkan qarzlar qizil rangda ogohlantiriladi.</li>
+        <li><strong>Akt Sverki (Solishtirma Dalolatnoma):</strong> Usta bilan hisob-kitobni aniqlashtirish uchun istalgan sana oraligʻida barcha olingan tovarlar va toʻlangan pullar koʻrsatilgan rasmiy Akt sverki chiqariladi.</li>
+      </ul>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/contacts</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/05_kontaktlar_kontragentlar.png" alt="Mijozlar Balansi">
+        <div class="screenshot-caption">
+          📌 7-rasm: Mijozlar va kontragentlar balansi, qarzlar nazorati
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 8: HRM & PAYROLL -->
+    <section id="step8" class="section-card page-break">
+      <div class="section-header">
+        <div class="step-badge">08</div>
+        <div>
+          <h2>8-Qadam: Xodimlar Ish Haqi va Oylik Soliqlar (HRM)</h2>
+          <p>Kassirlar, omborchilar va yuk tashuvchilar oyligi, 12% JShODS, 12% Ijtimoiy soliq va 0.1% INPS</p>
+        </div>
+      </div>
+
+      <p>
+        Doʻkon xodimlarining oylik maoshlari Oʻzbekiston Respublikasi Mehnat Kodeksi va Soliq stavkalariga asosan avtomatik hisoblanadi:
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Xodim Lavozimi</th>
+            <th>Belgilangan Oklad (Brutto)</th>
+            <th>JShODS (12%)</th>
+            <th>INPS (0.1%)</th>
+            <th>Xodimga Toʻlanadigan (Netto)</th>
+            <th>Korxona Ijtimoiy Soligʻi (12%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bosh Sotuvchi / Kassir</strong></td>
+            <td>5 000 000 soʻm</td>
+            <td>600 000 soʻm</td>
+            <td>5 000 soʻm</td>
+            <td><strong>4 400 000 soʻm</strong></td>
+            <td>600 000 soʻm</td>
+          </tr>
+          <tr>
+            <td><strong>Ombor Mudiri</strong></td>
+            <td>4 500 000 soʻm</td>
+            <td>540 000 soʻm</td>
+            <td>4 500 soʻm</td>
+            <td><strong>3 960 000 soʻm</strong></td>
+            <td>540 000 soʻm</td>
+          </tr>
+          <tr>
+            <td><strong>Yuk Tashuvchi (Yukchi)</strong></td>
+            <td>3 500 000 soʻm</td>
+            <td>420 000 soʻm</td>
+            <td>3 500 soʻm</td>
+            <td><strong>3 080 000 soʻm</strong></td>
+            <td>420 000 soʻm</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/payroll/profiles</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/20_ish_haqi_soliqlar_profil.png" alt="Ish Haqi va Soliqlar">
+        <div class="screenshot-caption">
+          📌 8-rasm: Oʻzbekiston soliq stavkalari boʻyicha ish haqi hisoblash oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 9: FINANCE & P&L -->
+    <section id="step9" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">09</div>
+        <div>
+          <h2>9-Qadam: Bank, Kassa va Moliyaviy Natijalar (P&L)</h2>
+          <p>Bank koʻchirmalari, operatsion xarajatlar va sof foyda hisoboti (2-shakl)</p>
+        </div>
+      </div>
+
+      <p>
+        Doʻkon egasi har kuni va har oy oxirida quyidagi asosiy moliyaviy koʻrsatkichlarni koʻrib turadi:
+      </p>
+
+      <ul class="checklist">
+        <li><strong>Kassa va Bank Qoldiqlari:</strong> Qancha naqd pul bor, bank hisobida qancha mablagʻ bor.</li>
+        <li><strong>Operatsion Xarajatlar:</strong> Doʻkon ijarasi, elektr energiyasi, yuk mashinasi yonilgʻisi va ish haqi xarajatlari toifalarga boʻlinib hisoblanadi.</li>
+        <li><strong>Sof Foyda (Moliyaviy Natijalar 2-shakl):</strong> <code>Tushum &minus; Tovarlar Tannarxi &minus; Operatsion Xarajatlar &minus; Soliqlar = Sof Foyda</code>.</li>
+      </ul>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/reports/income</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/25_moliyaviy_natijalar_balans.png" alt="Moliyaviy Natijalar">
+        <div class="screenshot-caption">
+          📌 9-rasm: Moliyaviy natijalar va sof foyda hisoboti oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 10: SOLIQ TAX REPORTS -->
+    <section id="step10" class="section-card page-break">
+      <div class="section-header">
+        <div class="step-badge">10</div>
+        <div>
+          <h2>10-Qadam: Davlat Soliq Qoʻmitasi (Soliq) Hisobotlari</h2>
+          <p>10006_29 QQS deklaratsiyasi va 11101_14 JShODS oylik hisobotlarini avtomatik tayyorlash</p>
+        </div>
+      </div>
+
+      <p>
+        Har oyning 15-sanasigacha Soliq qoʻmitasiga topshirilishi kerak boʻlgan barcha hisobotlar SAPAR tizimidagi birlamchi maʼlumotlar asosida 1 bosishda toʻliq yigʻib beriladi:
+      </p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-item-num">10.1</div>
+          <div class="step-content">
+            <strong>QQS 12% Oylik Deklaratsiyasi (Form 10006_29)</strong>
+            <p>Sotilgan tovarlar boʻyicha hisoblangan QQS va taʼminotchilardan olingan tovarlar boʻyicha hisobga olinadigan (zachet) QQS summasi avtomatik ayirilib, toʻlanadigan sof QQS summasi chiqariladi.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item-num">10.2</div>
+          <div class="step-content">
+            <strong>JShODS va Ijtimoiy Soliq Hisoboti (Form 11101_14)</strong>
+            <p>Barcha xodimlarning JShShIR (PINFL) raqamlari boʻyicha oylik hisoblangan ish haqi va ushlab qolingan soliqlar reyestri shakllanadi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-header">
+          <div class="screenshot-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span>SAPAR ERP &bull; /admin/reports/soliq</span>
+        </div>
+        <img class="screenshot-img" src="../module_screenshots_uz/26_soliq_hisobotlari_qqs_jshods.png" alt="Soliq Hisobotlari">
+        <div class="screenshot-caption">
+          📌 10-rasm: Soliq qoʻmitasi hisobotlari va deklaratsiyalari oynasi
+        </div>
+      </div>
+    </section>
+
+    <!-- DAILY WORKFLOW CHECKLIST -->
+    <section id="daily" class="section-card">
+      <div class="section-header">
+        <div class="step-badge">★</div>
+        <div>
+          <h2>Doʻkon Xodimlarining Kunlik Ish Tartibi (Cheklist)</h2>
+          <p>Ertalabki kassa ochishdan kechki Z-hisobot va ombor nazoratigacha</p>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Vaqt</th>
+            <th>Masʼul Xodim</th>
+            <th>Bajariladigan Vazifa</th>
+            <th>SAPAR Tizimidagi Boʻlim</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>08:00 &ndash; 08:30</strong></td>
+            <td>Kassir</td>
+            <td>POS Kassani ochish, boshlangʻich mayda pulni kiritish</td>
+            <td><code>/pos &rarr; Kassa ochish</code></td>
+          </tr>
+          <tr>
+            <td><strong>08:30 &ndash; 09:30</strong></td>
+            <td>Ombor mudiri</td>
+            <td>Zavoddan kelgan yangi yuklarni qabul qilish va kirim qilish</td>
+            <td><code>/admin/purchases &rarr; Yangi kirim</code></td>
+          </tr>
+          <tr>
+            <td><strong>09:30 &ndash; 18:00</strong></td>
+            <td>Kassir / Sotuvchi</td>
+            <td>Chakana xaridorlarga xizmat koʻrsatish, chek urish, nasiyani qayd etish</td>
+            <td><code>/pos</code></td>
+          </tr>
+          <tr>
+            <td><strong>10:00 &ndash; 17:00</strong></td>
+            <td>Menejer</td>
+            <td>Qurilish firmalariga E-Faktura (Didox) chiqarish, yukxati berish</td>
+            <td><code>/admin/invoices</code></td>
+          </tr>
+          <tr>
+            <td><strong>18:00 &ndash; 18:30</strong></td>
+            <td>Kassir</td>
+            <td>Kunlik kassani yopish, naqd pul va kartani sanash, Z-hisobot chiqarish</td>
+            <td><code>/pos &rarr; Smenani yopish</code></td>
+          </tr>
+          <tr>
+            <td><strong>18:30 &ndash; 19:00</strong></td>
+            <td>Rahbar / Buxgalter</td>
+            <td>Kunlik tushum, sof foyda va qarzdorliklar oʻzgarishini koʻrish</td>
+            <td><code>/admin/dashboard</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <strong>🚀 Xulosa</strong>
+        SAPAR ERP tizimi orqali qurilish mollari doʻkonida 100% shaffoflik, tovarlar yoʻqolishining oldini olish, nasiya qarzlarini oʻz vaqtida undirish va Soliq organlari bilan xatosiz ishlash toʻliq taʼminlanadi.
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
