@@ -70,6 +70,37 @@ const AdminLogin: React.FC = () => {
   const [isCreatingQr, setIsCreatingQr] = useState<boolean>(false);
   const qrPollTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Dynamic Multi-Tenant Workspace State (e.g. rizobay.app.sapar.uz)
+  const [tenantWorkspace, setTenantWorkspace] = useState<{
+    companyName: string;
+    siteLogo?: string | null;
+    phone?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    const parts = host.split(".");
+    if (parts.length >= 3) {
+      let slug = "";
+      if (parts.length >= 4 && parts[1] === "app") {
+        slug = parts[0];
+      } else if (parts.length === 3 && parts[0] !== "app" && parts[0] !== "www" && parts[0] !== "localhost") {
+        slug = parts[0];
+      }
+
+      if (slug && slug !== "app" && slug !== "www") {
+        axios
+          .get(`${Constants.API_URL}/public/tenant/resolve?slug=${slug}`)
+          .then((res) => {
+            if (res.data?.success && res.data?.data) {
+              setTenantWorkspace(res.data.data);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, []);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
@@ -349,17 +380,31 @@ const AdminLogin: React.FC = () => {
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header Branding */}
         <div className="p-6 sm:p-8 bg-gradient-to-b from-teal-50/70 to-white border-b border-gray-100 text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center text-white font-black text-xl shadow-md shadow-teal-600/30">
-              S
+          {tenantWorkspace?.siteLogo ? (
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <img
+                src={tenantWorkspace.siteLogo}
+                alt={tenantWorkspace.companyName}
+                className="h-12 w-auto max-w-[200px] object-contain rounded-xl"
+              />
             </div>
-            <span className="text-2xl font-black text-slate-900 tracking-tight">SAPAR<span className="text-teal-600">.ERP</span></span>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center text-white font-black text-xl shadow-md shadow-teal-600/30">
+                S
+              </div>
+              <span className="text-2xl font-black text-slate-900 tracking-tight">
+                SAPAR<span className="text-teal-600">.ERP</span>
+              </span>
+            </div>
+          )}
           <h1 className="text-xl font-bold text-slate-900">
-            Tizimga Kirish
+            {tenantWorkspace ? tenantWorkspace.companyName : "Tizimga Kirish"}
           </h1>
           <p className="text-xs text-slate-500 max-w-xs mx-auto">
-            Oʻzbekiston milliy buxgalteriya va korxona boshqaruv platformasi
+            {tenantWorkspace
+              ? "Korxona xodimlari va buxgalteriya boshqaruv paneli"
+              : "Oʻzbekiston milliy buxgalteriya va korxona boshqaruv platformasi"}
           </p>
         </div>
 

@@ -256,4 +256,52 @@ router.post('/telegram/webhook', telegramNotificationController.handleWebhook);
 const onboardingLeadController = require('../controllers/onboardingLeadController');
 router.post('/onboarding/request-trial', limiter, onboardingLeadController.requestTrial);
 
+// Public Tenant Workspace Resolver (for *.app.sapar.uz dynamic subdomains)
+router.get('/tenant/resolve', limiter, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const slug = (req.query.slug as string || '').toLowerCase().trim();
+    if (!slug) {
+      res.status(400).json({ success: false, message: 'Slug parameter is required' });
+      return;
+    }
+
+    const company = await prisma.companySettings.findFirst({
+      where: {
+        OR: [
+          { publicBaseUrl: { contains: slug, mode: 'insensitive' } },
+          { companyName: { contains: slug, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        companyName: true,
+        siteLogo: true,
+        email: true,
+        phone: true,
+        address: true,
+        city: true,
+        state: true,
+        country: true,
+        taxNumber: true,
+        publicBaseUrl: true,
+      },
+    });
+
+    if (!company) {
+      res.status(404).json({ success: false, message: 'Tenant workspace not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...company,
+        siteLogo: resolveSiteLogo(company.siteLogo, buildBaseUrl(req)),
+      },
+    });
+  } catch (err) {
+    console.error('tenant resolve error:', err);
+    res.status(500).json({ success: false, message: 'Failed to resolve tenant' });
+  }
+});
+
 module.exports = router;

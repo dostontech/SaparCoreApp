@@ -416,7 +416,7 @@ export const AdminRegister: React.FC = () => {
                   className="flex-1 px-3 py-2.5 bg-transparent text-xs text-slate-800 font-mono focus:outline-none placeholder-slate-400"
                 />
                 <span className="px-3 py-2.5 text-slate-500 bg-slate-100/70 border-l border-slate-200 font-mono">
-                  .sapar.uz
+                  .app.sapar.uz
                 </span>
               </div>
             </div>
