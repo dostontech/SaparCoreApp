@@ -1451,31 +1451,28 @@ const NavItem: React.FC<NavItemProps> = ({
 }) => {
     const { pathname } = useLocation();
     const isRootAdmin = item.to === "/admin" || item.to === "/admin/" || item.to === "/admin/dashboard";
-    const isMainActive = item.exact || isRootAdmin
-        ? (pathname === item.to || (isRootAdmin && (pathname === "/admin" || pathname === "/admin/")))
-        : (pathname === item.to || (item.to !== "/admin" && pathname.startsWith(`${item.to}/`)));
+    const isActive = isRootAdmin
+        ? (pathname === "/admin" || pathname === "/admin/" || pathname === "/admin/dashboard")
+        : (item.exact ? pathname === item.to : (pathname === item.to || pathname.startsWith(`${item.to}/`)));
     const isAddActive = item.addPath ? pathname === item.addPath : false;
 
     if (!canView(item.slug, permissions, user)) return null;
 
     return (
         <div className="flex items-center group relative mb-0.5">
-            <NavLink
+            <Link
                 to={item.to}
-                end={item.exact || isRootAdmin}
                 onClick={() => {
                     if (isRootAdmin) {
                         localStorage.setItem("sapar_workspace_mode", "all");
                         window.dispatchEvent(new CustomEvent("sapar-workspace-change", { detail: "all" }));
                     }
                 }}
-                className={({ isActive }) =>
-                    `flex items-center w-full px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 ${
-                        (item.exact || isRootAdmin ? isActive : (isActive || isMainActive))
-                            ? "bg-teal-700 text-white shadow-xs font-bold"
-                            : "text-slate-700 hover:bg-slate-200/70 hover:text-slate-900"
-                    }`
-                }
+                className={`flex items-center w-full px-3 py-2 text-xs font-semibold rounded-xl transition-all duration-150 ${
+                    isActive
+                        ? "bg-teal-700 text-white shadow-xs font-bold"
+                        : "text-slate-700 hover:bg-slate-200/70 hover:text-slate-900"
+                }`}
             >
                 {item.icon && (
                     <span className="shrink-0">{item.icon}</span>
@@ -1487,7 +1484,7 @@ const NavItem: React.FC<NavItemProps> = ({
                 >
                     {item.title}
                 </span>
-            </NavLink>
+            </Link>
 
             {item.addPath && isSidebarOpen && (
                 <Link
