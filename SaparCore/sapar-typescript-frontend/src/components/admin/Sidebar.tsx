@@ -637,6 +637,13 @@ const getNavItems = (visibility: ModuleVisibility, t: any, mode: WorkspaceMode =
         // =========================================================================
         { type: "header", title: t("common.main", "Boshqaruv"), slug: "dashboard" },
         {
+            type: "link" as const,
+            to: "/admin/business-loans",
+            icon: <Sparkles size={16} className="text-amber-500" />,
+            title: t("nav.businessLoans", "Biznes Krediti (Bank Finanslash)"),
+            slug: "dashboard",
+        },
+        {
             type: "collapsible" as const,
             id: "dashboards",
             icon: <Home size={16} />,

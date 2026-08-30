@@ -190,6 +190,7 @@ import ContactCard from "@pages/admin/contacts/ContactCard";
 import SubscriptionPlansPage from "@pages/admin/settings/SubscriptionPlansPage";
 import BhmsChartOfAccountsPage from "@pages/admin/accounting/BhmsChartOfAccountsPage";
 import UzbekistanFinancialReportsPage from "@pages/admin/accounting/UzbekistanFinancialReportsPage";
+import BusinessLoansPage from "@pages/admin/financing/BusinessLoansPage";
 
 const AdminRoute = () => {
     return (
@@ -508,6 +509,8 @@ const AdminRoute = () => {
                 <Route path="/settings/payment-gateways" element={<><Seo title="Payment Gateways" /><PaymentGateways /></>} />
                 <Route path="/settings/subscription-plans" element={<><Seo title="Obuna va Tariflar" /><SubscriptionPlansPage /></>} />
                 <Route path="/saas/clients" element={<><Seo title="SaaS Mijozlar Boshqaruvi" /><SaasClientsPage /></>} />
+                <Route path="/business-loans" element={<><Seo title="Biznes Krediti & Bank Finanslash" /><BusinessLoansPage /></>} />
+                <Route path="/financing" element={<><Seo title="Biznes Krediti & Bank Finanslash" /><BusinessLoansPage /></>} />
                 <Route path="/onboarding" element={<><Seo title="Onboarding Wizard" /><OnboardingWizardPage /></>} />
                 <Route path="/settings/payment-gateways/razorpay" element={<><Seo title="Razorpay Configuration" /><RazorpayConfig /></>} />
 
