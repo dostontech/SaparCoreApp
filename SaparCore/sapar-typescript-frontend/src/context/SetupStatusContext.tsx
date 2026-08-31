@@ -23,12 +23,14 @@ export const SetupStatusProvider = ({ children }: { children: ReactNode }) => {
         const loadStatus = async () => {
             try {
                 const stored = sessionStorage.getItem("setupStatus");
-                if (stored) {
+                if (stored && stored !== "undefined" && stored !== "null") {
                     setStatus(JSON.parse(stored));
                 } else {
                     const response = await axios.get(Constants.APP_VERSION_URL);
-                    setStatus(response.data.data);
-                    sessionStorage.setItem("setupStatus", JSON.stringify(response.data.data));
+                    if (response.data?.data) {
+                        setStatus(response.data.data);
+                        sessionStorage.setItem("setupStatus", JSON.stringify(response.data.data));
+                    }
                 }
             } catch (e) {
                 console.error("Failed to load setup status", e);

@@ -25,11 +25,38 @@ interface HeaderProps {
 }
 
 const getPageInfoFromPath = (pathname: string, t: any): { title: string; section: string } => {
-  if (pathname === '/admin' || pathname.startsWith('/admin/dashboard')) {
+  if (pathname === '/admin' || pathname === '/admin/' || pathname === '/admin/dashboard') {
     return { title: t('nav.dashboard', 'Boshqaruv paneli'), section: t('common.main', 'Asosiy') };
   }
+  if (pathname.startsWith('/admin/dashboard/sales')) {
+    return { title: t('nav.salesDashboard', 'Savdo Boshqaruvi'), section: t('nav.sales', 'Savdo') };
+  }
+  if (pathname.startsWith('/admin/dashboard/pos')) {
+    return { title: t('nav.posDashboard', 'POS Boshqaruvi'), section: t('workspace.pos', 'POS Kassa') };
+  }
+  if (pathname.startsWith('/admin/dashboard/inventory')) {
+    return { title: t('nav.inventoryDashboard', 'Ombor Boshqaruvi'), section: t('nav.inventory', 'Ombor') };
+  }
+  if (pathname.startsWith('/admin/dashboard/procurement')) {
+    return { title: t('nav.procurementDashboard', 'Xaridlar Boshqaruvi'), section: t('nav.purchases', 'Xaridlar') };
+  }
+  if (pathname.startsWith('/admin/dashboard/finance')) {
+    return { title: t('nav.financeDashboard', 'Moliya Boshqaruvi'), section: t('nav.finance', 'Moliya') };
+  }
+  if (pathname.startsWith('/admin/dashboard/crm')) {
+    return { title: t('nav.crmDashboard', 'CRM Boshqaruvi'), section: t('workspace.crm', 'CRM') };
+  }
+  if (pathname.startsWith('/admin/dashboard/hrm')) {
+    return { title: t('nav.hrmDashboard', 'HRM Boshqaruvi'), section: t('workspace.hrm', 'HRM') };
+  }
+  if (pathname.startsWith('/admin/dashboard/projects')) {
+    return { title: t('nav.projectsDashboard', 'Loyihalar Boshqaruvi'), section: t('workspace.projects', 'Loyihalar') };
+  }
+  if (pathname.startsWith('/admin/dashboard/support')) {
+    return { title: t('nav.supportDashboard', 'Yordam Boshqaruvi'), section: t('workspace.support', 'Yordam') };
+  }
   if (pathname.startsWith('/admin/pos')) {
-    return { title: t('nav.pos', 'POS Kassa Terminali'), section: t('nav.sales', 'Savdo') };
+    return { title: t('nav.pos', 'POS Kassa Terminali'), section: t('workspace.pos', 'POS Kassa') };
   }
   if (pathname.startsWith('/admin/e-documents')) {
     return { title: t('nav.eDocuments', 'E-Hujjatlar'), section: t('common.main', 'Asosiy') };

@@ -19,12 +19,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ( { moduleSlug, action}) =
         return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
     }
 
-    if(isLoading || !systemSettings) {
-        return <div>Loading...</div>
-    }
-
     if (user?.user_type === 1) {
         return <Outlet />;
+    }
+
+    if (isLoading) {
+        return <div>Loading...</div>;
     }
     
     if (moduleSlug && action) {
