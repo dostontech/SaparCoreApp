@@ -188,25 +188,31 @@ export const SecondarySubMenuPanel: React.FC<SecondarySubMenuPanelProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="w-64 bg-white border-r border-slate-200/90 flex flex-col h-screen shrink-0 select-none z-20 shadow-xs animate-in slide-in-from-left-2 duration-150">
-            {/* Bubble Header: Module Title & Quick Action */}
-            <div className="p-3.5 border-b border-slate-100 bg-slate-50/80 shrink-0 space-y-2.5">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 truncate">
-                        <div className="w-7 h-7 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-200/70 shrink-0">
-                            {config.icon}
-                        </div>
-                        <h2 className="text-xs font-black text-slate-900 truncate tracking-tight">
+        <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen shrink-0 select-none z-20 shadow-xs animate-in slide-in-from-left-2 duration-150">
+            {/* Top Module Bar: Exactly h-16 (64px) to align seamlessly with AdminHeader and PrimaryRail */}
+            <div className="h-16 px-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-200/70 shrink-0 shadow-2xs">
+                        {config.icon}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <h2 className="text-xs font-black text-slate-900 truncate tracking-tight uppercase">
                             {config.title}
                         </h2>
-                    </div>
-                    {config.badge && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 shrink-0">
-                            {config.badge}
+                        <span className="text-[10px] text-slate-400 font-medium -mt-0.5 truncate">
+                            {t("common.navigation", "Boʻlim menyusi")}
                         </span>
-                    )}
+                    </div>
                 </div>
+                {config.badge && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 shrink-0">
+                        {config.badge}
+                    </span>
+                )}
+            </div>
 
+            {/* Quick Action & In-Module Search Filter sub-section */}
+            <div className="p-3 border-b border-slate-100 bg-white shrink-0 space-y-2">
                 {/* Quick Action Button Pill */}
                 {config.quickAction && (
                     <Link
@@ -220,14 +226,14 @@ export const SecondarySubMenuPanel: React.FC<SecondarySubMenuPanelProps> = ({
                 )}
 
                 {/* In-Module Bubble Search Filter */}
-                <div className="relative pt-0.5">
+                <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t("nav.searchMenu", "Boʻlimdan qidirish...")}
-                        className="w-full pl-8 pr-7 py-1.5 bg-white border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600 transition shadow-2xs font-medium"
+                        className="w-full pl-8 pr-7 py-1.5 bg-slate-50/70 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-1 focus:ring-teal-600 transition shadow-2xs font-medium"
                     />
                     {searchQuery && (
                         <button

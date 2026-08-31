@@ -41,7 +41,7 @@ const AdminLogin: React.FC = () => {
   const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
 
   const [activeTab, setActiveTab] = useState<AuthTab>("PHONE");
-  const [phoneMethod, setPhoneMethod] = useState<PhoneMethod>("SMS_OTP");
+  const [phoneMethod, setPhoneMethod] = useState<PhoneMethod>("EMAIL");
 
   // Phone / Email States
   const [phone, setPhone] = useState<string>("+998 ");

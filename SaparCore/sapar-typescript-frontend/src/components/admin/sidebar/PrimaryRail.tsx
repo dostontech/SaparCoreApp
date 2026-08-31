@@ -257,11 +257,11 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
         <aside
             className={`${
                 isExpanded ? "w-60" : "w-[72px]"
-            } bg-[#0B2B33] text-slate-300 flex flex-col h-screen shrink-0 border-r border-[#071F24] select-none z-30 justify-between py-3 transition-all duration-300 ease-in-out`}
+            } bg-[#0B2B33] text-slate-300 flex flex-col h-screen shrink-0 border-r border-[#071F24] select-none z-30 justify-between transition-all duration-300 ease-in-out`}
         >
-            {/* Top: Branding & Collapse/Expand Button */}
+            {/* Top: Branding & Collapse/Expand Button (h-16 / 64px to align with AdminHeader and SecondarySubMenuPanel) */}
             {isExpanded ? (
-                <div className="flex items-center justify-between px-3 w-full shrink-0 mb-2.5 pb-2 border-b border-teal-900/40">
+                <div className="h-16 flex items-center justify-between px-3.5 w-full shrink-0 border-b border-teal-950/80 bg-[#0B2B33]">
                     <Link
                         to="/admin"
                         onClick={() => onSelectModule("dashboard")}
@@ -293,11 +293,11 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
                     </button>
                 </div>
             ) : (
-                <div className="flex flex-col items-center w-full shrink-0 mb-1">
+                <div className="h-16 flex items-center justify-between px-2.5 w-full shrink-0 border-b border-teal-950/80 bg-[#0B2B33]">
                     <Link
                         to="/admin"
                         onClick={() => onSelectModule("dashboard")}
-                        className="w-11 h-11 rounded-2xl bg-teal-500/10 hover:bg-teal-500/25 border border-teal-400/30 flex items-center justify-center transition-all group shadow-sm mb-1.5 cursor-pointer"
+                        className="w-10 h-10 rounded-2xl bg-teal-500/10 hover:bg-teal-500/25 border border-teal-400/30 flex items-center justify-center transition-all group shadow-sm cursor-pointer"
                         title="SAPAR ERP — Asosiy Boshqaruv Paneli"
                     >
                         {saparEmblemSvg}
@@ -305,17 +305,16 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
                     <button
                         type="button"
                         onClick={handleToggleExpand}
-                        className="w-8 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-teal-300 hover:bg-slate-800/80 transition cursor-pointer mb-1 border border-slate-700/40"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-teal-300 hover:bg-slate-800/80 transition cursor-pointer border border-slate-700/40"
                         title="Menyuni kengaytirish (Open Sidebar)"
                     >
                         <PanelLeftOpen size={14} />
                     </button>
-                    <div className="w-8 h-px bg-teal-900/50" />
                 </div>
             )}
 
             {/* Middle: Department Items Navigation */}
-            <div className={`flex-1 w-full overflow-y-auto overflow-x-hidden py-1 px-2 space-y-1.5 scrollbar-none flex flex-col ${
+            <div className={`flex-1 w-full overflow-y-auto overflow-x-hidden py-3 px-2 space-y-1.5 scrollbar-none flex flex-col ${
                 isExpanded ? "items-stretch" : "items-center"
             }`}>
                 {primaryModules.map((item) => {
