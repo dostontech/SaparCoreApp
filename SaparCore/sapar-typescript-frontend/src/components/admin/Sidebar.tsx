@@ -184,6 +184,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
     const [isSecondaryOpen, setIsSecondaryOpen] = useState<boolean>(isPinned);
     const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
 
+    // Primary Rail expanded state (can open to show full names or collapse to icon rail)
+    const [isPrimaryExpanded, setIsPrimaryExpanded] = useState<boolean>(() => {
+        const saved = localStorage.getItem("sapar_primary_rail_expanded");
+        return saved !== null ? saved === "true" : true;
+    });
+
+    useEffect(() => {
+        if (typeof isOpen === "boolean") {
+            setIsPrimaryExpanded(isOpen);
+        }
+    }, [isOpen]);
+
+    const handleTogglePrimaryExpand = useCallback(() => {
+        setIsPrimaryExpanded((prev) => {
+            const next = !prev;
+            localStorage.setItem("sapar_primary_rail_expanded", String(next));
+            return next;
+        });
+    }, []);
+
     // Module Visibility & Customization
     const [visibility, setVisibility] = useState<ModuleVisibility>(() => {
         try {
@@ -938,7 +958,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
     return (
         <>
             <div className="flex h-screen shrink-0 relative">
-                {/* TIER 1: Bubble Primary Global Icon Rail */}
+                {/* TIER 1: Bubble Primary Global Icon Rail (Expandable) */}
                 <PrimaryRail
                     activeModule={activeModule}
                     routeModule={routeModule}
@@ -946,6 +966,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     isPinned={isPinned}
                     onTogglePin={handleTogglePin}
                     onOpenCustomizeModal={() => setIsCustomizeModalOpen(true)}
+                    isExpanded={isPrimaryExpanded}
+                    onToggleExpand={handleTogglePrimaryExpand}
                 />
 
                 {/* TIER 2: Contextual Bubble Secondary Submenu Panel */}
