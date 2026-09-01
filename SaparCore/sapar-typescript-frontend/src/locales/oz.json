@@ -81,7 +81,9 @@
   "nav": {
     "dashboard": "Бошқарув панели",
     "mainDashboard": "Асосий ERP Панели",
-    "businessLoans": "Бизнес Кредити (Банк Финанслаш)",
+    "businessLoans": "Бизнесингизни молиялаштиринг",
+    "businessFinancing": "Бизнесингизни молиялаштиринг",
+    "getFinancedAction": "Молиялаштириш",
     "eDocuments": "Э-Ҳужжатлар (Э-Фактура)",
     "contacts": "Контактлар (CRM)",
     "sales": "Савдо ва Фактуралар",

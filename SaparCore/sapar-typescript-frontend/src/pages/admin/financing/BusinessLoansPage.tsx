@@ -210,11 +210,11 @@ export default function BusinessLoansPage() {
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
-        title="Biznes Krediti & Bank Finanslash"
+        title="Biznesingizni moliyalashtiring"
         breadcrumbs={[
           { label: 'Boshqaruv', to: '/admin' },
           { label: 'Moliya & Buxgalteriya', to: '/admin/dashboard/finance' },
-          { label: 'Biznes Krediti' },
+          { label: 'Biznesni moliyalashtirish' },
         ]}
       />
 

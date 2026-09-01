@@ -509,8 +509,8 @@ const AdminRoute = () => {
                 <Route path="/settings/payment-gateways" element={<><Seo title="Payment Gateways" /><PaymentGateways /></>} />
                 <Route path="/settings/subscription-plans" element={<><Seo title="Obuna va Tariflar" /><SubscriptionPlansPage /></>} />
                 <Route path="/saas/clients" element={<><Seo title="SaaS Mijozlar Boshqaruvi" /><SaasClientsPage /></>} />
-                <Route path="/business-loans" element={<><Seo title="Biznes Krediti & Bank Finanslash" /><BusinessLoansPage /></>} />
-                <Route path="/financing" element={<><Seo title="Biznes Krediti & Bank Finanslash" /><BusinessLoansPage /></>} />
+                <Route path="/business-loans" element={<><Seo title="Biznesingizni moliyalashtiring" /><BusinessLoansPage /></>} />
+                <Route path="/financing" element={<><Seo title="Biznesingizni moliyalashtiring" /><BusinessLoansPage /></>} />
                 <Route path="/onboarding" element={<><Seo title="Onboarding Wizard" /><OnboardingWizardPage /></>} />
                 <Route path="/settings/payment-gateways/razorpay" element={<><Seo title="Razorpay Configuration" /><RazorpayConfig /></>} />
 

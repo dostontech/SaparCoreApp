@@ -273,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             badge: "ERP",
             icon: <Home size={16} />,
             quickAction: {
-                title: t("nav.businessLoans", "Biznes Krediti"),
+                title: t("nav.getFinancedAction", "Moliyalashtirish"),
                 to: "/admin/business-loans",
             },
             groups: [
@@ -287,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                             slug: "dashboard",
                         },
                         {
-                            title: t("nav.businessLoans", "Biznes Krediti (Bank Finanslash)"),
+                            title: t("nav.businessFinancing", "Biznesingizni moliyalashtiring"),
                             to: "/admin/business-loans",
                             slug: "dashboard",
                         },

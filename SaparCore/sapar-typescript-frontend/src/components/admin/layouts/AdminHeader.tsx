@@ -148,6 +148,9 @@ const getPageInfoFromPath = (pathname: string, t: any): { title: string; section
   if (pathname.startsWith('/admin/settings')) {
     return { title: t('nav.settings', 'Tizim Sozlamalari'), section: t('nav.settings', 'Sozlamalar') };
   }
+  if (pathname.startsWith('/admin/business-loans') || pathname.startsWith('/admin/financing')) {
+    return { title: t('nav.businessFinancing', 'Biznesingizni moliyalashtiring'), section: t('common.main', 'Boshqaruv') };
+  }
   return { title: 'SAPAR ERP', section: t('common.main', 'Asosiy') };
 };
 

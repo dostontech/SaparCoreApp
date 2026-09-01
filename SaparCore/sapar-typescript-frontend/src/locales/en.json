@@ -90,7 +90,9 @@
   "nav": {
     "dashboard": "Dashboard",
     "mainDashboard": "Main ERP Dashboard",
-    "businessLoans": "Business Loans (Bank Financing)",
+    "businessLoans": "Finance Your Business",
+    "businessFinancing": "Finance Your Business",
+    "getFinancedAction": "Get Financing",
     "eDocuments": "E-Documents (E-Invoice)",
     "contacts": "Contacts (CRM)",
     "sales": "Sales & Invoices",

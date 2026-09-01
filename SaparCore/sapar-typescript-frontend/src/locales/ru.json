@@ -90,7 +90,9 @@
   "nav": {
     "dashboard": "Панель управления",
     "mainDashboard": "Основная панель ERP",
-    "businessLoans": "Бизнес-Кредиты (Банковское Финансирование)",
+    "businessLoans": "Финансирование бизнеса",
+    "businessFinancing": "Финансируйте свой бизнес",
+    "getFinancedAction": "Финансирование",
     "eDocuments": "Э-Документы (Э-Фактура)",
     "contacts": "Контакты (CRM)",
     "sales": "Продажи и Счета-фактуры",

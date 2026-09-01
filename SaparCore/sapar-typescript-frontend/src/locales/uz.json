@@ -90,7 +90,9 @@
   "nav": {
     "dashboard": "Boshqaruv paneli",
     "mainDashboard": "Asosiy ERP Paneli",
-    "businessLoans": "Biznes Krediti (Bank Finanslash)",
+    "businessLoans": "Biznesingizni moliyalashtiring",
+    "businessFinancing": "Biznesingizni moliyalashtiring",
+    "getFinancedAction": "Moliyalashtirish",
     "eDocuments": "E-Hujjatlar (E-Faktura)",
     "contacts": "Kontaktlar (CRM)",
     "sales": "Savdo va Fakturalar",
