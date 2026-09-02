@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Star,
   RefreshCw,
   Building2,
   HelpCircle,
@@ -11,7 +10,6 @@ import {
   User,
   LogOut,
   Settings,
-  Sparkles,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -21,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@components/ui';
+import { LanguageSwitcher } from '@components/admin/header/LanguageSwitcher';
 
 interface IboxHeaderProps {
   toggleSidebar: () => void;
@@ -39,7 +38,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
 
   return (
     <header className="bg-[#0B2B33] border-b border-[#028090]/40 text-white h-14 px-3 sm:px-5 flex items-center justify-between shadow-md z-40 select-none">
-      {/* Left Section: SAPAR Brand Logo, Toggle, Favorites */}
+      {/* Left Section: SAPAR Brand Logo & Sidebar Toggle */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* SAPAR Brand Logo with SVG Mark */}
         <div
@@ -92,16 +91,6 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
             className={`w-4 h-4 transition-transform duration-200 ${isSidebarOpen ? '' : 'rotate-180'}`}
           />
         </button>
-
-        {/* Sevimli sahifalar (SAPAR Sleek Teal Button) */}
-        <button
-          type="button"
-          onClick={() => navigate('/admin')}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D3B46] hover:bg-[#114E5D] border border-[#028090]/40 text-slate-100 text-xs font-bold transition shadow-xs"
-        >
-          <Star className="w-3.5 h-3.5 fill-[#02C39A] text-[#02C39A]" />
-          <span>Sevimli sahifalar</span>
-        </button>
       </div>
 
       {/* Center Section: Enterprise Edition Status */}
@@ -112,11 +101,16 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
         </div>
       </div>
 
-      {/* Right Section: Currency rates, Company switcher, Help, User */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      {/* Right Section: Language Switcher, Currency rates, Company switcher, Help, User */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Language Switcher Dropdown (Uzbek, Russian, English) */}
+        <div className="flex items-center">
+          <LanguageSwitcher variant="header" />
+        </div>
+
         {/* Currency Rates Widget */}
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0D3B46] border border-[#028090]/40 text-xs font-bold text-slate-100">
-          <RefreshCw className="w-3 h-3 text-[#02C39A] animate-spin-slow" />
+          <RefreshCw className="w-3 h-3 text-[#02C39A]" />
           <span>1 USD = 12 750 UZS, 1 RUB = 140 UZS</span>
         </div>
 
@@ -133,7 +127,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-[#0B2B33] text-slate-100 border-[#028090]/40">
-            <DropdownMenuLabel className="text-slate-300">Filiallar va Korxonalar</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-slate-300 font-bold">Filiallar va Korxonalar</DropdownMenuLabel>
             <DropdownMenuItem className="font-bold text-[#02C39A] focus:bg-[#0D3B46] focus:text-[#02C39A]">
               ✓ OOO "RIZOBAY STROY" (Asosiy)
             </DropdownMenuItem>
@@ -141,7 +135,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
             <DropdownMenuItem className="focus:bg-[#0D3B46]">Ulgurji baza (Qoʻyliq)</DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
             <DropdownMenuItem
-              onClick={() => navigate('/admin/settings/company')}
+              onClick={() => navigate('/admin/settings/company-settings')}
               className="focus:bg-[#0D3B46]"
             >
               <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> Korxona sozlamalari
@@ -149,7 +143,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Help Circle */}
+        {/* Help Circle - links to Guide */}
         <button
           type="button"
           onClick={() => navigate('/admin/guide')}
@@ -176,10 +170,10 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
             <DropdownMenuLabel className="font-bold text-white">{userName}</DropdownMenuLabel>
             <div className="px-2 py-0.5 text-[11px] text-[#02C39A] font-medium">Boshqaruvchi / Admin</div>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
-            <DropdownMenuItem onClick={() => navigate('/admin/profile')} className="focus:bg-[#0D3B46]">
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/profile')} className="focus:bg-[#0D3B46]">
               <User className="w-4 h-4 mr-2 text-[#02C39A]" /> Mening profilim
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/admin/settings')} className="focus:bg-[#0D3B46]">
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/company-settings')} className="focus:bg-[#0D3B46]">
               <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> Sozlamalar
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[#028090]/30" />

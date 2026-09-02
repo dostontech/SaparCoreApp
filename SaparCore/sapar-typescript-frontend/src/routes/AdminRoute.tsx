@@ -196,6 +196,13 @@ import DesignSystemPage from "@pages/admin/design-system/DesignSystemPage";
 import IboxDashboardPage from "@pages/admin/dashboard/IboxDashboardPage";
 import IboxSaleCreatePage from "@pages/admin/sales/IboxSaleCreatePage";
 import IboxSalesListPage from "@pages/admin/sales/IboxSalesListPage";
+import SaparGuidePage from "@pages/admin/guide/SaparGuidePage";
+import WarehousesPage from "@pages/admin/warehouses/WarehousesPage";
+import InventoryTransfersPage from "@pages/admin/inventory/InventoryTransfersPage";
+import InventoryAuditsPage from "@pages/admin/inventory/InventoryAuditsPage";
+import InventoryWriteOffsPage from "@pages/admin/inventory/InventoryWriteOffsPage";
+import ManufacturingOrdersPage from "@pages/admin/manufacturing/ManufacturingOrdersPage";
+import ManufacturingBomPage from "@pages/admin/manufacturing/ManufacturingBomPage";
 
 const AdminRoute = () => {
     return (
@@ -204,6 +211,22 @@ const AdminRoute = () => {
             <Route path="/register" element={<><Seo title="Register" /><AdminRegister /></>} />
 
             <Route element={<AdminLayout />}>
+                <Route path="/guide" element={<><Seo title="Foydalanuvchi Qoʻllanmasi" /><SaparGuidePage /></>} />
+                <Route path="/warehouses" element={<><Seo title="Omborlar" /><WarehousesPage /></>} />
+                <Route path="/inventory/transfers" element={<><Seo title="Omborlararo Koʻchirish" /><InventoryTransfersPage /></>} />
+                <Route path="/inventory/audits" element={<><Seo title="Inventarizatsiya" /><InventoryAuditsPage /></>} />
+                <Route path="/inventory/write-offs" element={<><Seo title="Hisobdan Chiqarish" /><InventoryWriteOffsPage /></>} />
+                <Route path="/manufacturing/orders" element={<><Seo title="Ishlab Chiqarish Buyurtmalari" /><ManufacturingOrdersPage /></>} />
+                <Route path="/manufacturing/bom" element={<><Seo title="Texnologik Xaritalar (BOM)" /><ManufacturingBomPage /></>} />
+
+                {/* Compatibility Aliases for Header & Sidebar Links */}
+                <Route path="/settings/company" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                <Route path="/settings/branches" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                <Route path="/vendors" element={<Navigate to="/admin/contacts" replace />} />
+                <Route path="/reports/accounts-payable" element={<Navigate to="/admin/accounting/reports/ap-aging" replace />} />
+                <Route path="/accounting/reports/profit-and-loss" element={<Navigate to="/admin/accounting/reports/uz-financial-statements" replace />} />
+                <Route path="/tax-reports" element={<Navigate to="/admin/accounting/reports/tax-summary" replace />} />
+
                 <Route path="/design-system" element={<><Seo title="Design System" /><DesignSystemPage /></>} />
                 {/* Dashboard */}
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>

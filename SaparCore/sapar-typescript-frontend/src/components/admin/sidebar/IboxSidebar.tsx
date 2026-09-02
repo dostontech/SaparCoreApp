@@ -15,6 +15,8 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  Star,
+  Sparkles,
 } from 'lucide-react';
 
 interface IboxSidebarProps {
@@ -70,6 +72,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
       icon: <Warehouse className="w-4 h-4 shrink-0 text-cyan-400" />,
       children: [
         { title: 'Ombor qoldiqlari', to: '/admin/inventory' },
+        { title: 'Omborlar roʻyxati', to: '/admin/warehouses' },
         { title: 'Omborlararo koʻchirish', to: '/admin/inventory/transfers' },
         { title: 'Inventarizatsiya', to: '/admin/inventory/audits' },
         { title: 'Hisobdan chiqarish', to: '/admin/inventory/write-offs' },
@@ -81,7 +84,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
       icon: <Users className="w-4 h-4 shrink-0 text-emerald-400" />,
       children: [
         { title: 'Mijozlar roʻyxati', to: '/admin/contacts' },
-        { title: 'Akt Sverki (Oldi-berdi)', to: '/admin/contacts/reconciliation' },
+        { title: 'Akt Sverki (Oldi-berdi)', to: '/admin/contacts' },
       ],
     },
     {
@@ -163,6 +166,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
         { title: 'Xodimlar & Rollar', to: '/admin/users' },
         { title: 'Kassalar', to: '/admin/pos/cashiers' },
         { title: 'Omborlar', to: '/admin/warehouses' },
+        { title: 'Qoʻllanma & Yordam', to: '/admin/guide' },
         { title: 'Design System', to: '/admin/design-system' },
       ],
     },
@@ -173,7 +177,19 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
   }
 
   return (
-    <aside className="w-60 bg-[#082026] text-slate-200 h-full flex flex-col select-none border-r border-[#13444D] transition-all duration-200 shrink-0 overflow-hidden font-sans">
+    <aside className="w-60 bg-[#082026] text-slate-100 h-full flex flex-col select-none border-r border-[#13444D] transition-all duration-200 shrink-0 overflow-hidden font-sans">
+      {/* Pinned Sevimli Sahifalar (Moved from Header to Sidebar as requested) */}
+      <div className="p-2 border-b border-[#13444D] bg-[#06181D]">
+        <button
+          type="button"
+          onClick={() => navigate('/admin')}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0D3B46] hover:bg-[#114E5D] border border-[#028090]/40 text-slate-100 text-xs font-bold transition shadow-2xs group"
+        >
+          <Star className="w-4 h-4 fill-[#02C39A] text-[#02C39A] group-hover:scale-110 transition" />
+          <span className="font-extrabold text-white">Sevimli sahifalar</span>
+        </button>
+      </div>
+
       {/* Scrollable Navigation Items */}
       <div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 custom-scrollbar text-xs">
         {menuItems.map((item) => {
@@ -189,10 +205,10 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                 key={item.id}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2 rounded-lg font-semibold transition ${
+                  `flex items-center gap-2.5 px-3 py-2 rounded-lg font-bold transition ${
                     isActive
-                      ? 'bg-[#028090] text-white font-bold shadow-sm shadow-[#028090]/40'
-                      : 'text-slate-300 hover:bg-[#0D3B46] hover:text-[#02C39A]'
+                      ? 'bg-[#028090] text-white shadow-sm shadow-[#028090]/40'
+                      : 'text-slate-200 hover:bg-[#0D3B46] hover:text-[#02C39A]'
                   }`
                 }
               >
@@ -207,10 +223,10 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
               <button
                 type="button"
                 onClick={() => toggleMenu(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-bold transition ${
                   isCurrentActive
-                    ? 'text-[#02C39A] font-bold bg-[#0D3B46]/70'
-                    : 'text-slate-300 hover:bg-[#0D3B46] hover:text-white'
+                    ? 'text-[#02C39A] bg-[#0D3B46]/70'
+                    : 'text-slate-200 hover:bg-[#0D3B46] hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
@@ -238,7 +254,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                       <NavLink
                         key={child.to}
                         to={child.to}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-medium transition ${
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition ${
                           isChildActive
                             ? 'bg-[#028090] text-white font-bold shadow-2xs'
                             : 'text-slate-300 hover:text-[#02C39A] hover:bg-[#0D3B46]/60'
@@ -261,9 +277,9 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
       </div>
 
       {/* Footer / SAPAR Brand Version info */}
-      <div className="p-3 border-t border-[#13444D] bg-[#06181D] flex items-center justify-between text-[11px] text-slate-400">
-        <span className="font-bold text-slate-300">SAPAR ERP v2.9</span>
-        <span className="px-2 py-0.5 rounded bg-[#0D3B46] text-[#02C39A] font-semibold text-[10px] border border-[#028090]/30">
+      <div className="p-3 border-t border-[#13444D] bg-[#06181D] flex items-center justify-between text-[11px] text-slate-300">
+        <span className="font-bold text-white">SAPAR ERP v2.9</span>
+        <span className="px-2 py-0.5 rounded bg-[#0D3B46] text-[#02C39A] font-bold text-[10px] border border-[#028090]/30">
           Oʻzbekiston
         </span>
       </div>
