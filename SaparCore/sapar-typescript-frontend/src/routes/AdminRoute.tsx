@@ -193,6 +193,9 @@ import BhmsChartOfAccountsPage from "@pages/admin/accounting/BhmsChartOfAccounts
 import UzbekistanFinancialReportsPage from "@pages/admin/accounting/UzbekistanFinancialReportsPage";
 import BusinessLoansPage from "@pages/admin/financing/BusinessLoansPage";
 import DesignSystemPage from "@pages/admin/design-system/DesignSystemPage";
+import IboxDashboardPage from "@pages/admin/dashboard/IboxDashboardPage";
+import IboxSaleCreatePage from "@pages/admin/sales/IboxSaleCreatePage";
+import IboxSalesListPage from "@pages/admin/sales/IboxSalesListPage";
 
 const AdminRoute = () => {
     return (
@@ -206,12 +209,14 @@ const AdminRoute = () => {
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
                     <Route
                         index
-                        element={<><Seo title="Dashboard" /><AdminDashboard /></>}
+                        element={<><Seo title="Bosh panel" /><IboxDashboardPage /></>}
                     />
                 </Route>
 
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
-                    <Route path="/dashboard" element={<><Seo title="Dashboard" /><AdminDashboard /></>} />
+                    <Route path="/dashboard" element={<><Seo title="Bosh panel" /><IboxDashboardPage /></>} />
+                    <Route path="/sales" element={<><Seo title="Sotuvlar" /><IboxSalesListPage /></>} />
+                    <Route path="/sales/create" element={<><Seo title="Sotuv (Yaratish)" /><IboxSaleCreatePage /></>} />
                     <Route path="/dashboard/hrm" element={<><Seo title="HRM & Xodimlar" /><HrmDashboard /></>} />
                     <Route path="/dashboard/inventory" element={<><Seo title="Ombor & Sklad" /><InventoryDashboard /></>} />
                     <Route path="/dashboard/crm" element={<><Seo title="CRM & Bitimlar" /><CrmDashboard /></>} />
