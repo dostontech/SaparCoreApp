@@ -15,7 +15,6 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
 
 interface IboxSidebarProps {
@@ -51,13 +50,13 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'dashboard',
       title: 'Bosh panel',
-      icon: <LayoutGrid className="w-4 h-4 shrink-0" />,
+      icon: <LayoutGrid className="w-4 h-4 shrink-0 text-[#02C39A]" />,
       to: '/admin',
     },
     {
       id: 'mahsulotlar',
       title: 'Mahsulotlar',
-      icon: <Package className="w-4 h-4 shrink-0" />,
+      icon: <Package className="w-4 h-4 shrink-0 text-teal-400" />,
       children: [
         { title: 'Mahsulotlar roʻyxati', to: '/admin/products' },
         { title: 'Kategoriyalar', to: '/admin/categories' },
@@ -68,7 +67,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'ombor',
       title: 'Ombor',
-      icon: <Warehouse className="w-4 h-4 shrink-0" />,
+      icon: <Warehouse className="w-4 h-4 shrink-0 text-cyan-400" />,
       children: [
         { title: 'Ombor qoldiqlari', to: '/admin/inventory' },
         { title: 'Omborlararo koʻchirish', to: '/admin/inventory/transfers' },
@@ -79,7 +78,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'mijozlar',
       title: 'Mijozlar',
-      icon: <Users className="w-4 h-4 shrink-0" />,
+      icon: <Users className="w-4 h-4 shrink-0 text-emerald-400" />,
       children: [
         { title: 'Mijozlar roʻyxati', to: '/admin/contacts' },
         { title: 'Akt Sverki (Oldi-berdi)', to: '/admin/contacts/reconciliation' },
@@ -88,7 +87,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'taminotchilar',
       title: 'Ta\'minotchilar',
-      icon: <Truck className="w-4 h-4 shrink-0" />,
+      icon: <Truck className="w-4 h-4 shrink-0 text-teal-300" />,
       children: [
         { title: 'Taʼminotchilar', to: '/admin/vendors' },
         { title: 'Qarzdorlik hisoboti', to: '/admin/reports/accounts-payable' },
@@ -97,9 +96,9 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'sotuvlar',
       title: 'Sotuvlar',
-      icon: <ShoppingCart className="w-4 h-4 shrink-0" />,
+      icon: <ShoppingCart className="w-4 h-4 shrink-0 text-[#02C39A]" />,
       children: [
-        { title: 'Sotuvlar (Yuk xatlari)', to: '/admin/invoices' },
+        { title: 'Sotuvlar (Yuk xatlari)', to: '/admin/sales' },
         { title: 'POS oyna (Kassa)', to: '/admin/pos', badge: 'Kassa' },
         { title: 'Kassirlar jurnali', to: '/admin/pos/cashiers' },
         { title: 'Tijorat takliflari', to: '/admin/quotations' },
@@ -109,7 +108,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'xaridlar',
       title: 'Xaridlar',
-      icon: <ShoppingBag className="w-4 h-4 shrink-0" />,
+      icon: <ShoppingBag className="w-4 h-4 shrink-0 text-teal-400" />,
       children: [
         { title: 'Xaridlar roʻyxati', to: '/admin/purchases' },
         { title: 'Xarid buyurtmalari', to: '/admin/purchase-orders' },
@@ -119,7 +118,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'pullar',
       title: 'Pullar',
-      icon: <Wallet className="w-4 h-4 shrink-0" />,
+      icon: <Wallet className="w-4 h-4 shrink-0 text-[#02C39A]" />,
       children: [
         { title: 'Kassadagi pullar', to: '/admin/pos/cashiers' },
         { title: 'Bank hisoblari', to: '/admin/banking' },
@@ -129,7 +128,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'fabrika',
       title: 'Fabrika',
-      icon: <Factory className="w-4 h-4 shrink-0" />,
+      icon: <Factory className="w-4 h-4 shrink-0 text-cyan-300" />,
       children: [
         { title: 'Ishlab chiqarish buyurtmalari', to: '/admin/manufacturing/orders' },
         { title: 'Texnologik xaritalar (BOM)', to: '/admin/manufacturing/bom' },
@@ -138,7 +137,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'korxonalar',
       title: 'Korxonalar',
-      icon: <Building2 className="w-4 h-4 shrink-0" />,
+      icon: <Building2 className="w-4 h-4 shrink-0 text-teal-400" />,
       children: [
         { title: 'Filiallar', to: '/admin/settings/branches' },
         { title: 'Yuridik shaxslar', to: '/admin/settings/company' },
@@ -147,7 +146,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'hisobotlar',
       title: 'Hisobotlar',
-      icon: <FileSpreadsheet className="w-4 h-4 shrink-0" />,
+      icon: <FileSpreadsheet className="w-4 h-4 shrink-0 text-[#02C39A]" />,
       children: [
         { title: 'Sotuvlar hisoboti', to: '/admin/reports/sales' },
         { title: 'Foyda va zararlar (2-Shakl)', to: '/admin/accounting/reports/profit-and-loss' },
@@ -158,7 +157,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
     {
       id: 'sozlamalar',
       title: 'Sozlamalar',
-      icon: <Settings className="w-4 h-4 shrink-0" />,
+      icon: <Settings className="w-4 h-4 shrink-0 text-slate-400" />,
       children: [
         { title: 'Korxona sozlamalari', to: '/admin/settings/company' },
         { title: 'Xodimlar & Rollar', to: '/admin/users' },
@@ -174,9 +173,9 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
   }
 
   return (
-    <aside className="w-60 bg-[#1E293B] text-slate-300 h-full flex flex-col select-none border-r border-slate-800 transition-all duration-200 shrink-0 overflow-hidden font-sans">
+    <aside className="w-60 bg-[#082026] text-slate-200 h-full flex flex-col select-none border-r border-[#13444D] transition-all duration-200 shrink-0 overflow-hidden font-sans">
       {/* Scrollable Navigation Items */}
-      <div className="flex-1 overflow-y-auto py-2.5 px-2 space-y-0.5 custom-scrollbar text-xs">
+      <div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 custom-scrollbar text-xs">
         {menuItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
           const isExpanded = !!openMenus[item.id];
@@ -190,10 +189,10 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                 key={item.id}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition ${
+                  `flex items-center gap-2.5 px-3 py-2 rounded-lg font-semibold transition ${
                     isActive
-                      ? 'bg-blue-600 text-white font-bold shadow-xs'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-[#028090] text-white font-bold shadow-sm shadow-[#028090]/40'
+                      : 'text-slate-300 hover:bg-[#0D3B46] hover:text-[#02C39A]'
                   }`
                 }
               >
@@ -210,8 +209,8 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                 onClick={() => toggleMenu(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition ${
                   isCurrentActive
-                    ? 'text-blue-400 font-bold bg-slate-800/60'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'text-[#02C39A] font-bold bg-[#0D3B46]/70'
+                    : 'text-slate-300 hover:bg-[#0D3B46] hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
@@ -220,7 +219,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                 </div>
                 <div className="text-slate-400">
                   {isExpanded ? (
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3.5 h-3.5 text-[#02C39A]" />
                   ) : (
                     <ChevronRight className="w-3.5 h-3.5" />
                   )}
@@ -229,7 +228,7 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
 
               {/* Submenu Children */}
               {isExpanded && hasChildren && (
-                <div className="pl-7 pr-1 py-1 space-y-0.5 border-l border-slate-700/60 ml-4">
+                <div className="pl-6 pr-1 py-1 space-y-0.5 border-l border-[#028090]/30 ml-4">
                   {item.children!.map((child) => {
                     const isChildActive =
                       location.pathname === child.to ||
@@ -241,13 +240,13 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
                         to={child.to}
                         className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-medium transition ${
                           isChildActive
-                            ? 'bg-blue-600 text-white font-bold shadow-2xs'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                            ? 'bg-[#028090] text-white font-bold shadow-2xs'
+                            : 'text-slate-300 hover:text-[#02C39A] hover:bg-[#0D3B46]/60'
                         }`}
                       >
                         <span className="truncate">{child.title}</span>
                         {child.badge && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500 text-slate-950">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-[#02C39A] text-[#0B2B33]">
                             {child.badge}
                           </span>
                         )}
@@ -261,11 +260,11 @@ export const IboxSidebar: React.FC<IboxSidebarProps> = ({ isOpen }) => {
         })}
       </div>
 
-      {/* Footer / App Version info */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-400">
-        <span className="font-semibold">iBox Theme v2.9</span>
-        <span className="px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 font-mono text-[10px]">
-          Central Asia
+      {/* Footer / SAPAR Brand Version info */}
+      <div className="p-3 border-t border-[#13444D] bg-[#06181D] flex items-center justify-between text-[11px] text-slate-400">
+        <span className="font-bold text-slate-300">SAPAR ERP v2.9</span>
+        <span className="px-2 py-0.5 rounded bg-[#0D3B46] text-[#02C39A] font-semibold text-[10px] border border-[#028090]/30">
+          Oʻzbekiston
         </span>
       </div>
     </aside>

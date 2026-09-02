@@ -1,48 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   Truck,
   Users,
   Calendar,
   ChevronDown,
-  Inbox,
   CreditCard,
   Banknote,
   Smartphone,
   ArrowRightLeft,
-  DollarSign,
+  Sparkles,
   TrendingUp,
-  AlertCircle,
-  Clock,
 } from 'lucide-react';
-import Constants from '@constants/api';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
 
 export const IboxDashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token') || '';
   const { format } = useCurrencyFormatter();
-
-  const [loading, setLoading] = useState(false);
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto font-sans text-slate-800 pb-16 animate-fade-in">
-      {/* Page Title */}
+      {/* Page Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-black text-slate-900">Bosh panel</h1>
+        <div>
+          <h1 className="text-xl font-black text-[#0B2B33]">Bosh panel</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            OOO "RIZOBAY STROY" • Savdo, ombor va kassa koʻrsatkichlari
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate('/admin/pos')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#02C39A] hover:bg-[#02A683] text-[#0B2B33] font-bold text-xs shadow-xs transition"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>POS Kassa Ochish</span>
+          </button>
+        </div>
       </div>
 
-      {/* 1. TOP 4 METRIC CARDS (Exact match to ibox_01_dashboard.png) */}
+      {/* 1. TOP 4 KPI CARDS WITH SAPAR BRAND PALETTE */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* BUGUN */}
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-blue-600 flex flex-col justify-between">
+        {/* BUGUN (SAPAR Teal #028090) */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-[#028090] flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-black text-blue-600 uppercase tracking-wider">BUGUN</p>
+              <p className="text-xs font-black text-[#028090] uppercase tracking-wider">BUGUN</p>
               <p className="text-xs text-slate-500 mt-0.5">0 ta sotuv</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#028090]/10 text-[#028090] flex items-center justify-center">
               <Truck className="w-4 h-4" />
             </div>
           </div>
@@ -52,12 +59,12 @@ export const IboxDashboardPage: React.FC = () => {
           </div>
           <div className="mt-2 pt-2 border-t border-slate-100">
             <p className="text-[11px] text-slate-400">Pul kirimlari</p>
-            <p className="text-xs font-bold text-emerald-600 font-mono">+47 227 302 UZS</p>
-            <p className="text-xs font-bold text-emerald-600 font-mono">+2 000 USD</p>
+            <p className="text-xs font-bold text-[#028090] font-mono">+47 227 302 UZS</p>
+            <p className="text-xs font-bold text-[#02C39A] font-mono">+2 000 USD</p>
           </div>
         </div>
 
-        {/* KECHA */}
+        {/* KECHA (Amber #D97706) */}
         <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-amber-500 flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div>
@@ -78,17 +85,17 @@ export const IboxDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* QARZDORLAR (Debitorlar) */}
+        {/* QARZDORLAR (Rose #E11D48) */}
         <div
           onClick={() => navigate('/admin/contacts')}
-          className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-red-500 flex flex-col justify-between cursor-pointer hover:border-slate-300 transition"
+          className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-rose-500 flex flex-col justify-between cursor-pointer hover:border-slate-300 transition"
         >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-black text-red-600 uppercase tracking-wider">QARZDORLAR</p>
+              <p className="text-xs font-black text-rose-600 uppercase tracking-wider">QARZDORLAR</p>
               <p className="text-xs text-slate-500 mt-0.5">Bizga qarz</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -102,17 +109,17 @@ export const IboxDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* KREDITORLAR */}
+        {/* KREDITORLAR (SAPAR Mint #02C39A) */}
         <div
           onClick={() => navigate('/admin/vendors')}
-          className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-emerald-500 flex flex-col justify-between cursor-pointer hover:border-slate-300 transition"
+          className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs border-l-4 border-l-[#02C39A] flex flex-col justify-between cursor-pointer hover:border-slate-300 transition"
         >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-black text-emerald-600 uppercase tracking-wider">KREDITORLAR</p>
+              <p className="text-xs font-black text-[#028090] uppercase tracking-wider">KREDITORLAR</p>
               <p className="text-xs text-slate-500 mt-0.5">Biz qarz</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#02C39A]/15 text-[#028090] flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -132,7 +139,7 @@ export const IboxDashboardPage: React.FC = () => {
         {/* Left 8 Cols: Eng ko'p sotilgan mahsulotlar */}
         <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col">
           <div className="p-3.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-bold text-sm text-slate-900">Eng koʻp sotilgan mahsulotlar</h3>
+            <h3 className="font-bold text-sm text-[#0B2B33]">Eng koʻp sotilgan mahsulotlar</h3>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -153,7 +160,7 @@ export const IboxDashboardPage: React.FC = () => {
 
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50/80 text-[11px] font-bold text-slate-500 border-b border-slate-200">
+              <thead className="bg-[#F0FBF8] text-[11px] font-bold text-[#0B2B33] border-b border-slate-200">
                 <tr>
                   <th className="px-4 py-3">Mahsulot</th>
                   <th className="px-4 py-3">Mahsulot kategoriyasi</th>
@@ -162,22 +169,22 @@ export const IboxDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                <tr>
+                <tr className="hover:bg-[#028090]/5 transition">
                   <td className="px-4 py-3 font-semibold text-slate-900">Armatura 12mm A500C (Bekobod)</td>
                   <td className="px-4 py-3 text-slate-500">Metall Prokat</td>
-                  <td className="px-4 py-3 text-center font-mono font-bold">14 200 kg</td>
+                  <td className="px-4 py-3 text-center font-mono font-bold text-[#028090]">14 200 kg</td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-slate-900">soʻm139,160,000</td>
                 </tr>
-                <tr>
+                <tr className="hover:bg-[#028090]/5 transition">
                   <td className="px-4 py-3 font-semibold text-slate-900">Akfa Emulsiya Fasid Boʻyoq 20kg</td>
                   <td className="px-4 py-3 text-slate-500">Boʻyoq va Qurilish Kimyosi</td>
-                  <td className="px-4 py-3 text-center font-mono font-bold">120 dona</td>
+                  <td className="px-4 py-3 text-center font-mono font-bold text-[#028090]">120 dona</td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-slate-900">soʻm33,000,000</td>
                 </tr>
-                <tr>
+                <tr className="hover:bg-[#028090]/5 transition">
                   <td className="px-4 py-3 font-semibold text-slate-900">Sement M-500 (Bekobod) 50kg</td>
                   <td className="px-4 py-3 text-slate-500">Qurilish Materiallari</td>
-                  <td className="px-4 py-3 text-center font-mono font-bold">450 qop</td>
+                  <td className="px-4 py-3 text-center font-mono font-bold text-[#028090]">450 qop</td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-slate-900">soʻm30,600,000</td>
                 </tr>
               </tbody>
@@ -185,14 +192,14 @@ export const IboxDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right 4 Cols: Kassadagi Pullar (Matches ibox_01_dashboard.png exactly) */}
+        {/* Right 4 Cols: Kassadagi Pullar */}
         <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-xs p-4 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-900">Kassadagi pullar</h3>
+            <h3 className="font-bold text-sm text-[#0B2B33]">Kassadagi pullar</h3>
             <button
               type="button"
               onClick={() => navigate('/admin/pos/cashiers')}
-              className="text-xs text-blue-600 font-semibold hover:underline"
+              className="text-xs text-[#028090] font-bold hover:underline"
             >
               Barchasi →
             </button>
@@ -200,9 +207,9 @@ export const IboxDashboardPage: React.FC = () => {
 
           <div className="space-y-2.5 text-xs">
             {/* Naqd pul */}
-            <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+            <div className="p-2.5 rounded-xl border border-slate-100 bg-[#F0FBF8] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-200/80 text-slate-600 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-lg bg-[#028090]/15 text-[#028090] flex items-center justify-center font-bold">
                   <Banknote className="w-4 h-4" />
                 </div>
                 <div>
@@ -211,7 +218,7 @@ export const IboxDashboardPage: React.FC = () => {
                 </div>
               </div>
               <div className="text-right font-mono text-[11px]">
-                <p className="text-emerald-700 font-bold">8 100 USD</p>
+                <p className="text-[#028090] font-bold">8 100 USD</p>
                 <p className="text-slate-400">1 000 RUB</p>
               </div>
             </div>
@@ -235,11 +242,11 @@ export const IboxDashboardPage: React.FC = () => {
             {/* Clik */}
             <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-200/80 text-slate-600 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold">
                   <Smartphone className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-800">Clik (QR toʻlov)</p>
+                  <p className="font-bold text-slate-800">Click / Payme (QR)</p>
                   <p className="font-mono text-[11px] text-slate-900 font-semibold">42 063 566.89 UZS</p>
                 </div>
               </div>
@@ -251,7 +258,7 @@ export const IboxDashboardPage: React.FC = () => {
             {/* Terminal */}
             <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-200/80 text-slate-600 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <div>
@@ -267,10 +274,15 @@ export const IboxDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. BOTTOM SECTION: Sotuv va mijoz to'lovlari Chart */}
+      {/* 3. BOTTOM SECTION: Sotuv va mijoz to'lovlari (SAPAR Teal-Mint Gradient Wave) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-          <h3 className="font-bold text-sm text-slate-900">Sotuv va mijoz toʻlovlari</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-sm text-[#0B2B33]">Sotuv va mijoz toʻlovlari</h3>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#02C39A]/20 text-[#028090]">
+              Kunlik Dinamika
+            </span>
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -289,14 +301,14 @@ export const IboxDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Wave Graph Simulation */}
+        {/* Dynamic Wave Graph Styled in SAPAR Teal/Mint */}
         <div className="h-44 flex items-end justify-between gap-1 pt-6 px-2">
           {[20, 35, 10, 5, 80, 15, 30, 45, 95, 60, 20, 10, 40, 70, 85, 30, 50, 65, 40, 90, 30, 45, 60, 25, 35, 75, 50, 40, 60, 80].map((h, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
               <div
                 style={{ height: `${h}%` }}
-                className="w-full bg-red-400/80 hover:bg-red-500 rounded-t transition-all cursor-pointer"
-                title={`Kun ${i + 1}: ${h * 5}M soʻm savdo`}
+                className="w-full bg-gradient-to-t from-[#028090] to-[#02C39A] group-hover:from-[#026875] group-hover:to-[#028090] rounded-t transition-all cursor-pointer shadow-2xs"
+                title={`Kun ${i + 1}: ${(h * 4.8).toFixed(1)}M soʻm savdo`}
               />
               <span className="text-[8px] text-slate-400 font-mono">{i + 1}</span>
             </div>
