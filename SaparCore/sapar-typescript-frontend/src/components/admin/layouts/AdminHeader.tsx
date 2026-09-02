@@ -19,6 +19,14 @@ import { QuickCreateDropdown } from '../header/QuickCreateDropdown';
 import { GlobalSearchModal } from '../header/GlobalSearchModal';
 import { NotificationDropdown } from '../header/NotificationDropdown';
 import { SaparLogo } from '../../common/SaparLogo';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@components/ui';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -245,74 +253,88 @@ const AdminHeader = ({ toggleSidebar }: HeaderProps) => {
             <span className="hidden md:inline">{t('common.help', 'Qoʻllanma')}</span>
           </button>
 
+          {/* Design System Showcase Link */}
+          <Link
+            to="/admin/design-system"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 hover:bg-purple-100 transition border border-purple-200 shadow-2xs"
+            title="Radix UI Design System"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            <span className="hidden sm:inline">Design System</span>
+          </Link>
+
           <div className="h-5 w-px bg-slate-200 mx-1" />
 
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition focus:outline-none cursor-pointer"
-              aria-expanded={isDropdownOpen}
-            >
-              <div
-                className={
-                  user?.profileImageUrl
-                    ? 'w-8 h-8 rounded-full ring-2 ring-teal-600 ring-offset-1 flex items-center justify-center text-xs font-semibold'
-                    : 'w-8 h-8 bg-gradient-to-br from-teal-700 to-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-2xs'
-                }
+          {/* Radix Profile Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition focus:outline-none cursor-pointer"
               >
-                {user?.profileImageUrl ? (
-                  <img
-                    src={assetUrl(user.profileImageUrl)}
-                    alt="User"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <span>
-                    {user?.firstName ? user.firstName[0].toUpperCase() : 'U'}
-                  </span>
-                )}
-              </div>
-              <span className="hidden lg:inline-block text-xs font-bold text-slate-700 max-w-[100px] truncate">
-                {user?.firstName || 'Foydalanuvchi'}
-              </span>
-            </button>
-
-            {isDropdownOpen && (
-              <div
-                className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200/80 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150 z-50"
-                onMouseLeave={() => setIsDropdownOpen(false)}
+                <div
+                  className={
+                    user?.profileImageUrl
+                      ? 'w-8 h-8 rounded-full ring-2 ring-teal-600 ring-offset-1 flex items-center justify-center text-xs font-semibold'
+                      : 'w-8 h-8 bg-gradient-to-br from-teal-700 to-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-2xs'
+                  }
+                >
+                  {user?.profileImageUrl ? (
+                    <img
+                      src={assetUrl(user.profileImageUrl)}
+                      alt="User"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span>
+                      {user?.firstName ? user.firstName[0].toUpperCase() : 'U'}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden lg:inline-block text-xs font-bold text-slate-700 max-w-[100px] truncate">
+                  {user?.firstName || 'Foydalanuvchi'}
+                </span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 p-1">
+              <DropdownMenuLabel className="px-3 py-2">
+                <p className="text-xs font-bold text-gray-900 truncate">
+                  {user?.firstName ? `${user.firstName} ${user?.lastName || ''}` : 'Foydalanuvchi'}
+                </p>
+                <p className="text-[11px] text-gray-500 truncate mt-0.5 lowercase">
+                  {user?.email || 'user@example.com'}
+                </p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/admin/settings/profile"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:text-gray-900"
+                >
+                  <User className="w-3.5 h-3.5 text-gray-400" />
+                  {t('nav.companySettings', 'Profil sozlamalari')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/admin/design-system"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-purple-700 hover:text-purple-900"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                  Radix UI Components
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="danger"
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-xs font-medium cursor-pointer"
               >
-                <div className="px-4 py-3">
-                  <p className="text-xs font-bold text-slate-900 truncate">
-                    {user?.firstName ? `${user.firstName} ${user?.lastName || ''}` : 'Foydalanuvchi'}
-                  </p>
-                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                    {user?.email || 'user@example.com'}
-                  </p>
-                </div>
-                <div className="py-1">
-                  <Link
-                    to="/admin/settings/profile"
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="flex items-center px-4 py-2 text-xs font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-900 transition-colors"
-                  >
-                    <User className="w-3.5 h-3.5 mr-2.5 text-slate-400" />
-                    {t('nav.companySettings', 'Profil sozlamalari')}
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
-                  >
-                    <LogOut className="w-3.5 h-3.5 mr-2.5 text-rose-500" />
-                    {t('common.logout', 'Chiqish')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+                <LogOut className="w-3.5 h-3.5" />
+                {t('common.logout', 'Chiqish')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

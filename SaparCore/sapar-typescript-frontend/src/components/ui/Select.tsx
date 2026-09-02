@@ -1,10 +1,161 @@
-import {
-  forwardRef,
-  useId,
-  type ReactNode,
-  type SelectHTMLAttributes,
-} from "react";
-import FormField, { fieldControlClasses } from "./FormField";
+import * as React from 'react';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import FormField, { fieldControlClasses } from './FormField';
+
+/* =========================================================================
+   Radix UI Select Primitives
+   ========================================================================= */
+
+const SelectRoot = SelectPrimitive.Root;
+
+const SelectGroup = SelectPrimitive.Group;
+
+const SelectValue = SelectPrimitive.Value;
+
+const SelectTrigger = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+    invalid?: boolean;
+  }
+>(({ className, children, invalid, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      'flex h-9 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm ring-offset-white placeholder:text-gray-400',
+      'focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600',
+      'disabled:cursor-not-allowed disabled:opacity-50',
+      invalid && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <ChevronDown className="h-4 w-4 opacity-50 transition-transform" />
+    </SelectPrimitive.Icon>
+  </SelectPrimitive.Trigger>
+));
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
+
+const SelectScrollUpButton = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.ScrollUpButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollUpButton
+    ref={ref}
+    className={cn(
+      'flex cursor-default items-center justify-center py-1 text-gray-500',
+      className
+    )}
+    {...props}
+  >
+    <ChevronUp className="h-4 w-4" />
+  </SelectPrimitive.ScrollUpButton>
+));
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
+
+const SelectScrollDownButton = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.ScrollDownButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollDownButton
+    ref={ref}
+    className={cn(
+      'flex cursor-default items-center justify-center py-1 text-gray-500',
+      className
+    )}
+    {...props}
+  >
+    <ChevronDown className="h-4 w-4" />
+  </SelectPrimitive.ScrollDownButton>
+));
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName;
+
+const SelectContent = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = 'popper', ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border border-gray-100 bg-white text-gray-800 shadow-xl data-[state=open]:animate-slide-down-fade',
+        position === 'popper' &&
+          'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectScrollUpButton />
+      <SelectPrimitive.Viewport
+        className={cn(
+          'p-1',
+          position === 'popper' &&
+            'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+      <SelectScrollDownButton />
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+));
+SelectContent.displayName = SelectPrimitive.Content.displayName;
+
+const SelectLabel = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn('py-1.5 pl-8 pr-2 text-xs font-semibold text-gray-400 uppercase tracking-wider', className)}
+    {...props}
+  />
+));
+SelectLabel.displayName = SelectPrimitive.Label.displayName;
+
+const SelectItem = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      'relative flex w-full cursor-pointer select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm font-medium outline-none transition-colors',
+      'focus:bg-purple-50 focus:text-purple-700 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <Check className="h-4 w-4 text-purple-600" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+));
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+
+const SelectSeparator = React.forwardRef<
+  React.ComponentRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn('-mx-1 my-1 h-px bg-gray-100', className)}
+    {...props}
+  />
+));
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
+
+/* =========================================================================
+   Backward-Compatible Native Form Select
+   ========================================================================= */
 
 export interface SelectOption {
   value: string | number;
@@ -13,44 +164,35 @@ export interface SelectOption {
 }
 
 export interface SelectProps
-  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "id"> {
-  label?: ReactNode;
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'id'> {
+  label?: React.ReactNode;
   required?: boolean;
   error?: string;
-  helper?: ReactNode;
+  helper?: React.ReactNode;
   id?: string;
   containerClassName?: string;
-  /** Declarative options list. If omitted, pass `<option>` children instead. */
   options?: SelectOption[];
-  /** Renders a disabled, hidden leading option (e.g. "Select Gender"). */
   placeholder?: string;
 }
 
-/**
- * Styled native `<select>` matching FormField's input styling (same
- * border/radius/focus/text tokens) with the same label/error/required
- * wrapper. Uses a real `<select>` for accessibility — not a custom dropdown.
- * Delegates the wrapper (label + error/helper + aria wiring) to FormField's
- * render-prop children so the id/aria-describedby association stays in sync.
- */
-const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>(function Select(
   {
     label,
     required = false,
     error,
     helper,
     id,
-    className = "",
-    containerClassName = "",
+    className = '',
+    containerClassName = '',
     options,
     placeholder,
     disabled,
     children,
     ...rest
   },
-  ref,
+  ref
 ) {
-  const autoId = useId();
+  const autoId = React.useId();
   const fieldId = id ?? autoId;
   const invalid = Boolean(error);
 
@@ -70,8 +212,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
           disabled={disabled}
           required={required}
           aria-required={required || undefined}
-          aria-invalid={field["aria-invalid"]}
-          aria-describedby={field["aria-describedby"]}
+          aria-invalid={field['aria-invalid']}
+          aria-describedby={field['aria-describedby']}
           className={`${fieldControlClasses(invalid)} ${className}`}
           {...rest}
         >
@@ -97,4 +239,16 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
   );
 });
 
+export {
+  SelectRoot,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+};
 export default Select;

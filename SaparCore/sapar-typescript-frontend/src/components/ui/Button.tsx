@@ -1,66 +1,53 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
-import { Loader2Icon } from "lucide-react";
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Loader2Icon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "soft"
-  | "white"
-  | "danger"
-  | "dangerOutline"
-  | "success"
-  | "warning"
-  | "ghost"
-  | "link";
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-1.5 font-semibold rounded-control transition-colors duration-150 select-none disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm',
+        secondary: 'bg-secondary text-white hover:opacity-90 shadow-sm',
+        outline:
+          'border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white',
+        soft: 'bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white',
+        white: 'bg-white border border-border text-heading hover:bg-gray-50 shadow-sm',
+        danger: 'bg-danger text-white hover:opacity-90 shadow-sm',
+        dangerOutline:
+          'border border-danger text-danger hover:bg-danger hover:text-white',
+        success: 'bg-success text-white hover:opacity-90 shadow-sm',
+        warning: 'bg-warning text-white hover:opacity-90 shadow-sm',
+        ghost: 'text-body hover:bg-gray-100 hover:text-heading',
+        link: 'bg-transparent text-purple-600 hover:underline underline-offset-2 disabled:no-underline p-0 h-auto',
+      },
+      size: {
+        sm: 'text-xs px-2.5 py-1.5',
+        md: 'text-[13px] px-3 py-2',
+        lg: 'text-sm px-4 py-2.5',
+        icon: 'p-2',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+    },
+  }
+);
 
-export type ButtonSize = "sm" | "md" | "lg" | "icon";
+export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
+export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  /**
-   * `icon` is the icon-only affordance: square padding, no gap/text sizing.
-   * Pass a single icon as `children` (not `leftIcon`) and always set
-   * `aria-label` — there is no visible text for assistive tech to read.
-   */
-  size?: ButtonSize;
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
   isLoading?: boolean;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
-
-const BASE =
-  "inline-flex items-center justify-center gap-1.5 font-semibold rounded-control transition disabled:opacity-60 disabled:cursor-not-allowed";
-
-const SIZES: Record<ButtonSize, string> = {
-  sm: "text-xs px-2.5 py-1.5",
-  md: "text-[13px] px-3 py-2",
-  lg: "text-sm px-4 py-2.5",
-  icon: "p-2",
-};
-
-const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-purple-600 text-white hover:bg-purple-700",
-  secondary: "bg-secondary text-white hover:opacity-90",
-  outline:
-    "border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white",
-  soft: "bg-[#F8F5FF] text-purple-600 hover:bg-purple-600 hover:text-white",
-  white: "bg-white border border-border text-heading hover:bg-surface",
-  danger: "bg-danger text-white hover:opacity-90",
-  // Softer red for routine inline actions (e.g. a "Delete" button in a table
-  // row) — the solid `danger` fill is reserved for the actual confirm step
-  // (delete-confirmation modal), so a screen full of list rows isn't a wall
-  // of alarming solid-red buttons.
-  dangerOutline: "border border-danger text-danger hover:bg-danger hover:text-white",
-  success: "bg-success text-white hover:opacity-90",
-  warning: "bg-warning text-white hover:opacity-90",
-  ghost: "text-body hover:bg-surface",
-  // Text-like, brand-color trigger with no background — for inline/table-cell
-  // actions that should read as a link rather than a button chip. Padding
-  // still comes from `size` (kept for a consistent hit target); use
-  // `className="p-0"` at the call site if you need a truly inline link.
-  link: "bg-transparent text-purple-600 hover:underline underline-offset-2 disabled:no-underline",
-};
 
 const SPINNER_SIZE: Record<ButtonSize, number> = {
   sm: 14,
@@ -69,42 +56,64 @@ const SPINNER_SIZE: Record<ButtonSize, number> = {
   icon: 15,
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  {
-    variant = "primary",
-    size = "md",
-    isLoading = false,
-    leftIcon,
-    rightIcon,
-    disabled,
-    className = "",
-    children,
-    type = "button",
-    ...rest
-  },
-  ref,
-) {
-  return (
-    <button
-      ref={ref}
-      type={type}
-      disabled={disabled || isLoading}
-      className={`${BASE} ${SIZES[size]} ${VARIANTS[variant]} ${className}`}
-      {...rest}
-    >
-      {isLoading ? (
-        <Loader2Icon
-          className="animate-spin"
-          style={{ width: SPINNER_SIZE[size], height: SPINNER_SIZE[size] }}
-          aria-hidden="true"
-        />
-      ) : (
-        leftIcon
-      )}
-      {children}
-      {!isLoading && rightIcon}
-    </button>
-  );
-});
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      asChild = false,
+      isLoading = false,
+      leftIcon,
+      rightIcon,
+      disabled,
+      children,
+      type = 'button',
+      ...props
+    },
+    ref
+  ) => {
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
 
+    const currentSize = size ?? 'md';
+
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={disabled || isLoading}
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        {isLoading ? (
+          <Loader2Icon
+            className="animate-spin"
+            style={{
+              width: SPINNER_SIZE[currentSize],
+              height: SPINNER_SIZE[currentSize],
+            }}
+            aria-hidden="true"
+          />
+        ) : (
+          leftIcon
+        )}
+        {children}
+        {!isLoading && rightIcon}
+      </button>
+    );
+  }
+);
+Button.displayName = 'Button';
+
+export { Button, buttonVariants };
 export default Button;

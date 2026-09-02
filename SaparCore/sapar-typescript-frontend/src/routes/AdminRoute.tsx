@@ -181,6 +181,7 @@ import LeaveReport from "@pages/admin/payroll/LeaveReport";
 import TabelAttendancePage from "@pages/admin/payroll/TabelAttendancePage";
 import PosTerminalPage from "@pages/admin/pos/PosTerminalPage";
 import PosShiftsPage from "@pages/admin/pos/PosShiftsPage";
+import PosCashiersPage from "@pages/admin/pos/PosCashiersPage";
 import CrmPipelinePage from "@pages/admin/crm/CrmPipelinePage";
 import UzbekPaymentGatewaysPage from "@pages/admin/settings/UzbekPaymentGatewaysPage";
 import HelpdeskTicketsPage from "@pages/admin/helpdesk/HelpdeskTicketsPage";
@@ -191,6 +192,7 @@ import SubscriptionPlansPage from "@pages/admin/settings/SubscriptionPlansPage";
 import BhmsChartOfAccountsPage from "@pages/admin/accounting/BhmsChartOfAccountsPage";
 import UzbekistanFinancialReportsPage from "@pages/admin/accounting/UzbekistanFinancialReportsPage";
 import BusinessLoansPage from "@pages/admin/financing/BusinessLoansPage";
+import DesignSystemPage from "@pages/admin/design-system/DesignSystemPage";
 
 const AdminRoute = () => {
     return (
@@ -199,6 +201,7 @@ const AdminRoute = () => {
             <Route path="/register" element={<><Seo title="Register" /><AdminRegister /></>} />
 
             <Route element={<AdminLayout />}>
+                <Route path="/design-system" element={<><Seo title="Design System" /><DesignSystemPage /></>} />
                 {/* Dashboard */}
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
                     <Route
@@ -254,6 +257,7 @@ const AdminRoute = () => {
                     <Route path="/view-invoice/:id" element={<><Seo title="Invoice" /><ViewInvoice /></>} />
                     <Route path="/pos" element={<><Seo title="POS Kassa Terminali" /><PosTerminalPage /></>} />
                     <Route path="/pos/shifts" element={<><Seo title="Kassa Smenalari" /><PosShiftsPage /></>} />
+                    <Route path="/pos/cashiers" element={<><Seo title="Kassirlar Jurnali" /><PosCashiersPage /></>} />
                 </Route>
 
                 {/* Recurring Invoice Schedules (dedicated non-posting template editor) */}

@@ -1,13 +1,87 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
+import * as React from 'react';
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { cn } from '@/lib/utils';
+
+const TabsRoot = TabsPrimitive.Root;
+
+const TabsList = React.forwardRef<
+  React.ComponentRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    variant?: 'underline' | 'segmented';
+  }
+>(({ className, variant = 'underline', ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      variant === 'segmented'
+        ? 'inline-flex items-center gap-1 rounded-lg bg-gray-100 p-1 text-gray-600'
+        : 'flex items-center gap-4 border-b border-gray-200',
+      className
+    )}
+    {...props}
+  />
+));
+TabsList.displayName = TabsPrimitive.List.displayName;
+
+const TabsTrigger = React.forwardRef<
+  React.ComponentRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    variant?: 'underline' | 'segmented';
+  }
+>(({ className, variant = 'underline', ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      variant === 'segmented'
+        ? [
+            'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ring-offset-white transition-all',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2',
+            'disabled:pointer-events-none disabled:opacity-50',
+            'data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm',
+            'text-gray-600 hover:text-gray-900',
+          ].join(' ')
+        : [
+            'inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-all -mb-px',
+            'border-b-2 border-transparent',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500',
+            'disabled:pointer-events-none disabled:opacity-50',
+            'data-[state=active]:border-purple-600 data-[state=active]:text-purple-600',
+            'text-gray-500 hover:text-gray-800',
+          ].join(' '),
+      className
+    )}
+    {...props}
+  />
+));
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+
+const TabsContent = React.forwardRef<
+  React.ComponentRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      'mt-3 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2',
+      className
+    )}
+    {...props}
+  />
+));
+TabsContent.displayName = TabsPrimitive.Content.displayName;
+
+/* =========================================================================
+   Backward-Compatible Declarative Tabs wrapper
+   ========================================================================= */
 
 export interface TabItem {
   key: string;
-  label: ReactNode;
-  icon?: ReactNode;
+  label: React.ReactNode;
+  icon?: React.ReactNode;
   disabled?: boolean;
 }
 
-export type TabsVariant = "underline" | "segmented";
+export type TabsVariant = 'underline' | 'segmented';
 
 export interface TabsProps {
   tabs: TabItem[];
@@ -15,118 +89,37 @@ export interface TabsProps {
   onChange: (key: string) => void;
   variant?: TabsVariant;
   className?: string;
-  /**
-   * Deterministic id prefix. When provided, each tab button gets
-   * `id={`${id}-tab-${key}`}` and `aria-controls={`${id}-panel-${key}`}` so a
-   * consumer can wire a matching `<div role="tabpanel" id={`${id}-panel-${key}`}>`.
-   * Omit if you don't need panel wiring — ids are still unique (via useId)
-   * but aria-controls is not emitted without a guaranteed matching panel.
-   */
   id?: string;
-  "aria-label"?: string;
+  'aria-label'?: string;
 }
 
-/**
- * Accessible tab bar (role="tablist"/"tab", aria-selected, roving tabIndex +
- * arrow-key navigation) matching the app's token language. Two visual
- * variants: `underline` (default, brand-purple underline/text) and
- * `segmented` (pill group on a surface background).
- */
 const Tabs = ({
   tabs,
   value,
   onChange,
-  variant = "underline",
-  className = "",
+  variant = 'underline',
+  className = '',
   id,
   ...rest
 }: TabsProps) => {
-  const autoId = useId();
-  const baseId = id ?? autoId;
-  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const enabled = tabs.filter((tab) => !tab.disabled);
-    if (enabled.length === 0) return;
-    const currentIndex = enabled.findIndex((tab) => tab.key === value);
-
-    let nextIndex: number;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      nextIndex = (currentIndex + 1 + enabled.length) % enabled.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      nextIndex = (currentIndex - 1 + enabled.length) % enabled.length;
-    } else if (event.key === "Home") {
-      nextIndex = 0;
-    } else if (event.key === "End") {
-      nextIndex = enabled.length - 1;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    const next = enabled[nextIndex];
-    onChange(next.key);
-    buttonRefs.current[next.key]?.focus();
-  };
-
-  const listClass =
-    variant === "segmented"
-      ? "inline-flex items-center gap-1 rounded-control bg-surface p-1"
-      : "flex items-center gap-4 border-b border-border";
-
   return (
-    <div
-      role="tablist"
-      aria-label={rest["aria-label"]}
-      className={`${listClass} ${className}`}
-      onKeyDown={handleKeyDown}
-    >
-      {tabs.map((tab) => {
-        const selected = tab.key === value;
-        const tabId = `${baseId}-tab-${tab.key}`;
-        const panelId = `${baseId}-panel-${tab.key}`;
-
-        return (
-          <button
+    <TabsRoot value={value} onValueChange={onChange} className={className}>
+      <TabsList variant={variant} aria-label={rest['aria-label']}>
+        {tabs.map((tab) => (
+          <TabsTrigger
             key={tab.key}
-            ref={(el) => {
-              buttonRefs.current[tab.key] = el;
-            }}
-            id={id ? tabId : undefined}
-            role="tab"
-            type="button"
-            aria-selected={selected}
-            aria-controls={id ? panelId : undefined}
-            tabIndex={selected ? 0 : -1}
+            value={tab.key}
+            variant={variant}
             disabled={tab.disabled}
-            onClick={() => !tab.disabled && onChange(tab.key)}
-            className={
-              variant === "segmented"
-                ? [
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control",
-                    "text-[13px] font-medium transition-colors",
-                    "disabled:opacity-60 disabled:cursor-not-allowed",
-                    selected
-                      ? "bg-white text-purple-600 shadow-card"
-                      : "text-body hover:text-heading",
-                  ].join(" ")
-                : [
-                    "inline-flex items-center gap-1.5 px-0.5 pb-2.5 -mb-px",
-                    "text-sm font-medium border-b-2 transition-colors",
-                    "disabled:opacity-60 disabled:cursor-not-allowed",
-                    selected
-                      ? "border-purple-600 text-purple-600"
-                      : "border-transparent text-body hover:text-heading",
-                  ].join(" ")
-            }
           >
             {tab.icon}
             {tab.label}
-          </button>
-        );
-      })}
-    </div>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </TabsRoot>
   );
 };
 
+export { TabsRoot, TabsList, TabsTrigger, TabsContent };
 export default Tabs;

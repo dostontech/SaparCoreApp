@@ -1,73 +1,59 @@
-import { useId, type ButtonHTMLAttributes, type ReactNode } from "react";
+import * as React from 'react';
+import * as SwitchPrimitives from '@radix-ui/react-switch';
+import { cn } from '@/lib/utils';
 
-export interface SwitchProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "type"> {
+export interface SwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  /** Label rendered next to the switch, associated via htmlFor (button is a labelable element). */
-  label?: ReactNode;
+  label?: React.ReactNode;
   disabled?: boolean;
-  /** Switch id (also used as the label's `htmlFor`). Auto-generated if omitted. */
   id?: string;
-  /** Class name applied to the outer wrapper (switch + label). */
+  className?: string;
   containerClassName?: string;
 }
 
-/**
- * Toggle switch built on a real `<button role="switch" aria-checked>` (not a
- * checked-checkbox-in-disguise), so it behaves like a native switch for
- * screen readers and keyboard users (Space/Enter toggle via button
- * semantics). Brand-purple "on" state, smooth transition that's disabled
- * under `prefers-reduced-motion`.
- */
-const Switch = ({
-  checked,
-  onChange,
-  label,
-  disabled,
-  id,
-  className = "",
-  containerClassName = "",
-  ...rest
-}: SwitchProps) => {
-  const autoId = useId();
+const Switch = React.forwardRef<
+  React.ComponentRef<typeof SwitchPrimitives.Root>,
+  SwitchProps
+>(({ checked, onChange, label, disabled, id, className, containerClassName }, ref) => {
+  const autoId = React.useId();
   const switchId = id ?? autoId;
 
   return (
-    <span className={`inline-flex items-center gap-2 ${containerClassName}`}>
-      <button
-        type="button"
+    <span className={cn('inline-flex items-center gap-2.5', containerClassName)}>
+      <SwitchPrimitives.Root
+        ref={ref}
         id={switchId}
-        role="switch"
-        aria-checked={checked}
+        checked={checked}
+        onCheckedChange={onChange}
         disabled={disabled}
-        onClick={() => onChange(!checked)}
-        className={[
-          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full",
-          "transition-colors motion-reduce:transition-none",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
-          "disabled:opacity-60 disabled:cursor-not-allowed",
-          checked ? "bg-purple-600" : "bg-gray-100",
-          className,
-        ].join(" ")}
-        {...rest}
+        className={cn(
+          'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          'data-[state=checked]:bg-purple-600 data-[state=unchecked]:bg-gray-200',
+          className
+        )}
       >
-        <span
-          aria-hidden="true"
-          className={[
-            "inline-block h-5 w-5 transform rounded-full bg-white shadow-card",
-            "transition-transform motion-reduce:transition-none",
-            checked ? "translate-x-5" : "translate-x-0.5",
-          ].join(" ")}
+        <SwitchPrimitives.Thumb
+          className={cn(
+            'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-md ring-0 transition-transform',
+            'data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0'
+          )}
         />
-      </button>
-      {label ? (
-        <label htmlFor={switchId} className="text-sm text-heading cursor-pointer">
+      </SwitchPrimitives.Root>
+      {label && (
+        <label
+          htmlFor={switchId}
+          className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+        >
           {label}
         </label>
-      ) : null}
+      )}
     </span>
   );
-};
+});
+Switch.displayName = 'Switch';
 
+export { SwitchPrimitives };
 export default Switch;

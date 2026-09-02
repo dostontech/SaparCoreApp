@@ -18,6 +18,7 @@ import {
   ArrowDownRight,
   ChevronRight,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 
 import Constants from '@constants/api';
@@ -187,6 +188,36 @@ export const DashboardPage: React.FC = () => {
       <PageHeader title="Boshqaruv Paneli">
         <DashboardSwitcher />
       </PageHeader>
+
+      {/* Radix UI Design System Showcase Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-900 via-[#0B2B33] to-slate-900 p-5 text-white shadow-md border border-teal-800/40">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-400 to-emerald-300 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
+              <Sparkles className="w-5 h-5 text-slate-950" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">Yangi Radix UI Dizayn Tizimi Oʻrnatildi</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-teal-400 text-slate-950">RADIX UI</span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Barcha modallar, dropdown menyular, tablar va forma elementlari Radix UI bilan yangilandi.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/design-system')}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-teal-400 text-slate-950 hover:bg-teal-300 shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+            >
+              <span>Komponentlar Koʻrgazmasi</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* =================================================================== */}
       {/* 1. BUKKU-STYLE CLEAN MINIMALIST HEADER & QUICK ACTIONS               */}

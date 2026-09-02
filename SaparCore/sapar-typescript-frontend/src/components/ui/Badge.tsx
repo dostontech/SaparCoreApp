@@ -11,6 +11,7 @@ export type BadgeColor =
   | "orange"
   | "pink"
   | "teal"
+  | "purple"
   | "gray";
 
 export type BadgeVariant = "soft" | "solid" | "outline";
@@ -76,6 +77,11 @@ const STYLES: Record<BadgeColor, Record<BadgeVariant, string>> = {
     solid: "bg-teal text-white",
     outline: "border border-teal text-teal",
   },
+  purple: {
+    soft: "bg-purple-50 text-purple-700 border border-purple-200",
+    solid: "bg-purple-600 text-white",
+    outline: "border border-purple-600 text-purple-700",
+  },
   gray: {
     soft: "bg-surface text-body",
     solid: "bg-gray-700 text-white",
@@ -87,10 +93,14 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
   { color = "gray", variant = "soft", className = "", children, ...rest },
   ref,
 ) {
+  const colorKey = color && STYLES[color] ? color : "gray";
+  const variantKey = variant && STYLES[colorKey]?.[variant] ? variant : "soft";
+  const badgeStyle = STYLES[colorKey][variantKey];
+
   return (
     <span
       ref={ref}
-      className={`${BASE} ${STYLES[color][variant]} ${className}`}
+      className={`${BASE} ${badgeStyle} ${className}`}
       {...rest}
     >
       {children}

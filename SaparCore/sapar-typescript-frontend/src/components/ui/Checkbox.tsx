@@ -1,56 +1,68 @@
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from "react";
+import * as React from 'react';
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import { Check, Minus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface CheckboxProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
-  /** Label rendered next to the checkbox, associated via htmlFor. */
-  label?: ReactNode;
-  /** Checkbox id (also used as the label's `htmlFor`). Auto-generated if omitted. */
-  id?: string;
-  /** Class name applied to the outer `<label>` wrapper. */
+  extends Omit<React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>, 'onChange'> {
+  label?: React.ReactNode;
   containerClassName?: string;
+  indeterminate?: boolean;
+  onChange?: (checked: boolean | 'indeterminate') => void;
 }
 
-/**
- * Labeled checkbox matching the app's token language. Uses a native
- * `<input type="checkbox">` (kept fully accessible/keyboardable) styled via
- * `accent-purple-600` for the brand-purple checked state, plus a token focus
- * ring. Forwards all other input props (checked, onChange, disabled, ...).
- */
-const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  function Checkbox(
-    { label, id, className = "", containerClassName = "", disabled, ...rest },
-    ref,
-  ) {
-    const autoId = useId();
-    const fieldId = id ?? autoId;
+const Checkbox = React.forwardRef<
+  React.ComponentRef<typeof CheckboxPrimitive.Root>,
+  CheckboxProps
+>(({ className, containerClassName, label, id, indeterminate, checked, onCheckedChange, onChange, disabled, ...props }, ref) => {
+  const autoId = React.useId();
+  const fieldId = id ?? autoId;
 
-    return (
-      <label
-        htmlFor={fieldId}
-        className={[
-          "inline-flex items-center gap-2",
-          disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
-          containerClassName,
-        ].join(" ")}
+  const currentChecked = indeterminate ? 'indeterminate' : checked;
+
+  const handleCheckedChange = (state: CheckboxPrimitive.CheckedState) => {
+    onCheckedChange?.(state);
+    onChange?.(state);
+  };
+
+  return (
+    <label
+      htmlFor={fieldId}
+      className={cn(
+        'inline-flex items-center gap-2 select-none',
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+        containerClassName
+      )}
+    >
+      <CheckboxPrimitive.Root
+        ref={ref}
+        id={fieldId}
+        checked={currentChecked}
+        onCheckedChange={handleCheckedChange}
+        disabled={disabled}
+        className={cn(
+          'peer h-4 w-4 shrink-0 rounded border border-gray-300 transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          'data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600 data-[state=checked]:text-white',
+          'data-[state=indeterminate]:bg-purple-600 data-[state=indeterminate]:border-purple-600 data-[state=indeterminate]:text-white',
+          className
+        )}
+        {...props}
       >
-        <input
-          ref={ref}
-          id={fieldId}
-          type="checkbox"
-          disabled={disabled}
-          className={[
-            "h-4 w-4 rounded-[3px] border border-border text-purple-600",
-            "accent-purple-600 outline-none transition-colors",
-            "focus-visible:ring-1 focus-visible:ring-purple-600",
-            "disabled:cursor-not-allowed",
-            className,
-          ].join(" ")}
-          {...rest}
-        />
-        {label ? <span className="text-sm text-heading">{label}</span> : null}
-      </label>
-    );
-  },
-);
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
+          {indeterminate ? (
+            <Minus className="h-3 w-3" strokeWidth={3} />
+          ) : (
+            <Check className="h-3 w-3" strokeWidth={3} />
+          )}
+        </CheckboxPrimitive.Indicator>
+      </CheckboxPrimitive.Root>
+      {label && <span className="text-sm font-medium text-gray-700">{label}</span>}
+    </label>
+  );
+});
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
+export { Checkbox, CheckboxPrimitive };
 export default Checkbox;

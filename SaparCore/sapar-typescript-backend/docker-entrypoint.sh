@@ -20,12 +20,10 @@
 # The app always starts regardless of migrate/seed/backfill/geo outcome (non-fatal design).
 set -e
 
-# Brief retry loop until the DB accepts connections. Compose already gates on
-# the postgres healthcheck, so this is belt-and-suspenders for edge cases where
-# the healthcheck passes before Postgres is fully ready for migrations.
+# Brief retry loop until the DB accepts connections.
 echo "[entrypoint] Waiting for database to be ready..."
 n=0
-until npx prisma migrate status > /dev/null 2>&1; do
+until node -e "require('net').createConnection(5432, process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'postgres').on('connect', () => process.exit(0)).on('error', () => process.exit(1))" 2>/dev/null; do
   n=$((n + 1))
   if [ "$n" -ge 10 ]; then
     echo "[entrypoint] Database not reachable after $n attempts — proceeding anyway." >&2

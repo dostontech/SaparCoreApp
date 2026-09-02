@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPAR ERP — Milliy Korporativ Boshqaruv Tizimi | Taqdimot</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#028090',
+              mint: '#02C39A',
+              navy: '#0B2B33',
+              dark: '#071F24',
+              light: '#F0FBF8',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Outfit"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- PptxGenJS for Instant PPTX Export -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #071F24;
+      color: #F1F5F9;
+      overflow: hidden;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px) scale(0.99);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .glass-card {
+      background: rgba(11, 43, 51, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(2, 195, 154, 0.18);
+    }
+    .glass-card-hover {
+      transition: all 0.25s ease;
+    }
+    .glass-card-hover:hover {
+      background: rgba(11, 43, 51, 0.95);
+      border-color: rgba(2, 195, 154, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(2, 128, 144, 0.35);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #02C39A 0%, #38BDF8 50%, #A7F3D0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    @media print {
+      body {
+        overflow: visible !important;
+        background: #0B2B33 !important;
+      }
+      .slide {
+        display: flex !important;
+        opacity: 1 !important;
+        page-break-after: always;
+        height: 100vh;
+        transform: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col justify-between select-none">
+
+  <!-- Top Navigation & Progress Bar -->
+  <header class="no-print w-full bg-[#0B2B33]/90 backdrop-blur-md border-b border-teal-900/60 px-6 py-3 flex items-center justify-between z-50 shrink-0">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <svg class="h-8 w-auto" viewBox="0 0 174 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="M0.571411 14.4812V25.6239L7.62723 21.7237V14.8521L18.3063 8.90914L11.4419 4.82776L3.89365 8.95446C1.84171 10.0763 0.571411 12.1895 0.571411 14.4812Z" fill="#02C39A" />
+            <path d="M41 30.0855V18.9429L33.9442 22.843V29.7146L23.2651 35.6576L30.1295 39.739L37.6778 35.6123C39.7298 34.4904 41 32.3772 41 30.0855Z" fill="#028090" />
+            <path d="M40.6892 14.0206L40.8093 15.6004L33.7535 19.3148V14.8575L13.7302 4.08136L20.5946 0L37.3268 8.93073C39.2607 9.96294 40.5263 11.8787 40.6892 14.0206Z" fill="#FFFFFF" />
+            <path d="M0.12016 30.925L0 29.3451L7.05584 25.6307V30.088L27.0791 40.8642L20.2147 44.9456L3.48254 36.0148C1.54864 34.9826 0.283068 33.0668 0.12016 30.925Z" fill="#FFFFFF" />
+          </g>
+          <path d="M65.4542 18.2756C65.3406 17.1297 64.8529 16.2396 63.9911 15.6051C63.1294 14.9706 61.9599 14.6534 60.4826 14.6534C59.4788 14.6534 58.6313 14.7955 57.94 15.0795C57.2487 15.3542 56.7184 15.7377 56.3491 16.2301C55.9892 16.7225 55.8093 17.2812 55.8093 17.9062C55.7904 18.4271 55.8993 18.8816 56.136 19.2699C56.3822 19.6581 56.7184 19.9943 57.1445 20.2784C57.5707 20.553 58.0631 20.7945 58.6218 21.0028C59.1805 21.2017 59.7771 21.3722 60.4116 21.5142L63.0252 22.1392C64.2942 22.4233 65.4589 22.8021 66.5195 23.2756C67.5801 23.7491 68.4987 24.3314 69.2752 25.0227C70.0517 25.714 70.6531 26.5284 71.0792 27.4659C71.5148 28.4034 71.7373 29.4782 71.7468 30.6903C71.7373 32.4706 71.2828 34.0142 70.3832 35.321C69.493 36.6184 68.2051 37.6269 66.5195 38.3466C64.8434 39.0568 62.8216 39.4119 60.4542 39.4119C58.1057 39.4119 56.0603 39.0521 54.3178 38.3324C52.5849 37.6127 51.2307 36.5473 50.2553 35.1364C49.2894 33.7159 48.7828 31.9593 48.7354 29.8665H54.6871C54.7534 30.8419 55.0328 31.6562 55.5252 32.3097C56.0271 32.9536 56.6947 33.4413 57.5281 33.7727C58.3709 34.0947 59.3226 34.2557 60.3832 34.2557C61.4248 34.2557 62.3292 34.1042 63.0962 33.8011C63.8728 33.4981 64.4741 33.0767 64.9002 32.5369C65.3264 31.9972 65.5394 31.3769 65.5394 30.6761C65.5394 30.0227 65.3453 29.4735 64.957 29.0284C64.5782 28.5833 64.0195 28.2045 63.2809 27.892C62.5517 27.5795 61.6568 27.2955 60.5962 27.0398L57.4286 26.2443C54.976 25.6477 53.0394 24.715 51.619 23.446C50.1985 22.1771 49.493 20.4678 49.5025 18.3182C49.493 16.5568 49.9618 15.018 50.9087 13.7017C51.8652 12.3854 53.1767 11.358 54.8434 10.6193C56.5101 9.88068 58.404 9.51136 60.5252 9.51136C62.6843 9.51136 64.5688 9.88068 66.1786 10.6193C67.7979 11.358 69.0574 12.3854 69.957 13.7017C70.8567 15.018 71.3207 16.5426 71.3491 18.2756H65.4542ZM81.9918 39.4119C80.5998 39.4119 79.3593 39.1705 78.2702 38.6875C77.1812 38.1951 76.3195 37.4706 75.685 36.5142C75.06 35.5483 74.7475 34.3456 74.7475 32.9062C74.7475 31.6941 74.9701 30.6761 75.4151 29.8523C75.8602 29.0284 76.4663 28.3655 77.2333 27.8636C78.0004 27.3617 78.8716 26.983 79.8469 26.7273C80.8318 26.4716 81.864 26.2917 82.9435 26.1875C84.2125 26.0549 85.2352 25.9318 86.0117 25.8182C86.7882 25.6951 87.3517 25.5152 87.7021 25.2784C88.0524 25.0417 88.2276 24.6913 88.2276 24.2273V24.142C88.2276 23.2424 87.9435 22.5464 87.3754 22.054C86.8166 21.5616 86.0212 21.3153 84.989 21.3153C83.9 21.3153 83.0335 21.5568 82.3896 22.0398C81.7456 22.5133 81.3195 23.1098 81.1112 23.8295L75.5146 23.375C75.7987 22.0492 76.3574 20.9034 77.1907 19.9375C78.024 18.9621 79.0988 18.214 80.4151 17.6932C81.7409 17.1629 83.275 16.8977 85.0174 16.8977C86.2295 16.8977 87.3896 17.0398 88.4975 17.3239C89.6149 17.608 90.6045 18.0483 91.4663 18.6449C92.3375 19.2415 93.024 20.0085 93.5259 20.946C94.0278 21.8741 94.2788 22.9867 94.2788 24.2841V39H88.5401V35.9744H88.3697C88.0193 36.6562 87.5505 37.2576 86.9634 37.7784C86.3763 38.2898 85.6708 38.6922 84.8469 38.9858C84.0231 39.2699 83.0714 39.4119 81.9918 39.4119ZM83.7248 35.2358C84.6149 35.2358 85.4009 35.0606 86.0827 34.7102C86.7646 34.3504 87.2996 33.8674 87.6879 33.2614C88.0761 32.6553 88.2702 31.9687 88.2702 31.2017V28.8864C88.0808 29.0095 87.8204 29.1231 87.489 29.2273C87.167 29.322 86.8024 29.4119 86.3952 29.4972C85.988 29.5729 85.5808 29.6439 85.1737 29.7102C84.7665 29.767 84.3971 29.8191 84.0657 29.8665C83.3555 29.9706 82.7352 30.1364 82.2049 30.3636C81.6746 30.5909 81.2627 30.8987 80.9691 31.2869C80.6755 31.6657 80.5288 32.1392 80.5288 32.7074C80.5288 33.5312 80.8271 34.161 81.4237 34.5966C82.0297 35.0227 82.7968 35.2358 83.7248 35.2358ZM98.9734 47.1818V17.1818H104.939V20.8466H105.209C105.474 20.2595 105.858 19.6629 106.36 19.0568C106.871 18.4413 107.534 17.9299 108.348 17.5227C109.172 17.1061 110.195 16.8977 111.417 16.8977C113.007 16.8977 114.475 17.3144 115.82 18.1477C117.165 18.9716 118.239 20.2169 119.044 21.8835C119.849 23.5407 120.252 25.6193 120.252 28.1193C120.252 30.553 119.859 32.608 119.073 34.2841C118.296 35.9508 117.236 37.215 115.891 38.0767C114.556 38.929 113.06 39.3551 111.402 39.3551C110.228 39.3551 109.229 39.161 108.405 38.7727C107.591 38.3845 106.923 37.8968 106.402 37.3097C105.882 36.7131 105.484 36.1117 105.209 35.5057H105.025V47.1818H98.9734ZM104.897 28.0909C104.897 29.3883 105.077 30.5199 105.436 31.4858C105.796 32.4517 106.317 33.2045 106.999 33.7443C107.681 34.2746 108.509 34.5398 109.485 34.5398C110.47 34.5398 111.303 34.2699 111.985 33.7301C112.667 33.1809 113.183 32.4233 113.533 31.4574C113.893 30.482 114.073 29.3598 114.073 28.0909C114.073 26.8314 113.898 25.7235 113.547 24.767C113.197 23.8106 112.681 23.0625 111.999 22.5227C111.317 21.983 110.479 21.7131 109.485 21.7131C108.5 21.7131 107.667 21.9735 106.985 22.4943C106.312 23.0152 105.796 23.7538 105.436 24.7102C105.077 25.6667 104.897 26.7936 104.897 28.0909ZM130.507 39.4119C129.115 39.4119 127.875 39.1705 126.786 38.6875C125.697 38.1951 124.835 37.4706 124.201 36.5142C123.576 35.5483 123.263 34.3456 123.263 32.9062C123.263 31.6941 123.486 30.6761 123.931 29.8523C124.376 29.0284 124.982 28.3655 125.749 27.8636C126.516 27.3617 127.387 26.983 128.363 26.7273C129.347 26.4716 130.38 26.2917 131.459 26.1875C132.728 26.0549 133.751 25.9318 134.527 25.8182C135.304 25.6951 135.867 25.5152 136.218 25.2784C136.568 25.0417 136.743 24.6913 136.743 24.2273V24.142C136.743 23.2424 136.459 22.5464 135.891 22.054C135.332 21.5616 134.537 21.3153 133.505 21.3153C132.416 21.3153 131.549 21.5568 130.905 22.0398C130.261 22.5133 129.835 23.1098 129.627 23.8295L124.03 23.375C124.314 22.0492 124.873 20.9034 125.706 19.9375C126.54 18.9621 127.614 18.214 128.931 17.6932C130.257 17.1629 131.791 16.8977 133.533 16.8977C134.745 16.8977 135.905 17.0398 137.013 17.3239C138.131 17.608 139.12 18.0483 139.982 18.6449C140.853 19.2415 141.54 20.0085 142.042 20.946C142.543 21.8741 142.794 22.9867 142.794 24.2841V39H137.056V35.9744H136.885C136.535 36.6562 136.066 37.2576 135.479 37.7784C134.892 38.2898 134.186 38.6922 133.363 38.9858C132.539 39.2699 131.587 39.4119 130.507 39.4119ZM132.24 35.2358C133.131 35.2358 133.917 35.0606 134.598 34.7102C135.28 34.3504 135.815 33.8674 136.203 33.2614C136.592 32.6553 136.786 31.9687 136.786 31.2017V28.8864C136.596 29.0095 136.336 29.1231 136.005 29.2273C135.683 29.322 135.318 29.4119 134.911 29.4972C134.504 29.5729 134.096 29.6439 133.689 29.7102C133.282 29.767 132.913 29.8191 132.581 29.8665C131.871 29.9706 131.251 30.1364 130.721 30.3636C130.19 30.5909 129.778 30.8987 129.485 31.2869C129.191 31.6657 129.044 32.1392 129.044 32.7074C129.044 33.5312 129.343 34.161 129.939 34.5966C130.545 35.0227 131.312 35.2358 132.24 35.2358ZM147.489 39V17.1818H153.355V20.9886H153.583C153.98 19.6345 154.648 18.6117 155.586 17.9205C156.523 17.2197 157.603 16.8693 158.824 16.8693C159.127 16.8693 159.454 16.8883 159.804 16.9261C160.155 16.964 160.462 17.0161 160.728 17.0824V22.4517C160.444 22.3665 160.051 22.2907 159.549 22.2244C159.047 22.1581 158.587 22.125 158.171 22.125C157.281 22.125 156.485 22.3191 155.784 22.7074C155.093 23.0862 154.544 23.6165 154.137 24.2983C153.739 24.9801 153.54 25.7661 153.54 26.6562V39H147.489Z" fill="#FFFFFF" />
+          <path d="M164.893 39.3693C163.956 39.3693 163.151 39.0379 162.478 38.375C161.815 37.7027 161.484 36.8977 161.484 35.9602C161.484 35.0322 161.815 34.2367 162.478 33.5739C163.151 32.911 163.956 32.5795 164.893 32.5795C165.802 32.5795 166.598 32.911 167.279 33.5739C167.961 34.2367 168.302 35.0322 168.302 35.9602C168.302 36.5852 168.141 37.1581 167.819 37.679C167.507 38.1903 167.095 38.6023 166.583 38.9148C166.072 39.2178 165.509 39.3693 164.893 39.3693Z" fill="#02C39A" />
+        </svg>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300 border border-teal-500/30">ERP</span>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="flex items-center gap-3">
+      <div class="w-48 bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700">
+        <div id="progressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-full w-[4.76%] transition-all duration-300"></div>
+      </div>
+      <span id="slideCounter" class="text-xs font-bold text-teal-300 font-mono">01 / 21</span>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="flex items-center gap-2">
+      <!-- Language Switcher -->
+      <button id="langToggleBtn" onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-950/80 hover:bg-teal-900 border border-teal-700/50 text-teal-300 text-xs font-bold transition shadow-xs cursor-pointer">
+        <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+        <span id="langLabel">🇺🇿 Oʻzbekcha</span>
+      </button>
+
+      <!-- Export to PPTX -->
+      <button onclick="exportToPPTX()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 text-xs font-bold transition shadow-xs cursor-pointer" title="PowerPoint (.pptx) formatida yuklab olish">
+        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+        <span data-i18n="btn_pptx">📥 PPTX Yuklab Olish</span>
+      </button>
+
+      <!-- Slide Grid / Overview -->
+      <button onclick="toggleGridModal()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="Barcha slaydlar (G)">
+        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Speaker Notes -->
+      <button onclick="toggleNotesDrawer()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="Spiker nutqi eslatmalari (N)">
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Fullscreen -->
+      <button onclick="toggleFullscreen()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="Toʻliq ekran (F)">
+        <i data-lucide="maximize" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Print / PDF -->
+      <button onclick="window.print()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="Chop etish / PDF">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Slide Canvas Container -->
+  <main class="flex-1 w-full h-[calc(100vh-120px)] relative overflow-hidden flex items-center justify-center p-4 md:p-8">
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 1: Cover & National Vision -->
+    <!-- ========================================================================= -->
+    <section class="slide active w-full max-w-6xl h-full flex-col justify-center items-center text-center relative" data-slide="1">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-bold mb-4 animate-pulse">
+        <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i>
+        <span data-i18n="s1_badge">President Tech Award 2026 Nomzodi</span>
+      </div>
+
+      <!-- Official Large Logo Mark -->
+      <div class="mb-4 flex items-center justify-center">
+        <svg class="h-14 md:h-16 w-auto" viewBox="0 0 174 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="M0.571411 14.4812V25.6239L7.62723 21.7237V14.8521L18.3063 8.90914L11.4419 4.82776L3.89365 8.95446C1.84171 10.0763 0.571411 12.1895 0.571411 14.4812Z" fill="#02C39A" />
+            <path d="M41 30.0855V18.9429L33.9442 22.843V29.7146L23.2651 35.6576L30.1295 39.739L37.6778 35.6123C39.7298 34.4904 41 32.3772 41 30.0855Z" fill="#028090" />
+            <path d="M40.6892 14.0206L40.8093 15.6004L33.7535 19.3148V14.8575L13.7302 4.08136L20.5946 0L37.3268 8.93073C39.2607 9.96294 40.5263 11.8787 40.6892 14.0206Z" fill="#FFFFFF" />
+            <path d="M0.12016 30.925L0 29.3451L7.05584 25.6307V30.088L27.0791 40.8642L20.2147 44.9456L3.48254 36.0148C1.54864 34.9826 0.283068 33.0668 0.12016 30.925Z" fill="#FFFFFF" />
+          </g>
+          <path d="M65.4542 18.2756C65.3406 17.1297 64.8529 16.2396 63.9911 15.6051C63.1294 14.9706 61.9599 14.6534 60.4826 14.6534C59.4788 14.6534 58.6313 14.7955 57.94 15.0795C57.2487 15.3542 56.7184 15.7377 56.3491 16.2301C55.9892 16.7225 55.8093 17.2812 55.8093 17.9062C55.7904 18.4271 55.8993 18.8816 56.136 19.2699C56.3822 19.6581 56.7184 19.9943 57.1445 20.2784C57.5707 20.553 58.0631 20.7945 58.6218 21.0028C59.1805 21.2017 59.7771 21.3722 60.4116 21.5142L63.0252 22.1392C64.2942 22.4233 65.4589 22.8021 66.5195 23.2756C67.5801 23.7491 68.4987 24.3314 69.2752 25.0227C70.0517 25.714 70.6531 26.5284 71.0792 27.4659C71.5148 28.4034 71.7373 29.4782 71.7468 30.6903C71.7373 32.4706 71.2828 34.0142 70.3832 35.321C69.493 36.6184 68.2051 37.6269 66.5195 38.3466C64.8434 39.0568 62.8216 39.4119 60.4542 39.4119C58.1057 39.4119 56.0603 39.0521 54.3178 38.3324C52.5849 37.6127 51.2307 36.5473 50.2553 35.1364C49.2894 33.7159 48.7828 31.9593 48.7354 29.8665H54.6871C54.7534 30.8419 55.0328 31.6562 55.5252 32.3097C56.0271 32.9536 56.6947 33.4413 57.5281 33.7727C58.3709 34.0947 59.3226 34.2557 60.3832 34.2557C61.4248 34.2557 62.3292 34.1042 63.0962 33.8011C63.8728 33.4981 64.4741 33.0767 64.9002 32.5369C65.3264 31.9972 65.5394 31.3769 65.5394 30.6761C65.5394 30.0227 65.3453 29.4735 64.957 29.0284C64.5782 28.5833 64.0195 28.2045 63.2809 27.892C62.5517 27.5795 61.6568 27.2955 60.5962 27.0398L57.4286 26.2443C54.976 25.6477 53.0394 24.715 51.619 23.446C50.1985 22.1771 49.493 20.4678 49.5025 18.3182C49.493 16.5568 49.9618 15.018 50.9087 13.7017C51.8652 12.3854 53.1767 11.358 54.8434 10.6193C56.5101 9.88068 58.404 9.51136 60.5252 9.51136C62.6843 9.51136 64.5688 9.88068 66.1786 10.6193C67.7979 11.358 69.0574 12.3854 69.957 13.7017C70.8567 15.018 71.3207 16.5426 71.3491 18.2756H65.4542ZM81.9918 39.4119C80.5998 39.4119 79.3593 39.1705 78.2702 38.6875C77.1812 38.1951 76.3195 37.4706 75.685 36.5142C75.06 35.5483 74.7475 34.3456 74.7475 32.9062C74.7475 31.6941 74.9701 30.6761 75.4151 29.8523C75.8602 29.0284 76.4663 28.3655 77.2333 27.8636C78.0004 27.3617 78.8716 26.983 79.8469 26.7273C80.8318 26.4716 81.864 26.2917 82.9435 26.1875C84.2125 26.0549 85.2352 25.9318 86.0117 25.8182C86.7882 25.6951 87.3517 25.5152 87.7021 25.2784C88.0524 25.0417 88.2276 24.6913 88.2276 24.2273V24.142C88.2276 23.2424 87.9435 22.5464 87.3754 22.054C86.8166 21.5616 86.0212 21.3153 84.989 21.3153C83.9 21.3153 83.0335 21.5568 82.3896 22.0398C81.7456 22.5133 81.3195 23.1098 81.1112 23.8295L75.5146 23.375C75.7987 22.0492 76.3574 20.9034 77.1907 19.9375C78.024 18.9621 79.0988 18.214 80.4151 17.6932C81.7409 17.1629 83.275 16.8977 85.0174 16.8977C86.2295 16.8977 87.3896 17.0398 88.4975 17.3239C89.6149 17.608 90.6045 18.0483 91.4663 18.6449C92.3375 19.2415 93.024 20.0085 93.5259 20.946C94.0278 21.8741 94.2788 22.9867 94.2788 24.2841V39H88.5401V35.9744H88.3697C88.0193 36.6562 87.5505 37.2576 86.9634 37.7784C86.3763 38.2898 85.6708 38.6922 84.8469 38.9858C84.0231 39.2699 83.0714 39.4119 81.9918 39.4119ZM83.7248 35.2358C84.6149 35.2358 85.4009 35.0606 86.0827 34.7102C86.7646 34.3504 87.2996 33.8674 87.6879 33.2614C88.0761 32.6553 88.2702 31.9687 88.2702 31.2017V28.8864C88.0808 29.0095 87.8204 29.1231 87.489 29.2273C87.167 29.322 86.8024 29.4119 86.3952 29.4972C85.988 29.5729 85.5808 29.6439 85.1737 29.7102C84.7665 29.767 84.3971 29.8191 84.0657 29.8665C83.3555 29.9706 82.7352 30.1364 82.2049 30.3636C81.6746 30.5909 81.2627 30.8987 80.9691 31.2869C80.6755 31.6657 80.5288 32.1392 80.5288 32.7074C80.5288 33.5312 80.8271 34.161 81.4237 34.5966C82.0297 35.0227 82.7968 35.2358 83.7248 35.2358ZM98.9734 47.1818V17.1818H104.939V20.8466H105.209C105.474 20.2595 105.858 19.6629 106.36 19.0568C106.871 18.4413 107.534 17.9299 108.348 17.5227C109.172 17.1061 110.195 16.8977 111.417 16.8977C113.007 16.8977 114.475 17.3144 115.82 18.1477C117.165 18.9716 118.239 20.2169 119.044 21.8835C119.849 23.5407 120.252 25.6193 120.252 28.1193C120.252 30.553 119.859 32.608 119.073 34.2841C118.296 35.9508 117.236 37.215 115.891 38.0767C114.556 38.929 113.06 39.3551 111.402 39.3551C110.228 39.3551 109.229 39.161 108.405 38.7727C107.591 38.3845 106.923 37.8968 106.402 37.3097C105.882 36.7131 105.484 36.1117 105.209 35.5057H105.025V47.1818H98.9734ZM104.897 28.0909C104.897 29.3883 105.077 30.5199 105.436 31.4858C105.796 32.4517 106.317 33.2045 106.999 33.7443C107.681 34.2746 108.509 34.5398 109.485 34.5398C110.47 34.5398 111.303 34.2699 111.985 33.7301C112.667 33.1809 113.183 32.4233 113.533 31.4574C113.893 30.482 114.073 29.3598 114.073 28.0909C114.073 26.8314 113.898 25.7235 113.547 24.767C113.197 23.8106 112.681 23.0625 111.999 22.5227C111.317 21.983 110.479 21.7131 109.485 21.7131C108.5 21.7131 107.667 21.9735 106.985 22.4943C106.312 23.0152 105.796 23.7538 105.436 24.7102C105.077 25.6667 104.897 26.7936 104.897 28.0909ZM130.507 39.4119C129.115 39.4119 127.875 39.1705 126.786 38.6875C125.697 38.1951 124.835 37.4706 124.201 36.5142C123.576 35.5483 123.263 34.3456 123.263 32.9062C123.263 31.6941 123.486 30.6761 123.931 29.8523C124.376 29.0284 124.982 28.3655 125.749 27.8636C126.516 27.3617 127.387 26.983 128.363 26.7273C129.347 26.4716 130.38 26.2917 131.459 26.1875C132.728 26.0549 133.751 25.9318 134.527 25.8182C135.304 25.6951 135.867 25.5152 136.218 25.2784C136.568 25.0417 136.743 24.6913 136.743 24.2273V24.142C136.743 23.2424 136.459 22.5464 135.891 22.054C135.332 21.5616 134.537 21.3153 133.505 21.3153C132.416 21.3153 131.549 21.5568 130.905 22.0398C130.261 22.5133 129.835 23.1098 129.627 23.8295L124.03 23.375C124.314 22.0492 124.873 20.9034 125.706 19.9375C126.54 18.9621 127.614 18.214 128.931 17.6932C130.257 17.1629 131.791 16.8977 133.533 16.8977C134.745 16.8977 135.905 17.0398 137.013 17.3239C138.131 17.608 139.12 18.0483 139.982 18.6449C140.853 19.2415 141.54 20.0085 142.042 20.946C142.543 21.8741 142.794 22.9867 142.794 24.2841V39H137.056V35.9744H136.885C136.535 36.6562 136.066 37.2576 135.479 37.7784C134.892 38.2898 134.186 38.6922 133.363 38.9858C132.539 39.2699 131.587 39.4119 130.507 39.4119ZM132.24 35.2358C133.131 35.2358 133.917 35.0606 134.598 34.7102C135.28 34.3504 135.815 33.8674 136.203 33.2614C136.592 32.6553 136.786 31.9687 136.786 31.2017V28.8864C136.596 29.0095 136.336 29.1231 136.005 29.2273C135.683 29.322 135.318 29.4119 134.911 29.4972C134.504 29.5729 134.096 29.6439 133.689 29.7102C133.282 29.767 132.913 29.8191 132.581 29.8665C131.871 29.9706 131.251 30.1364 130.721 30.3636C130.19 30.5909 129.778 30.8987 129.485 31.2869C129.191 31.6657 129.044 32.1392 129.044 32.7074C129.044 33.5312 129.343 34.161 129.939 34.5966C130.545 35.0227 131.312 35.2358 132.24 35.2358ZM147.489 39V17.1818H153.355V20.9886H153.583C153.98 19.6345 154.648 18.6117 155.586 17.9205C156.523 17.2197 157.603 16.8693 158.824 16.8693C159.127 16.8693 159.454 16.8883 159.804 16.9261C160.155 16.964 160.462 17.0161 160.728 17.0824V22.4517C160.444 22.3665 160.051 22.2907 159.549 22.2244C159.047 22.1581 158.587 22.125 158.171 22.125C157.281 22.125 156.485 22.3191 155.784 22.7074C155.093 23.0862 154.544 23.6165 154.137 24.2983C153.739 24.9801 153.54 25.7661 153.54 26.6562V39H147.489Z" fill="#FFFFFF" />
+          <path d="M164.893 39.3693C163.956 39.3693 163.151 39.0379 162.478 38.375C161.815 37.7027 161.484 36.8977 161.484 35.9602C161.484 35.0322 161.815 34.2367 162.478 33.5739C163.151 32.911 163.956 32.5795 164.893 32.5795C165.802 32.5795 166.598 32.911 167.279 33.5739C167.961 34.2367 168.302 35.0322 168.302 35.9602C168.302 36.5852 168.141 37.1581 167.819 37.679C167.507 38.1903 167.095 38.6023 166.583 38.9148C166.072 39.2178 165.509 39.3693 164.893 39.3693Z" fill="#02C39A" />
+        </svg>
+      </div>
+
+      <h1 class="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
+        <span class="text-slate-100" data-i18n="s1_title">Oʻzbekiston Biznesini Boyitish va Milliy Iqtisodiyotni Yuksaltirish Uchun Yagona Bulutli ERP</span>
+      </h1>
+
+      <p class="text-xs md:text-base text-slate-300 max-w-3xl mb-8 font-normal leading-relaxed" data-i18n="s1_subtitle">
+        Buxgalteriya hisobi (21-BHMS), Soliq integratsiyasi, FIFO ombor, Savdo va TTN, Sensorli POS Kassa, HRM & Ish haqi, Bank skoringi va CRM — Barchasi Yagona Ekotizimda.
+      </p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl">
+        <div class="glass-card p-4 rounded-2xl text-left border-teal-500/20">
+          <div class="text-teal-400 font-black text-lg mb-1">100% Bulutli</div>
+          <div class="text-xs text-slate-400" data-i18n="s1_f1">Oʻrnatish talab etilmaydi, barcha qurilmalardan ishlaydi</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl text-left border-teal-500/20">
+          <div class="text-teal-400 font-black text-lg mb-1">Bank Skoringi</div>
+          <div class="text-xs text-slate-400" data-i18n="s1_f2">Banklardan 1 kunda garovsiz aylanma mablagʻ krediti</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl text-left border-teal-500/20">
+          <div class="text-teal-400 font-black text-lg mb-1">E-IMZO & Soliq</div>
+          <div class="text-xs text-slate-400" data-i18n="s1_f3">Didox, Factura.uz va Soliq deklaratsiyalari bilan toʻliq integratsiya</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl text-left border-teal-500/20">
+          <div class="text-teal-400 font-black text-lg mb-1">5x Hamyonbop</div>
+          <div class="text-xs text-slate-400" data-i18n="s1_f4">1C ga nisbatan $8,500+ mablagʻni tejash imkoniyati</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 2: Macroeconomic Challenges in Uzbekistan -->
+    <!-- ========================================================================= -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="2">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2 flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span data-i18n="s2_tag">Makroiqtisodiy Muammolar</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s2_title">Oʻzbekiston Biznesi va Milliy Iqtisodiyotning Asosiy Toʻsiqlari</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl border-rose-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4"><i data-lucide="dollar-sign" class="w-6 h-6"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2" data-i18n="s2_c1_t">$120M+ Valyutaning Xorijga Chiqib Ketishi</h3>
+          <p class="text-sm text-slate-300 leading-relaxed" data-i18n="s2_c1_d">
+            Oʻzbekiston korxonalari har yili xorijiy eskirgan dasturlarga (1C litsenziyalari, serverlar, qimmat maslahatchilar) millionlab dollar xorijiy valyuta sarflamoqda.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-amber-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4"><i data-lucide="landmark" class="w-6 h-6"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2" data-i18n="s2_c2_t">Bank Krediti Olishdagi Qiyinchiliklar</h3>
+          <p class="text-sm text-slate-300 leading-relaxed" data-i18n="s2_c2_d">
+            Kichik biznesning buxgalteriyasi va real aylanmasi shaffof koʻrinmagani sababli, banklar ularga tezkor va garovsiz aylanma mablagʻ kreditlarini bera olmaydi.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-400 flex items-center justify-center mb-4"><i data-lucide="split" class="w-6 h-6"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2" data-i18n="s2_c3_t">Tarqoq Dasturlar va Xufyona Iqtisodiyot</h3>
+          <p class="text-sm text-slate-300 leading-relaxed" data-i18n="s2_c3_d">
+            POS kassa alohida, ombor daftarda, fakturalar Didoxda, hisoblar bankda. Maʼlumotlar tarqoqligi korxonaning daromad yoʻqotishiga sabab boʻlmoqda.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 3: The SAPAR National Mission -->
+    <!-- ========================================================================= -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="3">
+      <div class="mb-6 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center justify-center gap-2">
+          <i data-lucide="target" class="w-4 h-4"></i>
+          <span data-i18n="s3_tag">Milliy Missiya</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s3_title">Bizning Maqsadimiz: Bizneslarni Kuchli va Boy Qilish</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <div class="text-emerald-400 text-3xl font-black mb-2">+25%</div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s3_c1_t">Sof Daromadni Oshirish</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s3_c1_d">
+            FIFO tannarxini aniq hisoblash, tovar kamomadini yoʻqotish va savdo quvuri orqali korxona sof rentabelligi 25% gacha oshadi.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <div class="text-teal-400 text-3xl font-black mb-2">5x</div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s3_c2_t">Operatsion Xarajatlarni Qisqartirish</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s3_c2_d">
+            Qimmat jismoniy serverlar, doimiy 1C dasturchilari va texnik xizmat koʻrsatish xarajatlari toʻliq tejaladi.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <div class="text-cyan-400 text-3xl font-black mb-2">1 Kun</div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s3_c3_t">Tezkor Bank Kreditlari</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s3_c3_d">
+            SAPAR dagi tasdiqlangan moliyaviy hisobotlar orqali banklar tadbirkorga 1 kunda garovsiz va qulay foizli aylanma mablagʻ kreditlarini ajratadi.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 4: Comprehensive Competitor Matrix -->
+    <!-- ========================================================================= -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="4">
+      <div class="mb-6">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center gap-2">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          <span data-i18n="s4_tag">Raqobat Tahlili</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s4_title">Nima Uchun SAPAR ERP Bozor Yechimlaridan Ustun?</h2>
+      </div>
+
+      <div class="glass-card rounded-3xl overflow-hidden border-teal-500/30">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-teal-950/80 text-teal-300 font-bold border-b border-teal-800">
+            <tr>
+              <th class="p-3">Xususiyat / Feature</th>
+              <th class="p-3 bg-teal-800/40 text-white font-black">🚀 SAPAR ERP</th>
+              <th class="p-3">🏛️ 1C:Enterprise</th>
+              <th class="p-3">🛒 Poster POS</th>
+              <th class="p-3">🌍 Odoo / Microsoft</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-300">
+            <tr>
+              <td class="p-3 font-semibold text-white">100% Bulutli va Mobil Brauzer</td>
+              <td class="p-3 font-bold text-emerald-400 bg-teal-950/30">✅ Oʻrnatish talab etilmaydi</td>
+              <td class="p-3 text-rose-400">❌ Server va oʻrnatish shart</td>
+              <td class="p-3 text-amber-400">⚠️ Faqat POS qismi</td>
+              <td class="p-3 text-emerald-400">✅ Bulutli</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">21-son BHMS va 1/2-Shakl Balans</td>
+              <td class="p-3 font-bold text-emerald-400 bg-teal-950/30">✅ Nativ / Tayyor oʻrnatilgan</td>
+              <td class="p-3 text-emerald-400">✅ Mavjud</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+              <td class="p-3 text-rose-400">❌ Maxsus sozlash talab etiladi</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">E-IMZO, Didox va Soliq API</td>
+              <td class="p-3 font-bold text-emerald-400 bg-teal-950/30">✅ Toʻgʻridan-toʻgʻri integratsiya</td>
+              <td class="p-3 text-amber-400">⚠️ Qimmat qoʻshimcha modul</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">Bank Skoringi va Kredit API</td>
+              <td class="p-3 font-bold text-emerald-400 bg-teal-950/30">✅ Oʻrnatilgan moliyaviy skoring</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+              <td class="p-3 text-rose-400">❌ Mavjud emas</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">5 Yillik Xarajat (TCO)</td>
+              <td class="p-3 font-bold text-emerald-400 bg-teal-950/30">💰 $1,200 – $1,800</td>
+              <td class="p-3 text-rose-400">💸 $9,700+</td>
+              <td class="p-3 text-amber-400">💰 $3,500+</td>
+              <td class="p-3 text-rose-400">💸 $20,000+</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Slide 5 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="5">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+          <span data-i18n="s5_tag">Xarajatlar Tahlili</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s5_title">5 Yillik Egalik Qilish Xarajati: 1C ga Nisbatan $8,500+ Tejash</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="glass-card p-6 rounded-3xl border-rose-500/30 space-y-3">
+          <h3 class="text-xl font-bold text-rose-400">🏛️ 1C:Enterprise (5 Yillik Xarajat)</h3>
+          <div class="space-y-2 text-xs text-slate-300">
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Dastlabki litsenziyalar va konfiguratsiyalar:</span> <span class="font-bold text-white">$1,200</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Jismoniy server va UPS xaridi:</span> <span class="font-bold text-white">$1,500</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Oylik 1C mutaxassisi xizmati ($100/oy x 60 oy):</span> <span class="font-bold text-white">$6,000</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Yillik yangilanishlar va qonunchilik moslashuvi:</span> <span class="font-bold text-white">$1,000</span></div>
+            <div class="flex justify-between pt-2 text-sm font-black text-rose-400"><span>JAMI 5 YILLIK XARAJAT:</span> <span>$9,700+</span></div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-emerald-500/40 space-y-3 ring-2 ring-emerald-500/30">
+          <h3 class="text-xl font-bold text-emerald-400">🚀 SAPAR Cloud ERP (5 Yillik Xarajat)</h3>
+          <div class="space-y-2 text-xs text-slate-300">
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Server va bulut infratuzilmasi:</span> <span class="font-bold text-emerald-300">$0 (Kiritilgan)</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>Dasturchi yollash va texnik xizmat:</span> <span class="font-bold text-emerald-300">$0 (Avtomatik yangilanadi)</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>5 Yillik toʻliq SaaS obuna paketi:</span> <span class="font-bold text-white">$1,500</span></div>
+            <div class="flex justify-between border-b border-slate-800 pb-1.5"><span>24/7 Doimiy texnik qoʻllab-quvvatlash:</span> <span class="font-bold text-emerald-300">Kiritilgan</span></div>
+            <div class="flex justify-between pt-2 text-sm font-black text-emerald-400"><span>HAR BIR BIZNESGA SOF TEJAMKORLIK:</span> <span>+$8,200 TEJALDI!</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="6">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-purple-400 mb-2 flex items-center gap-2">
+          <i data-lucide="landmark" class="w-4 h-4"></i>
+          <span data-i18n="s6_tag">Banklar Bilan Hamkorlik</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s6_title">Bank Integratsiyasi va Tadbirkorlarga Tezkor Garovsiz Kredit</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl border-purple-500/20">
+          <div class="text-purple-400 mb-3"><i data-lucide="activity" class="w-8 h-8"></i></div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s6_c1_t">Moliyaviy Skoring Dvigateli</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s6_c1_d">
+            Hamkor banklar (Ipak Yoʻli, Kapitalbank, SQB, Agrobank) SAPAR dagi shaffof savdo aylanmasi asosida tadbirkorga 1 kunda kredit liniyalarini ajratadi.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-purple-500/20">
+          <div class="text-emerald-400 mb-3"><i data-lucide="file-check-2" class="w-8 h-8"></i></div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s6_c2_t">1C:ClientBank Avto-Sinxronizatsiya</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s6_c2_d">
+            Oʻzbekistonning barcha banklaridan koʻchirmalar (vipiska) 1 soniyada yuklanadi va buxgalteriya schotlari bilan avtomatik solishtiriladi.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-purple-500/20">
+          <div class="text-cyan-400 mb-3"><i data-lucide="credit-card" class="w-8 h-8"></i></div>
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s6_c3_t">Payme, Click va Uzum Pay</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s6_c3_d">
+            Mijozlardan QR-kod orqali toʻlovlarni toʻgʻridan-toʻgʻri korxona hisob-raqamiga qabul qilish va darhol buxgalteriyada aks ettirish.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="7">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4"></i>
+            <span data-i18n="s7_tag">Dizayn va UX</span>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-black text-white" data-i18n="s7_title">Mavjud Mahsulotlarga Nisbatan 2-Bosqichli Tezkor Navigatsiya</h2>
+          <p class="text-sm text-slate-300 leading-relaxed" data-i18n="s7_desc">
+            Mavjud eskirgan mahsulotlarning 80+ menyudan iborat chalkash roʻyxatidan farqli oʻlaroq, har bir boʻlim faqat kerakli vazifalarga yoʻnaltirilgan.
+          </p>
+          <ul class="space-y-2 text-xs text-slate-300 pt-2">
+            <li>✓ <strong>1-Bosqich (72px Rail):</strong> 13 ta asosiy boʻlim boʻyicha 1 bosishda oʻtish.</li>
+            <li>✓ <strong>2-Bosqich (256px Panel):</strong> Tezkor qidiruv, `+ Yangi...` tugmalari va filtrlar.</li>
+            <li>✓ <strong>1-Bosishda Mahkamlash (Pin):</strong> Katta moliyaviy jadvallar uchun 100% keng ekran.</li>
+          </ul>
+        </div>
+        <div class="lg:col-span-6">
+          <div class="relative rounded-2xl overflow-hidden border border-teal-500/40 bg-slate-950/80 shadow-2xl group">
+            <div class="px-4 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+              </div>
+              <div class="text-[11px] font-mono text-teal-300">app.sapar.uz/admin/dashboard</div>
+              <div class="text-[10px] px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300 font-bold">Dual Sidebar</div>
+            </div>
+            <img src="assets/images/dashboard_ui.png" onerror="this.src='dashboard_ui.png'" alt="SAPAR ERP Dual Sidebar Dashboard UI" class="w-full h-auto max-h-[300px] object-cover transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="8">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span data-i18n="s8_tag">Buxgalteriya va Moliya</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s8_title">21-son BHMS Milliy Buxgalteriya Standartlari</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s8_c1_t">Schotlar Rejasi va Provodkalar</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s8_c1_d">0100 dan 9900 gacha barcha milliy buxgalteriya schotlari tayyor kiritilgan. Har bir amaliyot avtomatik Bosh kitobga yoziladi.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s8_c2_t">1-Shakl, 2-Shakl va Oborotka</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s8_c2_d">Buxgalteriya balansi (1-shakl), Moliyaviy natijalar (2-shakl / P&L) va Aylanma vedomost (Oborotka) 1 soniyada avtomatik shakllanadi.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s8_c3_t">Vzaimozachet va Koʻp Valyutali Hisob</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s8_c3_d">Korxonalar oʻrtasidagi oʻzaro qarzdorliklarni yopish (Contras), UZS, USD, EUR, RUB kurslari boʻyicha avtomatik qayta baholash.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="9">
+      <div class="mb-8 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center justify-center gap-2">
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span data-i18n="s9_tag">Soliq va Raqamli Imzo</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s9_title">E-IMZO, Didox va Soliq Qoʻmitasi Bilan Toʻliq Integratsiya</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl text-left">
+          <h4 class="font-bold text-white text-base mb-1" data-i18n="s9_f1_t">Nativ E-IMZO Imzolash</h4>
+          <p class="text-xs text-slate-300" data-i18n="s9_f1_d">USB e-token yoki .pfx sertifikat orqali brauzerdan chiqmasdan toʻgʻridan-toʻgʻri PKCS#7 formatida hujjatlarni imzolash.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl text-left">
+          <h4 class="font-bold text-white text-base mb-1" data-i18n="s9_f2_t">Didox va Factura.uz</h4>
+          <p class="text-xs text-slate-300" data-i18n="s9_f2_d">Elektron fakturalarni 1 bosishda yuborish, statusini kuzatish va kiruvchi hujjatlarni avtomatik qabul qilish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl text-left">
+          <h4 class="font-bold text-white text-base mb-1" data-i18n="s9_f3_t">MXIK / IKPU Kodlari</h4>
+          <p class="text-xs text-slate-300" data-i18n="s9_f3_d">Tovar va xizmatlar uchun milliy klassifikator kodlari va shtrix-kodlarni avtomatik toʻgʻri belgilash.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl text-left">
+          <h4 class="font-bold text-white text-base mb-1" data-i18n="s9_f4_t">Soliq Deklaratsiyalari</h4>
+          <p class="text-xs text-slate-300" data-i18n="s9_f4_d">QQS (Forma 10006_29), JShODS (11101_14) va Aylanmadan olinadigan soliq (10104_18) hisobotlari.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="10">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          <span data-i18n="s10_tag">Savdo Zanjiri</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s10_title">Savdo Boshqaruvi, Hisob-Fakturalar va Yuk Xatlari (TTN)</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s10_c1_t">Tijorat Takliflari (KP)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s10_c1_d">Mijozlarga rasmiy shartlar koʻrsatilgan taklifnomalarni yuborish va mijoz qabul qilgach, 1 bosishda toʻlov fakturasiga aylantirish.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s10_c2_t">Yuk Xatlari (TTN)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s10_c2_d">Tovarni ombordan mijozga joʻnatishda avtotransport vositasi va haydovchi maʼlumotlari qayd etiladigan milliy yuk xatlari.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s10_c3_t">Ommaviy Havolalar va QR-Kod</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s10_c3_d">Mijozga Telegram orqali hisob-fakturaning onlayn havolasini yuborish va QR-kod orqali toʻlovlarni qabul qilish.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 11 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="11">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-sky-400 mb-2 flex items-center gap-2">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span data-i18n="s11_tag">Ombor va Tovar Nazorati</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s11_title">Koʻp Omborli Boshqaruv va FIFO Tannarx Qatlamlari</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-teal-400 font-bold text-xl mb-1">FIFO</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s11_f1_t">Aniq Tannarx Hisobi</h4>
+          <p class="text-xs text-slate-400" data-i18n="s11_f1_d">Dastlabki kirim partiyalari narxi boʻyicha tovar tannarxi va sof foydani aniq hisoblash.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-emerald-400 font-bold text-xl mb-1">Koʻp Skladli</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s11_f2_t">Filiallar va Omborlar</h4>
+          <p class="text-xs text-slate-400" data-i18n="s11_f2_d">Barcha filial va omborlardagi tovar qoldiqlarini real vaqt rejimida koʻrish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-cyan-400 font-bold text-xl mb-1">Transfer</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s11_f3_t">Omborlararo Koʻchirish</h4>
+          <p class="text-xs text-slate-400" data-i18n="s11_f3_d">Omborlar oʻrtasida tovarlarni xavfsiz va hujjatlashtirilgan holda oʻtkazish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-indigo-400 font-bold text-xl mb-1">Audit</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s11_f4_t">Inventarizatsiya</h4>
+          <p class="text-xs text-slate-400" data-i18n="s11_f4_d">Ortiqcha tovar kirimi va kamomadni hisobdan chiqarish dalolatnomalari.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 12 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="12">
+      <div class="mb-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1 flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span data-i18n="s12_tag">Chakana Savdo va POS</span>
+        </div>
+        <h2 class="text-2xl md:text-4xl font-black text-white" data-i18n="s12_title">Sensorli Touch POS Terminali va Smenalar Boshqaruvi</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div class="md:col-span-5 space-y-3">
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s12_c1_t">Tezkor Sensorli Interfeys</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s12_c1_d">Planshet va monitorlar uchun moslashtirilgan sub-soniyalik tezkor kassa oynasi.</p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s12_c2_t">Aralash (Split) Toʻlovlar</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s12_c2_d">Naqd pul + Uzcard/Humo + Payme/Click + Nasiya (qarz) hisobiga boʻlib toʻlash.</p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s12_c3_t">Kassir Smenalari va X/Z Hisobotlar</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s12_c3_d">Smenani ochish, kassa naqd pulini nazorat qilish va kun yakunida avtomatik X/Z hisoboti.</p>
+          </div>
+        </div>
+        <div class="md:col-span-7">
+          <div class="relative rounded-2xl overflow-hidden border border-indigo-500/30 bg-slate-950/80 shadow-2xl p-2 group">
+            <img src="assets/images/pos_terminal.png" onerror="this.src='pos_terminal.png'" alt="SAPAR Touch POS Terminal" class="w-full h-auto max-h-[300px] object-contain rounded-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 13 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="13">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-pink-400 mb-2 flex items-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span data-i18n="s13_tag">HRM va Xodimlar</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s13_title">Ish Vaqti Tabeli va Oʻzbekiston Oylik Ish Haqi Dvigateli</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s13_c1_t">Ish Vaqti Tabeli (Tabel)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s13_c1_d">Xodimlarning keldi-ketdi soatlari, dam olish kunlari va taʼtillarini hisobga oluvchi qonuniy tabel.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s13_c2_t">12% + 12% + 0.1% Soliqlar</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s13_c2_d">JShODS (12%), Ijtimoiy soliq (12% / IT Park 1%) va INPS (0.1%) pensiya badallari avtomatik hisoblanadi.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s13_c3_t">Taʼtillar va Kompensatsiyalar</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s13_c3_d">Mehnat taʼtillari kunlari hisobi, kasallik varaqalari va kompensatsiya toʻlovlari.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="14">
+      <div class="mb-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-rose-400 mb-1 flex items-center gap-2">
+          <i data-lucide="target" class="w-4 h-4"></i>
+          <span data-i18n="s14_tag">CRM va Savdo Oʻsishi</span>
+        </div>
+        <h2 class="text-2xl md:text-4xl font-black text-white" data-i18n="s14_title">Vizual Bitimlar Quvuri va 360° Mijoz Balansi</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div class="md:col-span-5 space-y-3">
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s14_c1_t">Kanban Bitimlar Quvuri</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s14_c1_d">Lidlar ➔ Birinchi aloqa ➔ Tijorat taklifi ➔ Shartnoma ➔ Toʻlov bosqichlarini vizual boshqaring.</p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s14_c2_t">360° Mijoz Kartasi</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s14_c2_d">Mijozning barcha hisob-fakturalari, oʻzaro qarzdorlik balansi va toʻlovlari yagona oynada.</p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl">
+            <h3 class="text-sm font-bold text-white mb-1" data-i18n="s14_c3_t">Telegram va WhatsApp Bildirishnomalari</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s14_c3_d">Mijozlarga hisob-faktura va toʻlov eslatmalarini avtomatik yuborish.</p>
+          </div>
+        </div>
+        <div class="md:col-span-7">
+          <div class="relative rounded-2xl overflow-hidden border border-rose-500/30 bg-slate-950/80 shadow-2xl p-1.5 group">
+            <img src="assets/images/crm_kanban.png" onerror="this.src='crm_kanban.png'" alt="SAPAR CRM Sales Pipeline Kanban" class="w-full h-auto max-h-[300px] object-cover rounded-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 15 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="15">
+      <div class="mb-8 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2 flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span data-i18n="s15_tag">Sunʼiy Intellekt</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s15_title">SAPAR AI Co-Pilot — Aqlli Biznes Maslahatchisi</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl text-left">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s15_c1_t">Chek va Hujjatlarni Tanib Olish (OCR)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s15_c1_d">Xarid cheklarini rasmga oling — AI uni avtomatik tovar kirimi va xarajatga aylantiradi.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl text-left">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s15_c2_t">Moliyaviy Bashorat va Maslahat</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s15_c2_d">Kutilayotgan soliq toʻlovlari va pul tanqisligi (cash gap) boʻyicha rahbarga aqlli tavsiyalar.</p>
+        </div>
+        <div class="glass-card p-6 rounded-3xl text-left">
+          <h3 class="text-lg font-bold text-white mb-2" data-i18n="s15_c3_t">Tabiiy Tilda Savol-Javob</h3>
+          <p class="text-xs text-slate-300 leading-relaxed" data-i18n="s15_c3_d">"Bu oy sof foydamiz qancha boʻldi?" deb soʻrang — AI hisobotni darhol chiqaradi.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 16 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="16">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          <span data-i18n="s16_tag">Iqtisodiy Samara</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s16_title">Oʻzbekiston Iqtisodiyoti va Xalq Farovonligiga Milliy Taʼsiri</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-emerald-400 font-black text-2xl mb-1">$120M+</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s16_f1_t">Import Oʻrnini Bosish</h4>
+          <p class="text-xs text-slate-400" data-i18n="s16_f1_d">Xorijiy dasturlarga ketayotgan millionlab dollar valyutani mamlakatimizda saqlab qolish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-teal-400 font-black text-2xl mb-1">+35%</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s16_f2_t">Ish Unumdorligi</h4>
+          <p class="text-xs text-slate-400" data-i18n="s16_f2_d">50,000+ korxonada qogʻozbozlikni yoʻqotish va operatsion tezlikni oshirish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-cyan-400 font-black text-2xl mb-1">100%</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s16_f3_t">Shaffoflik va Soliq</h4>
+          <p class="text-xs text-slate-400" data-i18n="s16_f3_d">Xufyona aylanmani qonuniylashtirish va davlat byudjetiga tushumlarni koʻpaytirish.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-indigo-400 font-black text-2xl mb-1">Eksport</div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="s16_f4_t">Markaziy Osiyo</h4>
+          <p class="text-xs text-slate-400" data-i18n="s16_f4_d">Mahalliy korxonalarni qoʻshni davlatlar bozoriga integratsiya qilish.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 17 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="17">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span data-i18n="s17_tag">Moliyaviy Model</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s17_title">3 Yillik Moliyaviy Reja va SaaS Unit Economics</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl border-teal-500/20">
+          <div class="text-teal-400 font-black text-xs uppercase mb-1">2026 (1-YIL)</div>
+          <div class="text-3xl font-black text-white mb-2">$750,000</div>
+          <p class="text-xs text-slate-300" data-i18n="s17_y1_d">2,500 Faol Korxona | Sof Foyda: 32%</p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-emerald-500/30 ring-1 ring-emerald-500/30">
+          <div class="text-emerald-400 font-black text-xs uppercase mb-1">2027 (2-YIL)</div>
+          <div class="text-3xl font-black text-white mb-2">$3,600,000</div>
+          <p class="text-xs text-slate-300" data-i18n="s17_y2_d">12,000 Faol Korxona | Sof Foyda: 48%</p>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-cyan-500/20">
+          <div class="text-cyan-400 font-black text-xs uppercase mb-1">2028 (3-YIL)</div>
+          <div class="text-3xl font-black text-white mb-2">$15,000,000</div>
+          <p class="text-xs text-slate-300" data-i18n="s17_y3_d">50,000 Faol Korxona | Sof Foyda: 56%</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 18 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="18">
+      <div class="mb-8">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span data-i18n="s18_tag">Xavfsizlik va Arxitektura</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s18_title">Bank Darajasidagi Xavfsizlik va OʻRQ-547 Standarti</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-teal-400 font-bold text-base mb-1">PostgreSQL & Prisma</div>
+          <p class="text-xs text-slate-300" data-i18n="s18_f1">Millionlab tranzaksiyalarga bardosh beruvchi relyatsion maʼlumotlar bazasi.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-emerald-400 font-bold text-base mb-1">Multi-Tenancy</div>
+          <p class="text-xs text-slate-300" data-i18n="s18_f2">Har bir korxona uchun alohida subdomen (korxona.sapar.uz) va toʻliq maʼlumotlar izolyatsiyasi.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-cyan-400 font-bold text-base mb-1">AES-256 Shifrlash</div>
+          <p class="text-xs text-slate-300" data-i18n="s18_f3">Parollar va maʼlumotlarni bank darajasida xavfsiz shifrlab saqlash.</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl">
+          <div class="text-indigo-400 font-bold text-base mb-1">Oʻzbekiston OʻRQ-547</div>
+          <p class="text-xs text-slate-300" data-i18n="s18_f4">Barcha maʼlumotlar Oʻzbekiston hududidagi maʼlumotlar markazida saqlanadi.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 19 -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="19">
+      <div class="mb-8 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center justify-center gap-2">
+          <i data-lucide="tag" class="w-4 h-4"></i>
+          <span data-i18n="s19_tag">Tariflar va Oʻrnatish</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white" data-i18n="s19_title">Hamyonbop va Moslashuvchan Biznes Modeli</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-3xl text-left">
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-teal-500/20 text-teal-300">STARTUP</span>
+          <h3 class="text-xl font-black text-white mt-3 mb-2" data-i18n="s19_t1_t">Boshlangʻich Biznes</h3>
+          <p class="text-xs text-slate-300 mb-4" data-i18n="s19_t1_d">Kichik doʻkonlar va savdo korxonalari uchun.</p>
+          <ul class="space-y-2 text-xs text-slate-300">
+            <li>✓ 3 tagacha foydalanuvchi ($15/oy)</li>
+            <li>✓ 1 ta ombor va Invoyslar</li>
+            <li>✓ Didox va E-IMZO integratsiyasi</li>
+          </ul>
+        </div>
+        <div class="glass-card p-6 rounded-3xl text-left border-emerald-500/40 ring-2 ring-emerald-500/40">
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">BUSINESS</span>
+          <h3 class="text-xl font-black text-white mt-3 mb-2" data-i18n="s19_t2_t">Oʻsib Borayotgan Korxona</h3>
+          <p class="text-xs text-slate-300 mb-4" data-i18n="s19_t2_d">Oʻrta biznes, ishlab chiqarish va ulgurji savdo.</p>
+          <ul class="space-y-2 text-xs text-slate-300">
+            <li>✓ 10 tagacha foydalanuvchi ($35/oy)</li>
+            <li>✓ 21-BHMS Buxgalteriya va 1/2-Shakl</li>
+            <li>✓ Sensorli POS Kassa va Smenalar</li>
+          </ul>
+        </div>
+        <div class="glass-card p-6 rounded-3xl text-left">
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300">ENTERPRISE</span>
+          <h3 class="text-xl font-black text-white mt-3 mb-2" data-i18n="s19_t3_t">Yirik Korporatsiyalar</h3>
+          <p class="text-xs text-slate-300 mb-4" data-i18n="s19_t3_d">Yirik korxonalar va maxsus serverlar uchun.</p>
+          <ul class="space-y-2 text-xs text-slate-300">
+            <li>✓ Cheksiz foydalanuvchilar ($80/oy)</li>
+            <li>✓ On-Premises Docker oʻrnatish</li>
+            <li>✓ 24/7 Shaxsiy qoʻllab-quvvatlash</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 20: Leadership & Engineering Team (NEW!) -->
+    <!-- ========================================================================= -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center" data-slide="20">
+      <div class="mb-6 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center justify-center gap-2">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span data-i18n="s20_tag">Bizning Jamoa</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-2" data-i18n="s20_title">Kuchli va Tajribali Mutaxassislar Jamoasi</h2>
+        <p class="text-xs md:text-sm text-slate-300 max-w-2xl mx-auto" data-i18n="s20_subtitle">
+          Fintech, bank tizimlari, 21-son BHMS buxgalteriyasi va bulutli arxitektura boʻyicha 10+ yillik amaliy tajribaga ega jamoa.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Team Member 1 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            DA
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white">Dostonbek & Hammuassislar</div>
+            <div class="text-[11px] font-semibold text-teal-300 mb-1" data-i18n="t1_role">Bosh Ijrochi Direktor (CEO & Founder)</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t1_desc">SaaS strategiyasi, xalqaro tajriba, korporativ boshqaruv va ekotizim viziyasi.</p>
+          </div>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-teal-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            CT
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white" data-i18n="t2_name">Bosh Texnologik Arxitektor</div>
+            <div class="text-[11px] font-semibold text-cyan-300 mb-1" data-i18n="t2_role">Bosh Texnik Direktor (CTO & Lead Architect)</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t2_desc">Yuqori yuklamali PostgreSQL, Node.js, microservices va bank darajasidagi xavfsizlik.</p>
+          </div>
+        </div>
+
+        <!-- Team Member 3 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            FA
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white" data-i18n="t3_name">Bosh Auditor & Moliyaviy Ekspert</div>
+            <div class="text-[11px] font-semibold text-emerald-300 mb-1" data-i18n="t3_role">Bosh Moliyachi (CFO & Tax Lead)</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t3_desc">21-son BHMS, Soliq kodeksi, 1/2-shakllar va milliy soliq deklaratsiyalari sertifikatlangan eksperti.</p>
+          </div>
+        </div>
+
+        <!-- Team Member 4 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            BI
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white" data-i18n="t4_name">Fintech & Bank Integratsiyasi Rahbari</div>
+            <div class="text-[11px] font-semibold text-indigo-300 mb-1" data-i18n="t4_role">Fintech & Bank API Lead</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t4_desc">Didox, E-IMZO, 1C:ClientBank va tijorat banklari skoring tizimlari boʻyicha mutaxassis.</p>
+          </div>
+        </div>
+
+        <!-- Team Member 5 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            AI
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white" data-i18n="t5_name">Sunʼiy Intellekt Muhandisi</div>
+            <div class="text-[11px] font-semibold text-rose-300 mb-1" data-i18n="t5_role">Head of AI & OCR Extraction</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t5_desc">Cheklarni rasmga olib tanish (OCR), moliyaviy tahlil LLM modellari va algoritmik tahlil.</p>
+          </div>
+        </div>
+
+        <!-- Team Member 6 -->
+        <div class="glass-card p-4 rounded-2xl flex items-start gap-3 border-teal-500/20">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-400 text-slate-950 font-black text-lg flex items-center justify-center shrink-0">
+            CS
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white" data-i18n="t6_name">Joriy Qilish & Mijozlar Xizmati</div>
+            <div class="text-[11px] font-semibold text-purple-300 mb-1" data-i18n="t6_role">Head of Customer Success & Support</div>
+            <p class="text-[11px] text-slate-300 leading-tight" data-i18n="t6_desc">500+ korxonalarda ERP joriy qilish, xodimlarni oʻqitish va 24/7 tezkor texnik yordam.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE 21: Summary, Contact & Call-to-Action -->
+    <!-- ========================================================================= -->
+    <section class="slide w-full max-w-6xl h-full flex-col justify-center items-center text-center relative" data-slide="21">
+      <div class="mb-6 flex items-center justify-center">
+        <svg class="h-16 md:h-20 w-auto" viewBox="0 0 174 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path d="M0.571411 14.4812V25.6239L7.62723 21.7237V14.8521L18.3063 8.90914L11.4419 4.82776L3.89365 8.95446C1.84171 10.0763 0.571411 12.1895 0.571411 14.4812Z" fill="#02C39A" />
+            <path d="M41 30.0855V18.9429L33.9442 22.843V29.7146L23.2651 35.6576L30.1295 39.739L37.6778 35.6123C39.7298 34.4904 41 32.3772 41 30.0855Z" fill="#028090" />
+            <path d="M40.6892 14.0206L40.8093 15.6004L33.7535 19.3148V14.8575L13.7302 4.08136L20.5946 0L37.3268 8.93073C39.2607 9.96294 40.5263 11.8787 40.6892 14.0206Z" fill="#FFFFFF" />
+            <path d="M0.12016 30.925L0 29.3451L7.05584 25.6307V30.088L27.0791 40.8642L20.2147 44.9456L3.48254 36.0148C1.54864 34.9826 0.283068 33.0668 0.12016 30.925Z" fill="#FFFFFF" />
+          </g>
+          <path d="M65.4542 18.2756C65.3406 17.1297 64.8529 16.2396 63.9911 15.6051C63.1294 14.9706 61.9599 14.6534 60.4826 14.6534C59.4788 14.6534 58.6313 14.7955 57.94 15.0795C57.2487 15.3542 56.7184 15.7377 56.3491 16.2301C55.9892 16.7225 55.8093 17.2812 55.8093 17.9062C55.7904 18.4271 55.8993 18.8816 56.136 19.2699C56.3822 19.6581 56.7184 19.9943 57.1445 20.2784C57.5707 20.553 58.0631 20.7945 58.6218 21.0028C59.1805 21.2017 59.7771 21.3722 60.4116 21.5142L63.0252 22.1392C64.2942 22.4233 65.4589 22.8021 66.5195 23.2756C67.5801 23.7491 68.4987 24.3314 69.2752 25.0227C70.0517 25.714 70.6531 26.5284 71.0792 27.4659C71.5148 28.4034 71.7373 29.4782 71.7468 30.6903C71.7373 32.4706 71.2828 34.0142 70.3832 35.321C69.493 36.6184 68.2051 37.6269 66.5195 38.3466C64.8434 39.0568 62.8216 39.4119 60.4542 39.4119C58.1057 39.4119 56.0603 39.0521 54.3178 38.3324C52.5849 37.6127 51.2307 36.5473 50.2553 35.1364C49.2894 33.7159 48.7828 31.9593 48.7354 29.8665H54.6871C54.7534 30.8419 55.0328 31.6562 55.5252 32.3097C56.0271 32.9536 56.6947 33.4413 57.5281 33.7727C58.3709 34.0947 59.3226 34.2557 60.3832 34.2557C61.4248 34.2557 62.3292 34.1042 63.0962 33.8011C63.8728 33.4981 64.4741 33.0767 64.9002 32.5369C65.3264 31.9972 65.5394 31.3769 65.5394 30.6761C65.5394 30.0227 65.3453 29.4735 64.957 29.0284C64.5782 28.5833 64.0195 28.2045 63.2809 27.892C62.5517 27.5795 61.6568 27.2955 60.5962 27.0398L57.4286 26.2443C54.976 25.6477 53.0394 24.715 51.619 23.446C50.1985 22.1771 49.493 20.4678 49.5025 18.3182C49.493 16.5568 49.9618 15.018 50.9087 13.7017C51.8652 12.3854 53.1767 11.358 54.8434 10.6193C56.5101 9.88068 58.404 9.51136 60.5252 9.51136C62.6843 9.51136 64.5688 9.88068 66.1786 10.6193C67.7979 11.358 69.0574 12.3854 69.957 13.7017C70.8567 15.018 71.3207 16.5426 71.3491 18.2756H65.4542ZM81.9918 39.4119C80.5998 39.4119 79.3593 39.1705 78.2702 38.6875C77.1812 38.1951 76.3195 37.4706 75.685 36.5142C75.06 35.5483 74.7475 34.3456 74.7475 32.9062C74.7475 31.6941 74.9701 30.6761 75.4151 29.8523C75.8602 29.0284 76.4663 28.3655 77.2333 27.8636C78.0004 27.3617 78.8716 26.983 79.8469 26.7273C80.8318 26.4716 81.864 26.2917 82.9435 26.1875C84.2125 26.0549 85.2352 25.9318 86.0117 25.8182C86.7882 25.6951 87.3517 25.5152 87.7021 25.2784C88.0524 25.0417 88.2276 24.6913 88.2276 24.2273V24.142C88.2276 23.2424 87.9435 22.5464 87.3754 22.054C86.8166 21.5616 86.0212 21.3153 84.989 21.3153C83.9 21.3153 83.0335 21.5568 82.3896 22.0398C81.7456 22.5133 81.3195 23.1098 81.1112 23.8295L75.5146 23.375C75.7987 22.0492 76.3574 20.9034 77.1907 19.9375C78.024 18.9621 79.0988 18.214 80.4151 17.6932C81.7409 17.1629 83.275 16.8977 85.0174 16.8977C86.2295 16.8977 87.3896 17.0398 88.4975 17.3239C89.6149 17.608 90.6045 18.0483 91.4663 18.6449C92.3375 19.2415 93.024 20.0085 93.5259 20.946C94.0278 21.8741 94.2788 22.9867 94.2788 24.2841V39H88.5401V35.9744H88.3697C88.0193 36.6562 87.5505 37.2576 86.9634 37.7784C86.3763 38.2898 85.6708 38.6922 84.8469 38.9858C84.0231 39.2699 83.0714 39.4119 81.9918 39.4119ZM83.7248 35.2358C84.6149 35.2358 85.4009 35.0606 86.0827 34.7102C86.7646 34.3504 87.2996 33.8674 87.6879 33.2614C88.0761 32.6553 88.2702 31.9687 88.2702 31.2017V28.8864C88.0808 29.0095 87.8204 29.1231 87.489 29.2273C87.167 29.322 86.8024 29.4119 86.3952 29.4972C85.988 29.5729 85.5808 29.6439 85.1737 29.7102C84.7665 29.767 84.3971 29.8191 84.0657 29.8665C83.3555 29.9706 82.7352 30.1364 82.2049 30.3636C81.6746 30.5909 81.2627 30.8987 80.9691 31.2869C80.6755 31.6657 80.5288 32.1392 80.5288 32.7074C80.5288 33.5312 80.8271 34.161 81.4237 34.5966C82.0297 35.0227 82.7968 35.2358 83.7248 35.2358ZM98.9734 47.1818V17.1818H104.939V20.8466H105.209C105.474 20.2595 105.858 19.6629 106.36 19.0568C106.871 18.4413 107.534 17.9299 108.348 17.5227C109.172 17.1061 110.195 16.8977 111.417 16.8977C113.007 16.8977 114.475 17.3144 115.82 18.1477C117.165 18.9716 118.239 20.2169 119.044 21.8835C119.849 23.5407 120.252 25.6193 120.252 28.1193C120.252 30.553 119.859 32.608 119.073 34.2841C118.296 35.9508 117.236 37.215 115.891 38.0767C114.556 38.929 113.06 39.3551 111.402 39.3551C110.228 39.3551 109.229 39.161 108.405 38.7727C107.591 38.3845 106.923 37.8968 106.402 37.3097C105.882 36.7131 105.484 36.1117 105.209 35.5057H105.025V47.1818H98.9734ZM104.897 28.0909C104.897 29.3883 105.077 30.5199 105.436 31.4858C105.796 32.4517 106.317 33.2045 106.999 33.7443C107.681 34.2746 108.509 34.5398 109.485 34.5398C110.47 34.5398 111.303 34.2699 111.985 33.7301C112.667 33.1809 113.183 32.4233 113.533 31.4574C113.893 30.482 114.073 29.3598 114.073 28.0909C114.073 26.8314 113.898 25.7235 113.547 24.767C113.197 23.8106 112.681 23.0625 111.999 22.5227C111.317 21.983 110.479 21.7131 109.485 21.7131C108.5 21.7131 107.667 21.9735 106.985 22.4943C106.312 23.0152 105.796 23.7538 105.436 24.7102C105.077 25.6667 104.897 26.7936 104.897 28.0909ZM130.507 39.4119C129.115 39.4119 127.875 39.1705 126.786 38.6875C125.697 38.1951 124.835 37.4706 124.201 36.5142C123.576 35.5483 123.263 34.3456 123.263 32.9062C123.263 31.6941 123.486 30.6761 123.931 29.8523C124.376 29.0284 124.982 28.3655 125.749 27.8636C126.516 27.3617 127.387 26.983 128.363 26.7273C129.347 26.4716 130.38 26.2917 131.459 26.1875C132.728 26.0549 133.751 25.9318 134.527 25.8182C135.304 25.6951 135.867 25.5152 136.218 25.2784C136.568 25.0417 136.743 24.6913 136.743 24.2273V24.142C136.743 23.2424 136.459 22.5464 135.891 22.054C135.332 21.5616 134.537 21.3153 133.505 21.3153C132.416 21.3153 131.549 21.5568 130.905 22.0398C130.261 22.5133 129.835 23.1098 129.627 23.8295L124.03 23.375C124.314 22.0492 124.873 20.9034 125.706 19.9375C126.54 18.9621 127.614 18.214 128.931 17.6932C130.257 17.1629 131.791 16.8977 133.533 16.8977C134.745 16.8977 135.905 17.0398 137.013 17.3239C138.131 17.608 139.12 18.0483 139.982 18.6449C140.853 19.2415 141.54 20.0085 142.042 20.946C142.543 21.8741 142.794 22.9867 142.794 24.2841V39H137.056V35.9744H136.885C136.535 36.6562 136.066 37.2576 135.479 37.7784C134.892 38.2898 134.186 38.6922 133.363 38.9858C132.539 39.2699 131.587 39.4119 130.507 39.4119ZM132.24 35.2358C133.131 35.2358 133.917 35.0606 134.598 34.7102C135.28 34.3504 135.815 33.8674 136.203 33.2614C136.592 32.6553 136.786 31.9687 136.786 31.2017V28.8864C136.596 29.0095 136.336 29.1231 136.005 29.2273C135.683 29.322 135.318 29.4119 134.911 29.4972C134.504 29.5729 134.096 29.6439 133.689 29.7102C133.282 29.767 132.913 29.8191 132.581 29.8665C131.871 29.9706 131.251 30.1364 130.721 30.3636C130.19 30.5909 129.778 30.8987 129.485 31.2869C129.191 31.6657 129.044 32.1392 129.044 32.7074C129.044 33.5312 129.343 34.161 129.939 34.5966C130.545 35.0227 131.312 35.2358 132.24 35.2358ZM147.489 39V17.1818H153.355V20.9886H153.583C153.98 19.6345 154.648 18.6117 155.586 17.9205C156.523 17.2197 157.603 16.8693 158.824 16.8693C159.127 16.8693 159.454 16.8883 159.804 16.9261C160.155 16.964 160.462 17.0161 160.728 17.0824V22.4517C160.444 22.3665 160.051 22.2907 159.549 22.2244C159.047 22.1581 158.587 22.125 158.171 22.125C157.281 22.125 156.485 22.3191 155.784 22.7074C155.093 23.0862 154.544 23.6165 154.137 24.2983C153.739 24.9801 153.54 25.7661 153.54 26.6562V39H147.489Z" fill="#FFFFFF" />
+            <path d="M164.893 39.3693C163.956 39.3693 163.151 39.0379 162.478 38.375C161.815 37.7027 161.484 36.8977 161.484 35.9602C161.484 35.0322 161.815 34.2367 162.478 33.5739C163.151 32.911 163.956 32.5795 164.893 32.5795C165.802 32.5795 166.598 32.911 167.279 33.5739C167.961 34.2367 168.302 35.0322 168.302 35.9602C168.302 36.5852 168.141 37.1581 167.819 37.679C167.507 38.1903 167.095 38.6023 166.583 38.9148C166.072 39.2178 165.509 39.3693 164.893 39.3693Z" fill="#02C39A" />
+        </svg>
+      </div>
+      <h2 class="text-3xl md:text-5xl font-black text-white mb-4" data-i18n="s21_title">Biznesingizni SAPAR Bilan Boshqaring!</h2>
+      <p class="text-base md:text-xl text-slate-300 max-w-2xl mb-8" data-i18n="s21_subtitle">
+        Eskirgan va qimmat dasturlardan xalos boʻling. Yagona oynada barcha korxona jarayonlarini avtomatlashtiring.
+      </p>
+      <div class="glass-card p-6 rounded-3xl border-teal-500/30 w-full max-w-2xl grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+        <div>
+          <div class="text-[11px] text-slate-400 uppercase font-bold">Rasmiy Veb-Sayt</div>
+          <div class="text-sm font-bold text-teal-300">https://sapar.uz</div>
+        </div>
+        <div>
+          <div class="text-[11px] text-slate-400 uppercase font-bold">Elektron Pochta</div>
+          <div class="text-sm font-bold text-teal-300">info@sapar.uz</div>
+        </div>
+        <div>
+          <div class="text-[11px] text-slate-400 uppercase font-bold">Manzil</div>
+          <div class="text-sm font-bold text-teal-300">Toshkent, IT Park Oʻzbekiston</div>
+        </div>
+      </div>
+      <div class="mt-8 flex items-center gap-4">
+        <a href="http://localhost:3000/admin" target="_blank" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-600 hover:to-emerald-500 text-slate-950 font-black text-sm shadow-xl transition-all transform hover:scale-105 cursor-pointer" data-i18n="s21_btn">
+          Demoni Sinab Koʻrish ➔
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Controller -->
+  <footer class="no-print w-full bg-[#0B2B33]/90 backdrop-blur-md border-t border-teal-900/60 px-6 py-3 flex items-center justify-between z-50 shrink-0">
+    <div class="flex items-center gap-2 text-xs text-slate-400">
+      <span>Boshqarish:</span>
+      <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">← Oldingi</kbd>
+      <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Keyingi →</kbd>
+      <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">G (Slaydlar)</kbd>
+      <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">N (Nutq eslatmasi)</kbd>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span data-i18n="btn_prev">Oldingi</span>
+      </button>
+      <button onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-600 hover:to-emerald-500 text-slate-950 text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-md">
+        <span data-i18n="btn_next">Keyingi</span>
+        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Slide Grid Modal Drawer -->
+  <div id="gridModal" class="no-print fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-6">
+    <div class="bg-[#0B2B33] border border-teal-900 rounded-3xl p-6 w-full max-w-5xl max-h-[85vh] flex flex-col space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-5 h-5 text-teal-400"></i>
+          <span data-i18n="grid_title">Barcha Slaydlar Koʻrinishi</span>
+        </h3>
+        <button onclick="toggleGridModal()" class="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="gridContainer" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 overflow-y-auto p-1 flex-1">
+      </div>
+    </div>
+  </div>
+
+  <!-- Speaker Notes Drawer Modal -->
+  <div id="notesDrawer" class="no-print fixed bottom-14 right-6 w-96 max-w-[90vw] bg-[#0B2B33] border border-teal-900 rounded-3xl p-5 shadow-2xl z-50 hidden flex-col space-y-3">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+      <div class="flex items-center gap-2 text-xs font-bold text-teal-300 uppercase">
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+        <span>Spiker Nutqi Eslatmasi (Speaker Notes)</span>
+      </div>
+      <button onclick="toggleNotesDrawer()" class="text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div id="notesContent" class="text-xs text-slate-300 leading-relaxed max-h-60 overflow-y-auto">
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_SLIDES = 21;
+    let currentSlide = 1;
+    let currentLang = 'uz';
+
+    const TRANSLATIONS = {
+      uz: {
+        btn_pptx: "📥 PPTX Yuklab Olish",
+        s1_badge: "President Tech Award 2026 Nomzodi",
+        s1_title: "Oʻzbekiston Biznesini Boyitish va Milliy Iqtisodiyotni Yuksaltirish Uchun Yagona Bulutli ERP",
+        s1_subtitle: "Buxgalteriya hisobi (21-BHMS), Soliq integratsiyasi, FIFO ombor, Savdo va TTN, Sensorli POS Kassa, HRM & Ish haqi, Bank skoringi va CRM — Barchasi Yagona Ekotizimda.",
+        s1_f1: "100% Bulutli: barcha qurilmalardan ishlaydi",
+        s1_f2: "Banklardan 1 kunda garovsiz aylanma mablagʻ krediti",
+        s1_f3: "Didox, Factura.uz va Soliq deklaratsiyalari bilan toʻliq integratsiya",
+        s1_f4: "1C ga nisbatan $8,500+ mablagʻni tejash imkoniyati",
+        s2_tag: "Makroiqtisodiy Muammolar",
+        s2_title: "Oʻzbekiston Biznesi va Milliy Iqtisodiyotning Asosiy Toʻsiqlari",
+        s2_c1_t: "$120M+ Valyutaning Xorijga Chiqib Ketishi",
+        s2_c1_d: "Oʻzbekiston korxonalari har yili xorijiy eskirgan dasturlarga (1C litsenziyalari, serverlar, qimmat maslahatchilar) millionlab dollar xorijiy valyuta sarflamoqda.",
+        s2_c2_t: "Bank Krediti Olishdagi Qiyinchiliklar",
+        s2_c2_d: "Kichik biznesning buxgalteriyasi va real aylanmasi shaffof koʻrinmagani sababli, banklar ularga tezkor va garovsiz aylanma mablagʻ kreditlarini bera olmaydi.",
+        s2_c3_t: "Tarqoq Dasturlar va Xufyona Iqtisodiyot",
+        s2_c3_d: "POS kassa alohida, ombor daftarda, fakturalar Didoxda, hisoblar bankda. Maʼlumotlar tarqoqligi korxonaning daromad yoʻqotishiga sabab boʻlmoqda.",
+        s3_tag: "Milliy Missiya",
+        s3_title: "Bizning Maqsadimiz: Bizneslarni Kuchli va Boy Qilish",
+        s3_c1_t: "Sof Daromadni Oshirish",
+        s3_c1_d: "FIFO tannarxini aniq hisoblash, tovar kamomadini yoʻqotish va savdo quvuri orqali korxona sof rentabelligi 25% gacha oshadi.",
+        s3_c2_t: "Operatsion Xarajatlarni Qisqartirish",
+        s3_c2_d: "Qimmat jismoniy serverlar, doimiy 1C dasturchilari va texnik xizmat koʻrsatish xarajatlari toʻliq tejaladi.",
+        s3_c3_t: "Tezkor Bank Kreditlari",
+        s3_c3_d: "SAPAR dagi tasdiqlangan moliyaviy hisobotlar orqali banklar tadbirkorga 1 kunda garovsiz va qulay foizli aylanma mablagʻ kreditlarini ajratadi.",
+        s4_tag: "Raqobat Tahlili",
+        s4_title: "Nima Uchun SAPAR ERP Bozor Yechimlaridan Ustun?",
+        s5_tag: "Xarajatlar Tahlili",
+        s5_title: "5 Yillik Egalik Qilish Xarajati: 1C ga Nisbatan $8,500+ Tejash",
+        s6_tag: "Banklar Bilan Hamkorlik",
+        s6_title: "Bank Integratsiyasi va Tadbirkorlarga Tezkor Garovsiz Kredit",
+        s6_c1_t: "Moliyaviy Skoring Dvigateli",
+        s6_c1_d: "Hamkor banklar (Ipak Yoʻli, Kapitalbank, SQB, Agrobank) SAPAR dagi shaffof savdo aylanmasi asosida tadbirkorga 1 kunda kredit liniyalarini ajratadi.",
+        s6_c2_t: "1C:ClientBank Avto-Sinxronizatsiya",
+        s6_c2_d: "Oʻzbekistonning barcha banklaridan koʻchirmalar (vipiska) 1 soniyada yuklanadi va buxgalteriya schotlari bilan avtomatik solishtiriladi.",
+        s6_c3_t: "Payme, Click va Uzum Pay",
+        s6_c3_d: "Mijozlardan QR-kod orqali toʻlovlarni toʻgʻridan-toʻgʻri korxona hisob-raqamiga qabul qilish va darhol buxgalteriyada aks ettirish.",
+        s7_tag: "Dizayn va UX",
+        s7_title: "Mavjud Mahsulotlarga Nisbatan 2-Bosqichli Tezkor Navigatsiya",
+        s7_desc: "Mavjud eskirgan mahsulotlarning 80+ menyudan iborat chalkash roʻyxatidan farqli oʻlaroq, har bir boʻlim faqat kerakli vazifalarga yoʻnaltirilgan.",
+        s8_tag: "Buxgalteriya va Moliya",
+        s8_title: "21-son BHMS Milliy Buxgalteriya Standartlari",
+        s8_c1_t: "Schotlar Rejasi va Provodkalar",
+        s8_c1_d: "0100 dan 9900 gacha barcha milliy buxgalteriya schotlari tayyor kiritilgan. Har bir amaliyot avtomatik Bosh kitobga yoziladi.",
+        s8_c2_t: "1-Shakl, 2-Shakl va Oborotka",
+        s8_c2_d: "Buxgalteriya balansi (1-shakl), Moliyaviy natijalar (2-shakl / P&L) va Aylanma vedomost (Oborotka) 1 soniyada avtomatik shakllanadi.",
+        s8_c3_t: "Vzaimozachet va Koʻp Valyutali Hisob",
+        s8_c3_d: "Korxonalar oʻrtasidagi oʻzaro qarzdorliklarni yopish (Contras), UZS, USD, EUR, RUB kurslari boʻyicha avtomatik qayta baholash.",
+        s9_tag: "Soliq va Raqamli Imzo",
+        s9_title: "E-IMZO, Didox va Soliq Qoʻmitasi Bilan Toʻliq Integratsiya",
+        s9_f1_t: "Nativ E-IMZO Imzolash",
+        s9_f1_d: "USB e-token yoki .pfx sertifikat orqali brauzerdan chiqmasdan toʻgʻridan-toʻgʻri PKCS#7 formatida hujjatlarni imzolash.",
+        s9_f2_t: "Didox va Factura.uz",
+        s9_f2_d: "Elektron fakturalarni 1 bosishda yuborish, statusini kuzatish va kiruvchi hujjatlarni avtomatik qabul qilish.",
+        s9_f3_t: "MXIK / IKPU Kodlari",
+        s9_f3_d: "Tovar va xizmatlar uchun milliy klassifikator kodlari va shtrix-kodlarni avtomatik toʻgʻri belgilash.",
+        s9_f4_t: "Soliq Deklaratsiyalari",
+        s9_f4_d: "QQS (Forma 10006_29), JShODS (11101_14) va Aylanmadan olinadigan soliq (10104_18) hisobotlari.",
+        s10_tag: "Savdo Zanjiri",
+        s10_title: "Savdo Boshqaruvi, Hisob-Fakturalar va Yuk Xatlari (TTN)",
+        s10_c1_t: "Tijorat Takliflari (KP)",
+        s10_c1_d: "Mijozlarga rasmiy shartlar koʻrsatilgan taklifnomalarni yuborish va mijoz qabul qilgach, 1 bosishda toʻlov fakturasiga aylantirish.",
+        s10_c2_t: "Yuk Xatlari (TTN)",
+        s10_c2_d: "Tovarni ombordan mijozga joʻnatishda avtotransport vositasi va haydovchi maʼlumotlari qayd etiladigan milliy yuk xatlari.",
+        s10_c3_t: "Ommaviy Havolalar va QR-Kod",
+        s10_c3_d: "Mijozga Telegram orqali hisob-fakturaning onlayn havolasini yuborish va QR-kod orqali toʻlovlarni qabul qilish.",
+        s11_tag: "Ombor va Tovar Nazorati",
+        s11_title: "Koʻp Omborli Boshqaruv va FIFO Tannarx Qatlamlari",
+        s11_f1_t: "Aniq Tannarx Hisobi",
+        s11_f1_d: "Dastlabki kirim partiyalari narxi boʻyicha tovar tannarxi va sof foydani aniq hisoblash.",
+        s11_f2_t: "Filiallar va Omborlar",
+        s11_f2_d: "Barcha filial va omborlardagi tovar qoldiqlarini real vaqt rejimida koʻrish.",
+        s11_f3_t: "Omborlararo Koʻchirish",
+        s11_f3_d: "Omborlar oʻrtasida tovarlarni xavfsiz va hujjatlashtirilgan holda oʻtkazish.",
+        s11_f4_t: "Inventarizatsiya",
+        s11_f4_d: "Ortiqcha tovar kirimi va kamomadni hisobdan chiqarish dalolatnomalari.",
+        s12_tag: "Chakana Savdo va POS",
+        s12_title: "Sensorli Touch POS Terminali va Smenalar Boshqaruvi",
+        s12_c1_t: "Tezkor Sensorli Interfeys",
+        s12_c1_d: "Planshet va monitorlar uchun moslashtirilgan sub-soniyalik tezkor kassa oynasi.",
+        s12_c2_t: "Aralash (Split) Toʻlovlar",
+        s12_c2_d: "Naqd pul + Uzcard/Humo + Payme/Click + Nasiya (qarz) hisobiga boʻlib toʻlash.",
+        s12_c3_t: "Kassir Smenalari va X/Z Hisobotlar",
+        s12_c3_d: "Smenani ochish, kassa naqd pulini nazorat qilish va kun yakunida avtomatik X/Z hisoboti.",
+        s13_tag: "HRM va Xodimlar",
+        s13_title: "Ish Vaqti Tabeli va Oʻzbekiston Oylik Ish Haqi Dvigateli",
+        s13_c1_t: "Ish Vaqti Tabeli (Tabel)",
+        s13_c1_d: "Xodimlarning keldi-ketdi soatlari, dam olish kunlari va taʼtillarini hisobga oluvchi qonuniy tabel.",
+        s13_c2_t: "12% + 12% + 0.1% Soliqlar",
+        s13_c2_d: "JShODS (12%), Ijtimoiy soliq (12% / IT Park 1%) va INPS (0.1%) pensiya badallari avtomatik hisoblanadi.",
+        s13_c3_t: "Taʼtillar va Kompensatsiyalar",
+        s13_c3_d: "Mehnat taʼtillari kunlari hisobi, kasallik varaqalari va kompensatsiya toʻlovlari.",
+        s14_tag: "CRM va Savdo Oʻsishi",
+        s14_title: "Vizual Bitimlar Quvuri va 360° Mijoz Balansi",
+        s14_c1_t: "Kanban Bitimlar Quvuri",
+        s14_c1_d: "Lidlar ➔ Birinchi aloqa ➔ Tijorat taklifi ➔ Shartnoma ➔ Toʻlov. Savdo bosqichlarini vizual boshqaring.",
+        s14_c2_t: "360° Mijoz Kartasi",
+        s14_c2_d: "Mijozning barcha hisob-fakturalari, oʻzaro qarzdorlik balansi va toʻlovlari yagona oynada.",
+        s14_c3_t: "Telegram va WhatsApp Bildirishnomalari",
+        s14_c3_d: "Mijozlarga hisob-faktura va toʻlov eslatmalarini avtomatik yuborish.",
+        s15_tag: "Sunʼiy Intellekt",
+        s15_title: "SAPAR AI Co-Pilot — Aqlli Biznes Maslahatchisi",
+        s15_c1_t: "Chek va Hujjatlarni Tanib Olish (OCR)",
+        s15_c1_d: "Xarid cheklarini rasmga oling — AI uni avtomatik tovar kirimi va xarajatga aylantiradi.",
+        s15_c2_t: "Moliyaviy Bashorat va Maslahat",
+        s15_c2_d: "Kutilayotgan soliq toʻlovlari va pul tanqisligi (cash gap) boʻyicha rahbarga aqlli tavsiyalar.",
+        s15_c3_t: "Tabiiy Tilda Savol-Javob",
+        s15_c3_d: "\"Bu oy sof foydamiz qancha boʻldi?\" deb soʻrang — AI hisobotni darhol chiqaradi.",
+        s16_tag: "Iqtisodiy Samara",
+        s16_title: "Oʻzbekiston Iqtisodiyoti va Xalq Farovonligiga Milliy Taʼsiri",
+        s16_f1_t: "Import Oʻrnini Bosish",
+        s16_f1_d: "Xorijiy dasturlarga ketayotgan millionlab dollar valyutani mamlakatimizda saqlab qolish.",
+        s16_f2_t: "Ish Unumdorligi",
+        s16_f2_d: "50,000+ korxonada qogʻozbozlikni yoʻqotish va operatsion tezlikni oshirish.",
+        s16_f3_t: "Shaffoflik va Soliq",
+        s16_f3_d: "Xufyona aylanmani qonuniylashtirish va davlat byudjetiga tushumlarni koʻpaytirish.",
+        s16_f4_t: "Markaziy Osiyo",
+        s16_f4_d: "Mahalliy korxonalarni qoʻshni davlatlar bozoriga integratsiya qilish.",
+        s17_tag: "Moliyaviy Model",
+        s17_title: "3 Yillik Moliyaviy Reja va SaaS Unit Economics",
+        s17_y1_d: "2,500 Faol Korxona | Sof Foyda: 32%",
+        s17_y2_d: "12,000 Faol Korxona | Sof Foyda: 48%",
+        s17_y3_d: "50,000 Faol Korxona | Sof Foyda: 56%",
+        s18_tag: "Xavfsizlik va Arxitektura",
+        s18_title: "Bank Darajasidagi Xavfsizlik va OʻRQ-547 Standarti",
+        s18_f1: "PostgreSQL & Prisma: Millionlab tranzaksiyalarga bardosh beruvchi relyatsion maʼlumotlar bazasi.",
+        s18_f2: "Multi-Tenancy: Har bir korxona uchun alohida subdomen (korxona.sapar.uz) va toʻliq maʼlumotlar izolyatsiyasi.",
+        s18_f3: "AES-256 Shifrlash: Parollar va maʼlumotlarni bank darajasida xavfsiz shifrlab saqlash.",
+        s18_f4: "Barcha maʼlumotlar Oʻzbekiston hududidagi maʼlumotlar markazida saqlanadi.",
+        s19_tag: "Tariflar va Oʻrnatish",
+        s19_title: "Hamyonbop va Moslashuvchan Biznes Modeli",
+        s19_t1_t: "Boshlangʻich Biznes",
+        s19_t1_d: "Kichik doʻkonlar va savdo korxonalari uchun.",
+        s19_t2_t: "Oʻsib Borayotgan Korxona",
+        s19_t2_d: "Oʻrta biznes, ishlab chiqarish va ulgurji savdo.",
+        s19_t3_t: "Yirik Korporatsiyalar",
+        s19_t3_d: "Yirik korxonalar va maxsus serverlar uchun.",
+        s20_tag: "Bizning Jamoa",
+        s20_title: "Kuchli va Tajribali Mutaxassislar Jamoasi",
+        s20_subtitle: "Fintech, bank tizimlari, 21-son BHMS buxgalteriyasi va bulutli arxitektura boʻyicha 10+ yillik amaliy tajribaga ega jamoa.",
+        t1_role: "Bosh Ijrochi Direktor (CEO & Founder)",
+        t1_desc: "SaaS strategiyasi, xalqaro tajriba, korporativ boshqaruv va ekotizim viziyasi.",
+        t2_name: "Bosh Texnologik Arxitektor",
+        t2_role: "Bosh Texnik Direktor (CTO & Lead Architect)",
+        t2_desc: "Yuqori yuklamali PostgreSQL, Node.js, microservices va bank darajasidagi xavfsizlik.",
+        t3_name: "Bosh Auditor & Moliyaviy Ekspert",
+        t3_role: "Bosh Moliyachi (CFO & Tax Lead)",
+        t3_desc: "21-son BHMS, Soliq kodeksi, 1/2-shakllar va milliy soliq deklaratsiyalari sertifikatlangan eksperti.",
+        t4_name: "Fintech & Bank Integratsiyasi Rahbari",
+        t4_role: "Fintech & Bank API Lead",
+        t4_desc: "Didox, E-IMZO, 1C:ClientBank va tijorat banklari skoring tizimlari boʻyicha mutaxassis.",
+        t5_name: "Sunʼiy Intellekt Muhandisi",
+        t5_role: "Head of AI & OCR Extraction",
+        t5_desc: "Cheklarni rasmga olib tanish (OCR), moliyaviy tahlil LLM modellari va algoritmik tahlil.",
+        t6_name: "Joriy Qilish & Mijozlar Xizmati",
+        t6_role: "Head of Customer Success & Support",
+        t6_desc: "500+ korxonalarda ERP joriy qilish, xodimlarni oʻqitish va 24/7 tezkor texnik yordam.",
+        s21_title: "Biznesingizni SAPAR Bilan Boshqaring!",
+        s21_subtitle: "Eskirgan va qimmat dasturlardan xalos boʻling. Yagona oynada barcha korxona jarayonlarini avtomatlashtiring.",
+        s21_btn: "Demoni Sinab Koʻrish ➔",
+        btn_prev: "Oldingi",
+        btn_next: "Keyingi",
+        grid_title: "Barcha Slaydlar Koʻrinishi"
+      },
+      en: {
+        btn_pptx: "📥 Export PPTX",
+        s1_badge: "Candidate for President Tech Award 2026",
+        s1_title: "National Enterprise Cloud ERP Driving Economic Prosperity in Uzbekistan",
+        s1_subtitle: "Unified Accounting (21-BHMS), Soliq Tax Compliance, Touch POS, FIFO Inventory, Payroll, Banking Scoring & CRM — All in One Ecosystem.",
+        s1_f1: "100% Cloud-Native: Zero installation, runs on web & mobile",
+        s1_f2: "Direct bank credit scoring for instant working capital loans",
+        s1_f3: "Direct Didox, Factura.uz & Soliq tax filing compliance",
+        s1_f4: "$8,500+ cost savings compared to legacy 1C systems",
+        s2_tag: "Macroeconomic Bottlenecks",
+        s2_title: "Key Economic Challenges Facing Uzbekistan's Enterprises",
+        s2_c1_t: "$120M+ Capital Outflow",
+        s2_c1_d: "Uzbek businesses spend millions annually in foreign currency on legacy software licenses (1C), servers, and expensive maintenance consultants.",
+        s2_c2_t: "Financing & Credit Friction",
+        s2_c2_d: "Banks struggle to issue collateral-free working capital loans because SME accounting and turnover lack transparent verification.",
+        s2_c3_t: "Disconnected Tools & Shadow Economy",
+        s2_c3_d: "POS in one app, stock in paper books, invoices on Didox, banking separate. Data fragmentation leads to profit leakage and unverified books.",
+        s3_tag: "National Mission",
+        s3_title: "The SAPAR Mission: Building Economic Wealth for Businesses",
+        s3_c1_t: "Margin Expansion (+25%)",
+        s3_c1_d: "Strict FIFO cost valuation, zero shrinkage, and sales pipeline optimization directly boost net enterprise profits by up to 25%.",
+        s3_c2_t: "5x Lower Operational Cost",
+        s3_c2_d: "Eliminating on-premise servers and monthly 1C developer retainers saves millions of sums each month.",
+        s3_c3_t: "Instant Bank Financing",
+        s3_c3_d: "Verified ledger statements allow partner banks to underwrite and disburse business loans in under 24 hours.",
+        s4_tag: "Market Comparison",
+        s4_title: "Why SAPAR ERP Outperforms Legacy Alternatives",
+        s5_tag: "Cost Breakdown",
+        s5_title: "5-Year Total Cost of Ownership: Save $8,500+ vs 1C",
+        s6_tag: "Banking Partnerships",
+        s6_title: "Banking Integrations & Instant SME Credit Underwriting",
+        s6_c1_t: "Financial Scoring API",
+        s6_c1_d: "Enables partner banks (Ipak Yoʻli, Kapitalbank, SQB, Agrobank) to extend working capital credit lines based on verified cash flows.",
+        s6_c2_t: "Automated 1C:ClientBank",
+        s6_c2_d: "Automatic multi-bank statement synchronization and ledger account reconciliation in seconds.",
+        s6_c3_t: "Payme, Click & Uzum Pay",
+        s6_c3_d: "Instant QR checkout accepting payments directly into corporate bank accounts.",
+        s7_tag: "Design & UX",
+        s7_title: "Two-Tier Velocity Navigation vs Existing Products",
+        s7_desc: "Unlike existing products with 80+ cluttered menu items, SAPAR is engineered for maximum speed, focus, and instant switching.",
+        s8_tag: "Accounting & Ledger",
+        s8_title: "National 21-BHMS Accounting Standards",
+        s8_c1_t: "Chart of Accounts & Journals",
+        s8_c1_d: "Pre-configured national chart of accounts (0100–9900). Every transaction automatically posts to the double-entry general ledger.",
+        s8_c2_t: "Form 1, Form 2 & Oborotka",
+        s8_c2_d: "Instant generation of official Balance Sheet (Form 1), Profit & Loss Statement (Form 2 / P&L), and Trial Balance (Oborotka).",
+        s8_c3_t: "Contras & Multi-Currency",
+        s8_c3_d: "Inter-company receivable/payable mutual settlements (Contras), automated FX revaluation for UZS, USD, EUR, RUB.",
+        s9_tag: "Tax & Digital Signature",
+        s9_title: "E-IMZO, Didox & State Tax Committee Integration",
+        s9_f1_t: "Native E-IMZO Signing",
+        s9_f1_d: "Direct PKCS#7 digital signature from USB e-tokens or .pfx files without third-party popups.",
+        s9_f2_t: "Didox & Factura.uz",
+        s9_f2_d: "1-click e-invoice dispatch, status synchronization, and automatic inbound invoice parsing.",
+        s9_f3_t: "MXIK / IKPU Integration",
+        s9_f3_d: "Native auto-mapping of national product catalog classification codes and barcodes.",
+        s9_f4_t: "1-Click Tax Declarations",
+        s9_f4_d: "Automated VAT (Form 10006_29), JShODS Payroll (11101_14), and Turnover Tax (10104_18) returns.",
+        s10_tag: "Sales Workflow",
+        s10_title: "Sales Invoices, Quotations & Delivery Challans (TTN)",
+        s10_c1_t: "Commercial Proposals (KP)",
+        s10_c1_d: "Professional PDF quotations with 1-click automatic conversion to final sales invoices upon client acceptance.",
+        s10_c2_t: "Delivery Challans (TTN)",
+        s10_c2_d: "Official waybill documentation recording driver details, transport vehicles, and signed dispatch confirmations.",
+        s10_c3_t: "Public Links & QR Codes",
+        s10_c3_d: "Share live invoice links with clients over Telegram for instant online verification and payments.",
+        s11_tag: "Warehouse & Inventory",
+        s11_title: "Multi-Warehouse Management & FIFO Cost Layers",
+        s11_f1_t: "Strict FIFO COGS",
+        s11_f1_d: "Accurate cost-of-goods-sold layering for true gross margin and profitability analysis.",
+        s11_f2_t: "Multi-Branch Stock",
+        s11_f2_d: "Real-time stock balances across warehouses, regional branches, and retail shelves.",
+        s11_f3_t: "Stock Transfers",
+        s11_f3_d: "Two-step inter-warehouse transfer requests, transit tracking, and received confirmations.",
+        s11_f4_t: "Audits & Adjustments",
+        s11_f4_d: "Digital stock counting, surplus intake, and damaged goods write-off reconciliation.",
+        s12_tag: "Retail Point of Sale",
+        s12_title: "Touch POS Terminal & Cashier Shift Operations",
+        s12_c1_t: "High-Speed Touch UI",
+        s12_c1_d: "Optimized touch cashier interface with sub-second product lookups and barcode scanning.",
+        s12_c2_t: "Split Multi-Payments",
+        s12_c2_d: "Accept split payments: Cash + Uzcard/Humo + Payme/Click + Store Credit in a single transaction.",
+        s12_c3_t: "Shift Cycles & X/Z Reports",
+        s12_c3_d: "Opening cash drawer floats, mid-shift payouts, and automated end-of-day X/Z fiscal summaries.",
+        s13_tag: "HRM & Workforce",
+        s13_title: "Tabel Attendance & Uzbekistan Payroll Engine",
+        s13_c1_t: "Work Attendance Matrix (Tabel)",
+        s13_c1_d: "Automated work hours, overtime, weekend shifts, and tardiness tracking for legal compliance.",
+        s13_c2_t: "12% + 12% + 0.1% Payroll Taxes",
+        s13_c2_d: "Automated deduction of Personal Income Tax (12%), Social Tax (12% / IT Park 1%), and INPS (0.1%).",
+        s13_c3_t: "Leave & Compensation",
+        s13_c3_d: "Paid vacation accruals, sick leave tracking, and automated severance/compensation payouts.",
+        s14_tag: "CRM & Growth",
+        s14_title: "Visual Deals Pipeline & 360° Customer Ledger",
+        s14_c1_t: "Kanban Sales Pipeline",
+        s14_c1_d: "Leads ➔ Discovery ➔ Proposal ➔ Contract ➔ Paid. Visual drag-and-drop pipeline to maximize deal velocity.",
+        s14_c2_t: "360° Customer 360°",
+        s14_c2_d: "Consolidated view of customer open balances, invoices, payment history, and communication logs.",
+        s14_c3_t: "Telegram & WhatsApp Alerts",
+        s14_c3_d: "Automated invoice dispatch and overdue payment reminder triggers directly to customer phones.",
+        s15_tag: "Artificial Intelligence",
+        s15_title: "SAPAR AI Co-Pilot — Intelligent Business Assistant",
+        s15_c1_t: "Document OCR Extraction",
+        s15_c1_d: "Upload paper receipts and invoices — AI extracts line items and generates expense entries automatically.",
+        s15_c2_t: "Financial Predictive Advice",
+        s15_c2_d: "Proactive cash gap warnings, tax liability projections, and debtor collection recommendations.",
+        s15_c3_t: "Natural Language Queries",
+        s15_c3_d: "Ask \"What is our net margin this month?\" and receive real-time calculated business intelligence.",
+        s16_tag: "Economic Impact",
+        s16_title: "Macroeconomic Impact on Uzbekistan's Economy & Prosperity",
+        s16_f1_t: "Import Substitution",
+        s16_f1_d: "Replacing foreign software license outflows ($120M+) with a homegrown national ERP platform.",
+        s16_f2_t: "Productivity Growth (+35%)",
+        s16_f2_d: "Boosting operational throughput and eliminating paper bureaucracy across 50,000+ businesses.",
+        s16_f3_t: "100% Tax Transparency",
+        s16_f3_d: "Transitioning shadow commerce into verifiable formal transactions for budget expansion.",
+        s16_f4_t: "Regional Exports",
+        s16_f4_d: "Empowering Uzbek companies with standardized multi-currency trade across Central Asia.",
+        s17_tag: "Financial Model",
+        s17_title: "3-Year Financial Model & SaaS Unit Economics",
+        s17_y1_d: "2,500 Active Enterprises | ARR: $750,000 | Net: 32%",
+        s17_y2_d: "12,000 Active Enterprises | ARR: $3,600,000 | Net: 48%",
+        s17_y3_d: "50,000 Active Enterprises | ARR: $15,000,000 | Net: 56%",
+        s18_tag: "Security & Architecture",
+        s18_title: "Bank-Grade Security & Law No. ZRU-547 Compliance",
+        s18_f1: "PostgreSQL & Prisma: High-throughput relational data engine built for millions of transactions.",
+        s18_f2: "Multi-Tenancy: Isolated subdomains (company.sapar.uz) with strict data separation.",
+        s18_f3: "AES-256 Encryption: Bank-grade encryption for passwords, keys, and confidential enterprise data.",
+        s18_f4: "Uzbekistan ZRU-547: 100% data residency compliance with servers located inside Uzbekistan.",
+        s19_tag: "Pricing & Deployment",
+        s19_title: "Flexible & Transparent Business Model",
+        s19_t1_t: "Startup Tier",
+        s19_t1_d: "For small retail stores and early-stage trade companies ($15/mo).",
+        s19_t2_t: "Business Tier",
+        s19_t2_d: "For growing SME, manufacturing, and wholesale distributors ($35/mo).",
+        s19_t3_t: "Enterprise Tier",
+        s19_t3_d: "For large enterprise corporations requiring custom infrastructure ($80/mo).",
+        s20_tag: "Our Team",
+        s20_title: "World-Class Leadership & Engineering Team",
+        s20_subtitle: "Proven track record in enterprise cloud systems, fintech integrations, and national accounting compliance.",
+        t1_role: "Chief Executive Officer (CEO & Founder)",
+        t1_desc: "SaaS strategy, international tech leadership, corporate governance, and vision.",
+        t2_name: "Chief Technology Architect",
+        t2_role: "Chief Technology Officer (CTO & Lead Architect)",
+        t2_desc: "High-throughput PostgreSQL, Node.js, microservices, and bank-grade system security.",
+        t3_name: "Chief Auditor & Tax Expert",
+        t3_role: "Chief Financial Officer (CFO & Tax Lead)",
+        t3_desc: "Certified national auditor in 21-BHMS, Tax Code, Form 1/2 reporting, and statutory filings.",
+        t4_name: "Fintech & Banking API Lead",
+        t4_role: "Head of Fintech & Banking Integrations",
+        t4_desc: "Didox, E-IMZO, 1C:ClientBank, and commercial banking scoring API architect.",
+        t5_name: "AI & Machine Learning Engineer",
+        t5_role: "Head of AI & OCR Extraction",
+        t5_desc: "Receipt image OCR intake, financial forecasting LLMs, and algorithmic business analytics.",
+        t6_name: "Customer Success & Implementation",
+        t6_role: "Head of Customer Success & Support",
+        t6_desc: "500+ ERP corporate rollouts, employee training programs, and 24/7 dedicated support.",
+        s21_title: "Take Your Business to the Next Level with SAPAR!",
+        s21_subtitle: "Ditch legacy desktop software. Unify your entire enterprise operations in a single modern window.",
+        s21_btn: "Launch Live Demo ➔",
+        btn_prev: "Previous",
+        btn_next: "Next",
+        grid_title: "All Slides Overview"
+      }
+    };
+
+    const SPEAKER_NOTES = {
+      uz: {
+        1: "SAPAR ERP — Oʻzbekiston biznesi uchun eskirgan 1C tizimini toʻliq almashtirishga qaratilgan milliy platforma. President Tech Award 2026 nomzodi.",
+        2: "Oʻzbekistondagi makroiqtisodiy muammolar: $120M+ valyutaning xorijga ketishi, 1C ning qimmatligi va banklar tadbirkorga shaffof hisobot yoʻqligi sababli kredit berolmasligi.",
+        3: "Bizning milliy missiyamiz: korxona daromadlarini 25% gacha oshirish, operatsion xarajatlarni 5 barobar qisqartirish va 1 kunda garovsiz bank krediti olishga yordam berish.",
+        4: "SAPAR ning 1C, Poster va Odoo ga nisbatan chuqur solishtirma tahlili.",
+        5: "5 yillik egalik qilish qiymati (TCO) tahlili: 1C ga ketadigan $9,700+ oʻrniga $1,500 sarflanadi va $8,200+ sof mablagʻ tejaladi.",
+        6: "Banklar bilan integratsiya: Ipak Yoʻli, Kapitalbank, SQB, Agrobank bilan moliyaviy skoring va 1C:ClientBank avto-importi.",
+        7: "Mavjud boshqa mahsulotlardan farqli oʻlaroq, tizimda zamonaviy 2 bosqichli navigatsiya va qulay foydalanuvchi tajribasi yaratilgan.",
+        8: "21-son BHMS schotlar rejasi (0100-9900), 1-shakl Balans, 2-shakl P&L va Oborotka.",
+        9: "E-IMZO orqali brauzerdan chiqmasdan imzolash, Didox va Soliq API orqali QQS 12% hisobotlarini avtomatlashtirish.",
+        10: "Tijorat takliflari, hisob-fakturalar, TTN yuk xatlari va ommaviy QR-kodli havolalar.",
+        11: "Omborlararo koʻchirish, FIFO tannarx qatlamlari va inventarizatsiya.",
+        12: "Chakana savdo uchun tezkor touch POS terminali, aralash toʻlovlar va X/Z hisobotlar.",
+        13: "Tabel vaqt hisobi, JShODS 12%, Ijtimoiy soliq 12%, INPS 0.1% avtomatik ish haqi hisobi.",
+        14: "Kanban bitimlar quvuri, mijozlar 360° kartasi va Telegram/WhatsApp xabarnomalari.",
+        15: "AI Co-Pilot: xarid cheklarini rasmga olib xarajatga aylantirish va tabiiy tilda tahliliy hisobot soʻrash.",
+        16: "Oʻzbekiston iqtisodiyotiga taʼsiri: $120M+ import oʻrnini bosish, shaffof soliq tushumlari va ish unumdorligini 35% oshirish.",
+        17: "3 yillik moliyaviy reja: 2028-yilga borib 50,000 korxona va $15M ARR daromad.",
+        18: "PostgreSQL, Prisma, subdomenlar, AES-256 shifrlash va Oʻzbekiston OʻRQ-547 qonuniga muvofiqlik.",
+        19: "SaaS obuna tariflari ($15, $35, $80) va On-Premises korporativ oʻrnatish.",
+        20: "Jamoamiz: dasturchilar, buxgalteriya auditorlari, bank integratsiyasi va sunʼiy intellekt boʻyicha yuqori malakali mutaxassislar.",
+        21: "Xulosa, demo hisobga kirish va rasmiy aloqa rekvizitlari."
+      },
+      en: {
+        1: "Welcome to SAPAR ERP — National Cloud ERP Platform engineered specifically for Uzbekistan & Central Asia. Candidate for President Tech Award 2026.",
+        2: "Macroeconomic challenges in Uzbekistan: $120M+ software import outflows, legacy 1C bottlenecks, and credit underwriting friction.",
+        3: "Our national mission: boosting SME margins by 25%, cutting IT costs by 5x, and unlocking instant bank credit lines.",
+        4: "Detailed competitive matrix comparing SAPAR against 1C, Poster POS, Odoo, and Microsoft Dynamics.",
+        5: "5-year TCO financial analysis showing over $8,500 net cash savings per enterprise compared to legacy 1C.",
+        6: "Banking partnerships: direct financial scoring API for instant credit underwriting and 1C:ClientBank statement synchronization.",
+        7: "Unlike existing products on the market, our two-tier navigation provides instant department switching and maximum focus.",
+        8: "National 21-BHMS chart of accounts, automated Form 1 Balance Sheet, Form 2 P&L, and Trial Balance (Oborotka).",
+        9: "Native browser E-IMZO PKCS#7 signing, Didox/Factura.uz EDI connectors, and automated tax returns (QQS 12%).",
+        10: "Full commercial cycle: quotations, QR-verified invoices, TTN waybills, and shareable public links.",
+        11: "Real-time multi-warehouse control, strict FIFO cost layering, and digital stock audit reconciliation.",
+        12: "High-speed touch POS terminal for retail cashiers, split payments, and automated X/Z fiscal reports.",
+        13: "Work hours tabel matrix, automated payroll tax deduction (12% JShODS, 12% Social, 0.1% INPS).",
+        14: "Visual Kanban deals pipeline, 360° customer ledger, and automated WhatsApp/Telegram alerts.",
+        15: "AI Co-Pilot: receipt OCR extraction, financial predictive warnings, and natural language analytics.",
+        16: "Macroeconomic impact: $120M+ software import substitution, 35% productivity boost, and Central Asian export growth.",
+        17: "3-year financial model: scaling to 50,000 active businesses and $15M ARR by 2028 with 21x LTV/CAC.",
+        18: "PostgreSQL, Prisma, isolated subdomains, AES-256 encryption, and full compliance with Uzbekistan Law No. ZRU-547.",
+        19: "SaaS cloud subscription tiers ($15, $35, $80/mo) and on-premise dedicated enterprise licensing.",
+        20: "Our leadership and engineering team: certified enterprise software engineers, certified public accountants, fintech integrators, and AI researchers.",
+        21: "Summary, live demo access credentials, and contact information."
+      }
+    };
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      const pct = ((currentSlide) / TOTAL_SLIDES) * 100;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('slideCounter').textContent = `${String(currentSlide).padStart(2, '0')} / ${TOTAL_SLIDES}`;
+
+      const notes = SPEAKER_NOTES[currentLang][currentSlide] || '';
+      document.getElementById('notesContent').textContent = notes;
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = Math.max(1, Math.min(TOTAL_SLIDES, n));
+      updateSlide();
+      const modal = document.getElementById('gridModal');
+      if (!modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'uz' ? 'en' : 'uz';
+      document.getElementById('langLabel').textContent = currentLang === 'uz' ? "🇺🇿 Oʻzbekcha" : "🇬🇧 English";
+      
+      const dict = TRANSLATIONS[currentLang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      updateSlide();
+      buildGrid();
+    }
+
+    function toggleGridModal() {
+      const modal = document.getElementById('gridModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+      if (!modal.classList.contains('hidden')) {
+        buildGrid();
+      }
+    }
+
+    function toggleNotesDrawer() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.classList.toggle('hidden');
+      drawer.classList.toggle('flex');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function buildGrid() {
+      const container = document.getElementById('gridContainer');
+      container.innerHTML = '';
+      const slideTitles = {
+        uz: [
+          "1. Asosiy Muqova", "2. Makro Muammolar", "3. Milliy Missiya", "4. Raqobat Tahlili",
+          "5. 5 Yillik Xarajat TCO", "6. Bank Integratsiyasi", "7. 2-Bosqichli Navigatsiya",
+          "8. 21-BHMS Buxgalteriya", "9. Soliq va E-IMZO", "10. Savdo va TTN",
+          "11. Ombor va FIFO", "12. Touch POS Kassa", "13. HRM va Oylik Ish Haqi",
+          "14. CRM Bitimlar Quvuri", "15. SAPAR AI Co-Pilot", "16. Iqtisodiy Samara",
+          "17. 3 Yillik Moliyaviy Reja", "18. Xavfsizlik va OʻRQ-547", "19. Tariflar va Narxlar", 
+          "20. Bizning Jamoamiz", "21. Xulosa va Aloqa"
+        ],
+        en: [
+          "1. Cover & Vision", "2. Macro Challenges", "3. National Mission", "4. Competitor Matrix",
+          "5. 5-Year TCO Breakdown", "6. Banking Integration", "7. Two-Tier Navigation",
+          "8. 21-BHMS Accounting", "9. Soliq, EDI & E-IMZO", "10. Sales, Invoices & TTN",
+          "11. Stock & FIFO", "12. Touch POS Terminal", "13. HRM & Payroll",
+          "14. CRM Deals Pipeline", "15. SAPAR AI Co-Pilot", "16. Macroeconomic Impact",
+          "17. 3-Year Financial Model", "18. Security & ZRU-547", "19. Pricing Plans", 
+          "20. Leadership & Team", "21. Conclusion & Contact"
+        ]
+      };
+
+      for (let i = 1; i <= TOTAL_SLIDES; i++) {
+        const btn = document.createElement('button');
+        const isActive = i === currentSlide;
+        btn.className = `p-3 rounded-2xl border text-left transition flex flex-col justify-between h-24 cursor-pointer ${
+          isActive 
+            ? 'bg-teal-700 text-white border-teal-400 font-bold shadow-lg ring-2 ring-teal-300' 
+            : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800'
+        }`;
+        btn.onclick = () => goToSlide(i);
+        btn.innerHTML = `
+          <span class="text-xs font-mono font-black ${isActive ? 'text-teal-200' : 'text-teal-400'}">SLIDE ${String(i).padStart(2, '0')}</span>
+          <span class="text-[11px] font-semibold truncate leading-tight">${slideTitles[currentLang][i - 1]}</span>
+        `;
+        container.appendChild(btn);
+      }
+    }
+
+    function exportToPPTX() {
+      try {
+        if (typeof PptxGenJS === 'undefined') {
+          // Fallback to pre-generated PPTX if CDN isn't loaded
+          window.location.href = '/SAPAR_ERP_Enterprise_Presentation_2026.pptx';
+          return;
+        }
+
+        const pptx = new PptxGenJS();
+        pptx.layout = 'LAYOUT_16x9';
+        pptx.author = 'SAPAR ERP Team';
+        pptx.company = 'SAPAR ERP Uzbekistan';
+        pptx.title = 'SAPAR ERP — Milliy Korporativ Taqdimot';
+
+        const isUz = currentLang === 'uz';
+
+        const C_DARK = '071F24';
+        const C_CARD = '0B2B33';
+        const C_TEAL = '028090';
+        const C_MINT = '02C39A';
+        const C_CYAN = '38BDF8';
+        const C_WHITE = 'FFFFFF';
+        const C_SLATE = 'CBD5E1';
+        const C_ROSE = 'F43F5E';
+        const C_AMBER = 'FBBF24';
+
+        function createSlideHeader(s, tag, title, tagColor = C_MINT) {
+          s.background = { color: C_DARK };
+          s.addText(tag.toUpperCase(), { x: 0.8, y: 0.5, fontSize: 11, bold: true, color: tagColor });
+          s.addText(title, { x: 0.8, y: 0.85, fontSize: 22, bold: true, color: C_WHITE, w: 11.5 });
+        }
+
+        function createCard(s, x, y, w, h, title, desc, titleColor = C_MINT) {
+          s.addShape(pptx.ShapeType.roundRect, {
+            x: x, y: y, w: w, h: h,
+            fill: { color: C_CARD },
+            line: { color: C_TEAL, width: 1 },
+            rectRadius: 0.15
+          });
+          s.addText(title, { x: x + 0.15, y: y + 0.15, w: w - 0.3, fontSize: 14, bold: true, color: titleColor });
+          s.addText(desc, { x: x + 0.15, y: y + 0.6, w: w - 0.3, fontSize: 11, color: C_SLATE, lineSpacing: 16 });
+        }
+
+        // ==========================================
+        // SLIDE 1: Cover & National Vision
+        // ==========================================
+        let s1 = pptx.addSlide();
+        s1.background = { color: C_DARK };
+        s1.addText("★ PRESIDENT TECH AWARD 2026 NOMZODI", { x: 0.8, y: 0.8, fontSize: 12, bold: true, color: C_MINT });
+        s1.addText("SAPAR ERP", { x: 0.8, y: 1.3, fontSize: 44, bold: true, color: C_WHITE });
+        s1.addText(isUz ? "Oʻzbekiston Biznesini Boyitish va Milliy Iqtisodiyotni Yuksaltirish Uchun Yagona Bulutli ERP" : "National Enterprise Cloud ERP Driving Economic Prosperity in Uzbekistan", { x: 0.8, y: 2.2, fontSize: 20, bold: true, color: C_CYAN, w: 11.5 });
+        s1.addText(isUz ? "Buxgalteriya hisobi (21-BHMS), Soliq integratsiyasi, FIFO ombor, Savdo va TTN, Sensorli POS Kassa, HRM & Ish haqi, Bank skoringi va CRM — Barchasi Yagona Ekotizimda." : "Unified Accounting (21-BHMS), Soliq Tax, Touch POS, FIFO Inventory, Payroll, Banking Scoring & CRM — All in One Ecosystem.", { x: 0.8, y: 3.1, fontSize: 13, color: C_SLATE, w: 11.5 });
+        createCard(s1, 0.8, 4.3, 2.7, 2.4, "100% Bulutli", isUz ? "Oʻrnatish talab etilmaydi, barcha qurilmalardan ishlaydi." : "Zero installation, runs in any browser and mobile.");
+        createCard(s1, 3.7, 4.3, 2.7, 2.4, "Bank Skoringi", isUz ? "Banklardan 1 kunda garovsiz aylanma mablagʻ krediti." : "Direct bank credit underwriting in 24 hours.");
+        createCard(s1, 6.6, 4.3, 2.7, 2.4, "E-IMZO & Soliq", isUz ? "Didox, Factura.uz va Soliq deklaratsiyalari integratsiyasi." : "Full Soliq, Didox & E-IMZO PKCS#7 compliance.");
+        createCard(s1, 9.5, 4.3, 2.7, 2.4, "5x Hamyonbop", isUz ? "1C ga nisbatan $8,500+ mablagʻni tejash imkoniyati." : "$8,500+ cost savings compared to legacy 1C.");
+
+        // ==========================================
+        // SLIDE 2: Macroeconomic Challenges
+        // ==========================================
+        let s2 = pptx.addSlide();
+        createSlideHeader(s2, isUz ? "Makroiqtisodiy Muammolar" : "Macroeconomic Bottlenecks", isUz ? "Oʻzbekiston Biznesi va Milliy Iqtisodiyotning Asosiy Toʻsiqlari" : "Key Economic Challenges Facing Uzbekistan's Enterprises", C_ROSE);
+        createCard(s2, 0.8, 1.8, 3.6, 5.0, isUz ? "$120M+ Valyuta Ketishi" : "$120M+ Capital Outflow", isUz ? "Oʻzbekiston korxonalari har yili xorijiy eskirgan dasturlarga (1C litsenziyalari, serverlar, qimmat maslahatchilar) millionlab dollar xorijiy valyuta sarflamoqda." : "Enterprises spend millions annually in foreign currency on legacy licenses, on-premise hardware, and consultants.", C_ROSE);
+        createCard(s2, 4.8, 1.8, 3.6, 5.0, isUz ? "Kredit Olishdagi Qiyinchiliklar" : "Financing & Credit Friction", isUz ? "Kichik biznesning buxgalteriyasi va real aylanmasi shaffof koʻrinmagani sababli, banklar ularga tezkor va garovsiz aylanma mablagʻ kreditlarini bera olmaydi." : "Banks struggle to issue collateral-free working capital loans because SME books lack verified transparency.", C_AMBER);
+        createCard(s2, 8.8, 1.8, 3.6, 5.0, isUz ? "Tarqoq Dasturlar & Xufyona" : "Disconnected Tools & Shadow", isUz ? "POS kassa alohida, ombor daftarda, fakturalar Didoxda, hisoblar bankda. Maʼlumotlar tarqoqligi korxonaning daromad yoʻqotishiga sabab boʻlmoqda." : "POS separate, inventory in paper, invoices in Didox, banking offline. Fragmentation causes major profit leakage.", C_CYAN);
+
+        // ==========================================
+        // SLIDE 3: National Mission
+        // ==========================================
+        let s3 = pptx.addSlide();
+        createSlideHeader(s3, isUz ? "Milliy Missiya" : "National Mission", isUz ? "Bizning Maqsadimiz: Bizneslarni Kuchli va Boy Qilish" : "The SAPAR Mission: Building Economic Wealth for Businesses", C_MINT);
+        createCard(s3, 0.8, 1.8, 3.6, 5.0, isUz ? "+25% Sof Daromad Oʻsishi" : "Margin Expansion (+25%)", isUz ? "FIFO tannarxini aniq hisoblash, tovar kamomadini yoʻqotish va savdo quvuri orqali korxona sof rentabelligi 25% gacha oshadi." : "Strict FIFO cost valuation, zero shrinkage, and sales pipeline optimization directly boost net enterprise profits.", C_MINT);
+        createCard(s3, 4.8, 1.8, 3.6, 5.0, isUz ? "5x Xarajatlarni Qisqartirish" : "5x Lower Operational Cost", isUz ? "Qimmat jismoniy serverlar, doimiy 1C dasturchilari va texnik xizmat koʻrsatish xarajatlari toʻliq tejaladi." : "Eliminating on-premise servers and monthly 1C developer retainers saves millions each month.", C_CYAN);
+        createCard(s3, 8.8, 1.8, 3.6, 5.0, isUz ? "1 Kunda Bank Krediti" : "Instant Bank Financing", isUz ? "SAPAR dagi tasdiqlangan moliyaviy hisobotlar orqali banklar tadbirkorga 1 kunda garovsiz va qulay foizli aylanma mablagʻ kreditlarini ajratadi." : "Verified ledger statements allow partner banks to underwrite and disburse business loans in under 24 hours.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 4: Competitor Matrix Table
+        // ==========================================
+        let s4 = pptx.addSlide();
+        createSlideHeader(s4, isUz ? "Raqobat Tahlili" : "Market Comparison", isUz ? "Nima Uchun SAPAR ERP Bozor Yechimlaridan Ustun?" : "Why SAPAR ERP Outperforms Legacy Alternatives", C_MINT);
+        const tableRows = [
+          [
+            { text: isUz ? "Xususiyat" : "Feature", options: { bold: true, fill: C_TEAL, color: C_WHITE } },
+            { text: "🚀 SAPAR ERP", options: { bold: true, fill: C_MINT, color: C_DARK } },
+            { text: "🏛️ 1C:Enterprise", options: { bold: true, fill: C_TEAL, color: C_WHITE } },
+            { text: "🛒 Poster POS", options: { bold: true, fill: C_TEAL, color: C_WHITE } },
+            { text: "🌍 Odoo / Microsoft", options: { bold: true, fill: C_TEAL, color: C_WHITE } }
+          ],
+          [
+            { text: isUz ? "100% Bulutli & Mobil" : "100% Cloud-Native", options: { fill: C_CARD, color: C_WHITE } },
+            { text: isUz ? "✅ Oʻrnatish shart emas" : "✅ Zero install", options: { fill: C_CARD, color: C_MINT, bold: true } },
+            { text: isUz ? "❌ Server va oʻrnatish" : "❌ On-premise only", options: { fill: C_CARD, color: C_ROSE } },
+            { text: isUz ? "⚠️ Faqat POS" : "⚠️ POS only", options: { fill: C_CARD, color: C_AMBER } },
+            { text: "✅ Bulutli", options: { fill: C_CARD, color: C_MINT } }
+          ],
+          [
+            { text: isUz ? "21-son BHMS & 1/2-Shakl" : "21-BHMS & Balance", options: { fill: C_CARD, color: C_WHITE } },
+            { text: isUz ? "✅ Nativ oʻrnatilgan" : "✅ Native built-in", options: { fill: C_CARD, color: C_MINT, bold: true } },
+            { text: isUz ? "✅ Mavjud" : "✅ Available", options: { fill: C_CARD, color: C_MINT } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } },
+            { text: isUz ? "❌ Maxsus sozlash kerak" : "❌ Custom coding needed", options: { fill: C_CARD, color: C_ROSE } }
+          ],
+          [
+            { text: isUz ? "E-IMZO & Soliq API" : "E-IMZO & Soliq Tax", options: { fill: C_CARD, color: C_WHITE } },
+            { text: isUz ? "✅ Toʻgʻridan-toʻgʻri" : "✅ Native direct API", options: { fill: C_CARD, color: C_MINT, bold: true } },
+            { text: isUz ? "⚠️ Qimmat modul" : "⚠️ Expensive add-on", options: { fill: C_CARD, color: C_AMBER } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } }
+          ],
+          [
+            { text: isUz ? "Bank Skoringi API" : "Bank Credit Scoring", options: { fill: C_CARD, color: C_WHITE } },
+            { text: isUz ? "✅ Oʻrnatilgan skoring" : "✅ Integrated scoring", options: { fill: C_CARD, color: C_MINT, bold: true } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } },
+            { text: isUz ? "❌ Yoʻq" : "❌ None", options: { fill: C_CARD, color: C_ROSE } }
+          ],
+          [
+            { text: isUz ? "5 Yillik Xarajat (TCO)" : "5-Year TCO Cost", options: { fill: C_CARD, color: C_WHITE, bold: true } },
+            { text: "💰 $1,200 – $1,800", options: { fill: C_CARD, color: C_MINT, bold: true } },
+            { text: "💸 $9,700+", options: { fill: C_CARD, color: C_ROSE, bold: true } },
+            { text: "💰 $3,500+", options: { fill: C_CARD, color: C_AMBER } },
+            { text: "💸 $20,000+", options: { fill: C_CARD, color: C_ROSE } }
+          ]
+        ];
+        s4.addTable(tableRows, { x: 0.8, y: 1.8, w: 11.7, h: 4.8, fontSize: 11 });
+
+        // ==========================================
+        // SLIDE 5: 5-Year TCO Breakdown
+        // ==========================================
+        let s5 = pptx.addSlide();
+        createSlideHeader(s5, isUz ? "Xarajatlar Tahlili" : "Cost Breakdown", isUz ? "5 Yillik Egalik Qilish Xarajati: 1C ga Nisbatan $8,500+ Tejash" : "5-Year Total Cost of Ownership: Save $8,500+ vs 1C", C_MINT);
+        createCard(s5, 0.8, 1.8, 5.6, 5.0, isUz ? "🏛️ 1C:Enterprise (5 Yillik Xarajat)" : "🏛️ 1C:Enterprise (5-Year TCO)", isUz ? "• Dastlabki litsenziyalar va konfiguratsiyalar: $1,200\n• Jismoniy server va UPS xaridi: $1,500\n• Oylik 1C mutaxassisi xizmati ($100/oy x 60 oy): $6,000\n• Yillik yangilanishlar va qonunchilik moslashuvi: $1,000\n\nJAMI 5 YILLIK XARAJAT: $9,700+" : "• Base licenses & initial configuration: $1,200\n• Dedicated on-premise server & UPS: $1,500\n• Monthly 1C developer retainer ($100/mo x 60 mo): $6,000\n• Annual regulatory updates & compliance: $1,000\n\nTOTAL 5-YEAR TCO: $9,700+", C_ROSE);
+        createCard(s5, 6.8, 1.8, 5.6, 5.0, isUz ? "🚀 SAPAR Cloud ERP (5 Yillik Xarajat)" : "🚀 SAPAR Cloud ERP (5-Year TCO)", isUz ? "• Server va bulut infratuzilmasi: $0 (Kiritilgan)\n• Dasturchi yollash va texnik xizmat: $0 (Avtomatik yangilanadi)\n• 5 Yillik toʻliq SaaS obuna paketi: $1,500\n• 24/7 Doimiy texnik qoʻllab-quvvatlash: Kiritilgan\n\nHAR BIR BIZNESGA SOF TEJAMKORLIK: +$8,200 TEJALDI!" : "• Cloud hosting & automated backups: $0 (Included)\n• Developer retainers & patches: $0 (Auto-updated)\n• 5-Year full SaaS cloud subscription: $1,500\n• 24/7 Dedicated expert support: Included\n\nNET SAVINGS PER ENTERPRISE: +$8,200 CASH SAVED!", C_MINT);
+
+        // ==========================================
+        // SLIDE 6: Banking Partnerships
+        // ==========================================
+        let s6 = pptx.addSlide();
+        createSlideHeader(s6, isUz ? "Banklar Bilan Hamkorlik" : "Banking Partnerships", isUz ? "Bank Integratsiyasi va Tadbirkorlarga Tezkor Garovsiz Kredit" : "Banking Integrations & Instant SME Credit Underwriting", C_CYAN);
+        createCard(s6, 0.8, 1.8, 3.6, 5.0, isUz ? "Moliyaviy Skoring Dvigateli" : "Financial Scoring Engine", isUz ? "Hamkor banklar (Ipak Yoʻli, Kapitalbank, SQB, Agrobank) SAPAR dagi shaffof savdo aylanmasi asosida tadbirkorga 1 kunda kredit liniyalarini ajratadi." : "Enables partner banks (Ipak Yoʻli, Kapitalbank, SQB, Agrobank) to extend working capital credit lines based on verified cash flows.", C_CYAN);
+        createCard(s6, 4.8, 1.8, 3.6, 5.0, isUz ? "1C:ClientBank Avto-Sinxronizatsiya" : "Automated 1C:ClientBank", isUz ? "Oʻzbekistonning barcha banklaridan koʻchirmalar (vipiska) 1 soniyada yuklanadi va buxgalteriya schotlari bilan avtomatik solishtiriladi." : "Automatic multi-bank statement synchronization and ledger account reconciliation in seconds.", C_MINT);
+        createCard(s6, 8.8, 1.8, 3.6, 5.0, isUz ? "Payme, Click va Uzum Pay" : "Payme, Click & Uzum Pay", isUz ? "Mijozlardan QR-kod orqali toʻlovlarni toʻgʻridan-toʻgʻri korxona hisob-raqamiga qabul qilish va darhol buxgalteriyada aks ettirish." : "Instant QR checkout accepting payments directly into corporate bank accounts.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 7: Navigation vs Existing Products
+        // ==========================================
+        let s7 = pptx.addSlide();
+        createSlideHeader(s7, isUz ? "Dizayn va UX" : "Design & UX", isUz ? "Mavjud Mahsulotlarga Nisbatan 2-Bosqichli Tezkor Navigatsiya" : "Two-Tier Velocity Navigation vs Existing Products", C_MINT);
+        createCard(s7, 0.8, 1.8, 5.6, 5.0, isUz ? "Fokuslangan 2-Bosqichli Struktura" : "Focused 2-Tier Hierarchy", isUz ? "• 1-Bosqich (72px Rail): 13 ta asosiy boʻlim boʻyicha 1 bosishda oʻtish.\n• 2-Bosqich (256px Panel): Tezkor qidiruv, + Yangi... tugmalari va filtrlar.\n• 1-Bosishda Mahkamlash (Pin): Katta moliyaviy jadvallar uchun 100% keng ekran.\n\nMavjud eskirgan mahsulotlarning 80+ chalkash menyusidan xalos boʻling." : "• Tier 1 (72px Rail): Instant 1-click access across 13 core modules.\n• Tier 2 (256px Drawer): Contextual actions, search, and deep filters.\n• 1-Click Pin / Unpin: Full-screen mode for heavy accounting ledgers.\n\nEliminates cluttered 80+ item dropdowns found in legacy systems.", C_MINT);
+        createCard(s7, 6.8, 1.8, 5.6, 5.0, isUz ? "Dual Sidebar Arxitekturasi" : "Dual Sidebar Architecture", isUz ? "Foydalanuvchi qaysi sahifada boʻlsa, tizim oʻsha boʻlimni avtomatik aniqlaydi.\n\nBoʻlimlararo oʻtganda sahifa qayta yuklanmasdan, darhol kerakli ish stoli ochiladi va xodim vaqti 3 barobar tejaladi." : "Dynamic active route detection highlights the exact contextual drawer.\n\nZero page reloads when toggling workspaces, tripling daily employee velocity.", C_CYAN);
+
+        // ==========================================
+        // SLIDE 8: 21-BHMS Accounting
+        // ==========================================
+        let s8 = pptx.addSlide();
+        createSlideHeader(s8, isUz ? "Buxgalteriya va Moliya" : "Accounting & Ledger", isUz ? "21-son BHMS Milliy Buxgalteriya Standartlari" : "National 21-BHMS Accounting Standards", C_MINT);
+        createCard(s8, 0.8, 1.8, 3.6, 5.0, isUz ? "Schotlar Rejasi & Provodkalar" : "Chart of Accounts & Journals", isUz ? "0100 dan 9900 gacha barcha milliy buxgalteriya schotlari tayyor kiritilgan. Har bir amaliyot avtomatik Bosh kitobga yoziladi." : "Pre-configured national chart of accounts (0100–9900). Every transaction automatically posts to the double-entry general ledger.", C_MINT);
+        createCard(s8, 4.8, 1.8, 3.6, 5.0, isUz ? "1-Shakl, 2-Shakl & Oborotka" : "Form 1, Form 2 & Oborotka", isUz ? "Buxgalteriya balansi (1-shakl), Moliyaviy natijalar (2-shakl / P&L) va Aylanma vedomost (Oborotka) 1 soniyada avtomatik shakllanadi." : "Instant generation of official Balance Sheet (Form 1), Profit & Loss Statement (Form 2 / P&L), and Trial Balance (Oborotka).", C_CYAN);
+        createCard(s8, 8.8, 1.8, 3.6, 5.0, isUz ? "Vzaimozachet & Valyutalar" : "Contras & Multi-Currency", isUz ? "Korxonalar oʻrtasidagi oʻzaro qarzdorliklarni yopish (Contras), UZS, USD, EUR, RUB kurslari boʻyicha avtomatik qayta baholash." : "Inter-company receivable/payable mutual settlements (Contras), automated FX revaluation for UZS, USD, EUR, RUB.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 9: Soliq, Didox & E-IMZO
+        // ==========================================
+        let s9 = pptx.addSlide();
+        createSlideHeader(s9, isUz ? "Soliq va Raqamli Imzo" : "Tax & Digital Signature", isUz ? "E-IMZO, Didox va Soliq Qoʻmitasi Bilan Toʻliq Integratsiya" : "E-IMZO, Didox & State Tax Committee Integration", C_MINT);
+        createCard(s9, 0.8, 1.8, 2.7, 5.0, isUz ? "Nativ E-IMZO Imzolash" : "Native E-IMZO Signing", isUz ? "USB e-token yoki .pfx sertifikat orqali brauzerdan chiqmasdan toʻgʻridan-toʻgʻri PKCS#7 formatida hujjatlarni imzolash." : "Direct PKCS#7 digital signature from USB e-tokens or .pfx files without third-party popups.", C_MINT);
+        createCard(s9, 3.7, 1.8, 2.7, 5.0, isUz ? "Didox va Factura.uz" : "Didox & Factura.uz", isUz ? "Elektron fakturalarni 1 bosishda yuborish, statusini kuzatish va kiruvchi hujjatlarni avtomatik qabul qilish." : "1-click e-invoice dispatch, status synchronization, and automatic inbound invoice parsing.", C_CYAN);
+        createCard(s9, 6.6, 1.8, 2.7, 5.0, isUz ? "MXIK / IKPU Kodlari" : "MXIK / IKPU Integration", isUz ? "Tovar va xizmatlar uchun milliy klassifikator kodlari va shtrix-kodlarni avtomatik toʻgʻri belgilash." : "Native auto-mapping of national product catalog classification codes and barcodes.", C_WHITE);
+        createCard(s9, 9.5, 1.8, 2.7, 5.0, isUz ? "Soliq Deklaratsiyalari" : "1-Click Tax Filings", isUz ? "QQS (Forma 10006_29), JShODS (11101_14) va Aylanmadan olinadigan soliq (10104_18) hisobotlari." : "Automated VAT (Form 10006_29), JShODS Payroll (11101_14), and Turnover Tax (10104_18) returns.", C_MINT);
+
+        // ==========================================
+        // SLIDE 10: Sales Workflow & TTN
+        // ==========================================
+        let s10 = pptx.addSlide();
+        createSlideHeader(s10, isUz ? "Savdo Zanjiri" : "Sales Workflow", isUz ? "Savdo Boshqaruvi, Hisob-Fakturalar va Yuk Xatlari (TTN)" : "Sales Invoices, Quotations & Delivery Challans (TTN)", C_MINT);
+        createCard(s10, 0.8, 1.8, 3.6, 5.0, isUz ? "Tijorat Takliflari (KP)" : "Commercial Proposals (KP)", isUz ? "Mijozlarga rasmiy shartlar koʻrsatilgan taklifnomalarni yuborish va mijoz qabul qilgach, 1 bosishda toʻlov fakturasiga aylantirish." : "Professional PDF quotations with 1-click automatic conversion to final sales invoices upon client acceptance.", C_MINT);
+        createCard(s10, 4.8, 1.8, 3.6, 5.0, isUz ? "Yuk Xatlari (TTN)" : "Delivery Challans (TTN)", isUz ? "Tovarni ombordan mijozga joʻnatishda avtotransport vositasi va haydovchi maʼlumotlari qayd etiladigan milliy yuk xatlari." : "Official waybill documentation recording driver details, transport vehicles, and signed dispatch confirmations.", C_CYAN);
+        createCard(s10, 8.8, 1.8, 3.6, 5.0, isUz ? "Ommaviy Link & QR-Kod" : "Public Links & QR Codes", isUz ? "Mijozga Telegram orqali hisob-fakturaning onlayn havolasini yuborish va QR-kod orqali toʻlovlarni qabul qilish." : "Share live invoice links with clients over Telegram for instant online verification and payments.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 11: Multi-Warehouse & FIFO
+        // ==========================================
+        let s11 = pptx.addSlide();
+        createSlideHeader(s11, isUz ? "Ombor va Tovar Nazorati" : "Warehouse & Inventory", isUz ? "Koʻp Omborli Boshqaruv va FIFO Tannarx Qatlamlari" : "Multi-Warehouse Management & FIFO Cost Layers", C_CYAN);
+        createCard(s11, 0.8, 1.8, 2.7, 5.0, isUz ? "FIFO Tannarx Hisobi" : "Strict FIFO COGS", isUz ? "Dastlabki kirim partiyalari narxi boʻyicha tovar tannarxi va sof foydani aniq hisoblash." : "Accurate cost-of-goods-sold layering for true gross margin and profitability analysis.", C_MINT);
+        createCard(s11, 3.7, 1.8, 2.7, 5.0, isUz ? "Filiallar va Omborlar" : "Multi-Branch Stock", isUz ? "Barcha filial va omborlardagi tovar qoldiqlarini real vaqt rejimida koʻrish." : "Real-time stock balances across warehouses, regional branches, and retail shelves.", C_CYAN);
+        createCard(s11, 6.6, 1.8, 2.7, 5.0, isUz ? "Omborlararo Koʻchirish" : "Stock Transfers", isUz ? "Omborlar oʻrtasida tovarlarni xavfsiz va hujjatlashtirilgan holda oʻtkazish." : "Two-step inter-warehouse transfer requests, transit tracking, and received confirmations.", C_WHITE);
+        createCard(s11, 9.5, 1.8, 2.7, 5.0, isUz ? "Inventarizatsiya" : "Audits & Adjustments", isUz ? "Ortiqcha tovar kirimi va kamomadni hisobdan chiqarish dalolatnomalari." : "Digital stock counting, surplus intake, and damaged goods write-off reconciliation.", C_ROSE);
+
+        // ==========================================
+        // SLIDE 12: Touch POS Terminal
+        // ==========================================
+        let s12 = pptx.addSlide();
+        createSlideHeader(s12, isUz ? "Chakana Savdo va POS" : "Retail Point of Sale", isUz ? "Sensorli Touch POS Terminali va Smenalar Boshqaruvi" : "Touch POS Terminal & Cashier Shift Operations", C_CYAN);
+        createCard(s12, 0.8, 1.8, 3.6, 5.0, isUz ? "Tezkor Sensorli Interfeys" : "High-Speed Touch UI", isUz ? "Planshet va monitorlar uchun moslashtirilgan sub-soniyalik tezkor kassa oynasi." : "Optimized touch cashier interface with sub-second product lookups and barcode scanning.", C_MINT);
+        createCard(s12, 4.8, 1.8, 3.6, 5.0, isUz ? "Aralash (Split) Toʻlovlar" : "Split Multi-Payments", isUz ? "Naqd pul + Uzcard/Humo + Payme/Click + Nasiya (qarz) hisobiga boʻlib toʻlash." : "Accept split payments: Cash + Uzcard/Humo + Payme/Click + Store Credit in a single transaction.", C_CYAN);
+        createCard(s12, 8.8, 1.8, 3.6, 5.0, isUz ? "Kassir Smenalari & X/Z" : "Shift Cycles & X/Z Reports", isUz ? "Smenani ochish, kassa naqd pulini nazorat qilish va kun yakunida avtomatik X/Z hisoboti." : "Opening cash drawer floats, mid-shift payouts, and automated end-of-day X/Z fiscal summaries.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 13: HRM & Payroll
+        // ==========================================
+        let s13 = pptx.addSlide();
+        createSlideHeader(s13, isUz ? "HRM va Xodimlar" : "HRM & Workforce", isUz ? "Ish Vaqti Tabeli va Oʻzbekiston Oylik Ish Haqi Dvigateli" : "Tabel Attendance & Uzbekistan Payroll Engine", C_ROSE);
+        createCard(s13, 0.8, 1.8, 3.6, 5.0, isUz ? "Ish Vaqti Tabeli (Tabel)" : "Work Attendance (Tabel)", isUz ? "Xodimlarning keldi-ketdi soatlari, dam olish kunlari va taʼtillarini hisobga oluvchi qonuniy tabel." : "Automated work hours, overtime, weekend shifts, and tardiness tracking for legal compliance.", C_MINT);
+        createCard(s13, 4.8, 1.8, 3.6, 5.0, isUz ? "12% + 12% + 0.1% Soliqlar" : "12% + 12% + 0.1% Taxes", isUz ? "JShODS (12%), Ijtimoiy soliq (12% / IT Park 1%) va INPS (0.1%) pensiya badallari avtomatik hisoblanadi." : "Automated deduction of Personal Income Tax (12%), Social Tax (12% / IT Park 1%), and INPS (0.1%).", C_ROSE);
+        createCard(s13, 8.8, 1.8, 3.6, 5.0, isUz ? "Taʼtillar & Kompensatsiya" : "Leave & Compensation", isUz ? "Mehnat taʼtillari kunlari hisobi, kasallik varaqalari va kompensatsiya toʻlovlari." : "Paid vacation accruals, sick leave tracking, and automated severance/compensation payouts.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 14: CRM Deals Pipeline
+        // ==========================================
+        let s14 = pptx.addSlide();
+        createSlideHeader(s14, isUz ? "CRM va Savdo Oʻsishi" : "CRM & Growth", isUz ? "Vizual Bitimlar Quvuri va 360° Mijoz Balansi" : "Visual Deals Pipeline & 360° Customer Ledger", C_MINT);
+        createCard(s14, 0.8, 1.8, 3.6, 5.0, isUz ? "Kanban Bitimlar Quvuri" : "Kanban Sales Pipeline", isUz ? "Lidlar ➔ Birinchi aloqa ➔ Tijorat taklifi ➔ Shartnoma ➔ Toʻlov. Savdo bosqichlarini vizual boshqaring." : "Leads ➔ Discovery ➔ Proposal ➔ Contract ➔ Paid. Visual drag-and-drop pipeline to maximize deal velocity.", C_MINT);
+        createCard(s14, 4.8, 1.8, 3.6, 5.0, isUz ? "360° Mijoz Kartasi" : "360° Customer Ledger", isUz ? "Mijozning barcha hisob-fakturalari, oʻzaro qarzdorlik balansi va toʻlovlari yagona oynada." : "Consolidated view of customer open balances, invoices, payment history, and communication logs.", C_CYAN);
+        createCard(s14, 8.8, 1.8, 3.6, 5.0, isUz ? "Telegram & WhatsApp Eslatma" : "Telegram & WhatsApp Alerts", isUz ? "Mijozlarga hisob-faktura va toʻlov eslatmalarini avtomatik yuborish." : "Automated invoice dispatch and overdue payment reminder triggers directly to customer phones.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 15: SAPAR AI Co-Pilot
+        // ==========================================
+        let s15 = pptx.addSlide();
+        createSlideHeader(s15, isUz ? "Sunʼiy Intellekt" : "Artificial Intelligence", isUz ? "SAPAR AI Co-Pilot — Aqlli Biznes Maslahatchisi" : "SAPAR AI Co-Pilot — Intelligent Business Assistant", C_CYAN);
+        createCard(s15, 0.8, 1.8, 3.6, 5.0, isUz ? "Cheklarni Tanib Olish (OCR)" : "Document OCR Extraction", isUz ? "Xarid cheklarini rasmga oling — AI uni avtomatik tovar kirimi va xarajatga aylantiradi." : "Upload paper receipts and invoices — AI extracts line items and generates expense entries automatically.", C_MINT);
+        createCard(s15, 4.8, 1.8, 3.6, 5.0, isUz ? "Moliyaviy Bashorat" : "Predictive Financial Advice", isUz ? "Kutilayotgan soliq toʻlovlari va pul tanqisligi (cash gap) boʻyicha rahbarga aqlli tavsiyalar." : "Proactive cash gap warnings, tax liability projections, and debtor collection recommendations.", C_CYAN);
+        createCard(s15, 8.8, 1.8, 3.6, 5.0, isUz ? "Tabiiy Tilda Savol-Javob" : "Natural Language Analytics", isUz ? "\"Bu oy sof foydamiz qancha boʻldi?\" deb soʻrang — AI hisobotni darhol chiqaradi." : "Ask \"What is our net margin this month?\" and receive real-time calculated business intelligence.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 16: Macroeconomic Impact
+        // ==========================================
+        let s16 = pptx.addSlide();
+        createSlideHeader(s16, isUz ? "Iqtisodiy Samara" : "Economic Impact", isUz ? "Oʻzbekiston Iqtisodiyoti va Xalq Farovonligiga Milliy Taʼsiri" : "Macroeconomic Impact on Uzbekistan's Economy & Prosperity", C_MINT);
+        createCard(s16, 0.8, 1.8, 2.7, 5.0, isUz ? "$120M+ Tejash" : "$120M+ Import Sub", isUz ? "Import Oʻrnini Bosish: Xorijiy dasturlarga ketayotgan millionlab dollar valyutani mamlakatimizda saqlab qolish." : "Replacing foreign software license outflows with a homegrown national ERP platform.", C_MINT);
+        createCard(s16, 3.7, 1.8, 2.7, 5.0, isUz ? "+35% Unumdorlik" : "+35% Productivity", isUz ? "50,000+ korxonada qogʻozbozlikni yoʻqotish va operatsion tezlikni oshirish." : "Boosting operational throughput and eliminating paper bureaucracy across 50,000+ businesses.", C_CYAN);
+        createCard(s16, 6.6, 1.8, 2.7, 5.0, isUz ? "100% Shaffoflik" : "100% Transparency", isUz ? "Xufyona aylanmani qonuniylashtirish va davlat byudjetiga tushumlarni koʻpaytirish." : "Transitioning shadow commerce into verifiable formal transactions for budget expansion.", C_WHITE);
+        createCard(s16, 9.5, 1.8, 2.7, 5.0, isUz ? "Markaziy Osiyo" : "Regional Trade", isUz ? "Mahalliy korxonalarni mintaqa bozorlariga kengaytirish." : "Empowering Uzbek companies with standardized multi-currency trade across Central Asia.", C_MINT);
+
+        // ==========================================
+        // SLIDE 17: 3-Year Financial Model
+        // ==========================================
+        let s17 = pptx.addSlide();
+        createSlideHeader(s17, isUz ? "Moliyaviy Model" : "Financial Model", isUz ? "3 Yillik Moliyaviy Reja va SaaS Unit Economics" : "3-Year Financial Model & SaaS Unit Economics", C_MINT);
+        createCard(s17, 0.8, 1.8, 3.6, 5.0, isUz ? "2026 (1-YIL): $750,000" : "2026 (Year 1): $750,000", isUz ? "• 2,500 Faol Korxona\n• Oylik daromad: $62,500\n• Sof Foyda: 32%\n• CAC: $45 | LTV: $950+" : "• 2,500 Active Enterprises\n• Monthly ARR: $62,500\n• Net Profit Margin: 32%\n• CAC: $45 | LTV: $950+", C_MINT);
+        createCard(s17, 4.8, 1.8, 3.6, 5.0, isUz ? "2027 (2-YIL): $3,600,000" : "2027 (Year 2): $3,600,000", isUz ? "• 12,000 Faol Korxona\n• Oylik daromad: $300,000\n• Sof Foyda: 48%\n• LTV / CAC: 21x" : "• 12,000 Active Enterprises\n• Monthly ARR: $300,000\n• Net Profit Margin: 48%\n• LTV / CAC: 21x", C_CYAN);
+        createCard(s17, 8.8, 1.8, 3.6, 5.0, isUz ? "2028 (3-YIL): $15,000,000" : "2028 (Year 3): $15,000,000", isUz ? "• 50,000 Faol Korxona\n• Oylik daromad: $1,250,000\n• Sof Foyda: 56%\n• Churn: < 1.2% / oy" : "• 50,000 Active Enterprises\n• Monthly ARR: $1,250,000\n• Net Profit Margin: 56%\n• Monthly Churn: < 1.2%", C_WHITE);
+
+        // ==========================================
+        // SLIDE 18: Security & Compliance
+        // ==========================================
+        let s18 = pptx.addSlide();
+        createSlideHeader(s18, isUz ? "Xavfsizlik va Arxitektura" : "Security & Architecture", isUz ? "Bank Darajasidagi Xavfsizlik va OʻRQ-547 Standarti" : "Bank-Grade Security & Law No. ZRU-547 Compliance", C_MINT);
+        createCard(s18, 0.8, 1.8, 2.7, 5.0, "PostgreSQL & Prisma", isUz ? "Millionlab tranzaksiyalarga bardosh beruvchi relyatsion maʼlumotlar bazasi." : "High-throughput relational engine built for millions of transactions.", C_MINT);
+        createCard(s18, 3.7, 1.8, 2.7, 5.0, "Multi-Tenancy", isUz ? "Har bir korxona uchun alohida subdomen (korxona.sapar.uz) va toʻliq maʼlumotlar izolyatsiyasi." : "Isolated subdomains (company.sapar.uz) with strict tenant data separation.", C_CYAN);
+        createCard(s18, 6.6, 1.8, 2.7, 5.0, "AES-256 Shifrlash", isUz ? "Parollar va maʼlumotlarni bank darajasida xavfsiz shifrlab saqlash." : "Bank-grade encryption for credentials, API keys, and sensitive documents.", C_WHITE);
+        createCard(s18, 9.5, 1.8, 2.7, 5.0, isUz ? "Oʻzbekiston OʻRQ-547" : "Uzbekistan ZRU-547", isUz ? "Barcha maʼlumotlar Oʻzbekiston hududidagi maʼlumotlar markazida saqlanadi." : "100% data residency compliance with servers located inside Uzbekistan.", C_MINT);
+
+        // ==========================================
+        // SLIDE 19: Pricing & Deployment
+        // ==========================================
+        let s19 = pptx.addSlide();
+        createSlideHeader(s19, isUz ? "Tariflar va Oʻrnatish" : "Pricing & Deployment", isUz ? "Hamyonbop va Moslashuvchan Biznes Modeli" : "Flexible & Transparent Business Model", C_MINT);
+        createCard(s19, 0.8, 1.8, 3.6, 5.0, "STARTUP ($15 / oy)", isUz ? "• 3 tagacha foydalanuvchi\n• 1 ta ombor va Hisob-fakturalar\n• Didox va E-IMZO integratsiyasi\n• Kichik doʻkonlar va savdo korxonalari uchun." : "• Up to 3 active users\n• 1 Warehouse & Invoice module\n• Didox & E-IMZO integration\n• Perfect for small shops and retail.", C_MINT);
+        createCard(s19, 4.8, 1.8, 3.6, 5.0, "BUSINESS ($35 / oy)", isUz ? "• 10 tagacha foydalanuvchi\n• 21-BHMS Buxgalteriya va 1/2-Shakl\n• Sensorli POS Kassa va Smenalar\n• Oʻrta biznes va ulgurji savdo korxonalari." : "• Up to 10 active users\n• 21-BHMS Accounting & Form 1/2\n• Touch POS Cashier & Shift system\n• For growing SME & distributors.", C_CYAN);
+        createCard(s19, 8.8, 1.8, 3.6, 5.0, "ENTERPRISE ($80 / oy)", isUz ? "• Cheksiz foydalanuvchilar\n• On-Premises Docker oʻrnatish\n• 24/7 Shaxsiy qoʻllab-quvvatlash\n• Yirik korxonalar va maxsus serverlar." : "• Unlimited users\n• On-Premises Docker deployment\n• 24/7 Dedicated VIP engineer\n• For large corporations & holdings.", C_WHITE);
+
+        // ==========================================
+        // SLIDE 20: Leadership & Engineering Team
+        // ==========================================
+        let s20 = pptx.addSlide();
+        createSlideHeader(s20, isUz ? "Bizning Jamoa" : "Our Team", isUz ? "Kuchli va Tajribali Mutaxassislar Jamoasi" : "World-Class Leadership & Engineering Team", C_MINT);
+        createCard(s20, 0.8, 1.8, 3.6, 2.4, isUz ? "Dostonbek & Hammuassislar" : "Dostonbek & Co-Founders", isUz ? "Bosh Ijrochi Direktor (CEO & Founder)\nSaaS strategiyasi, xalqaro tajriba, korporativ boshqaruv va ekotizim viziyasi." : "Chief Executive Officer (CEO & Founder)\nEnterprise SaaS strategy, corporate governance, and vision.", C_MINT);
+        createCard(s20, 4.8, 1.8, 3.6, 2.4, isUz ? "Bosh Texnologik Arxitektor" : "Chief Technology Architect", isUz ? "Bosh Texnik Direktor (CTO & Lead Architect)\nYuqori yuklamali PostgreSQL, Node.js, microservices va bank darajasidagi xavfsizlik." : "Chief Technology Officer (CTO & Lead Architect)\nHigh-throughput PostgreSQL, Node.js, and bank-grade security.", C_CYAN);
+        createCard(s20, 8.8, 1.8, 3.6, 2.4, isUz ? "Bosh Auditor & Ekspert" : "Chief Auditor & Tax Expert", isUz ? "Bosh Moliyachi (CFO & Tax Lead)\n21-son BHMS, Soliq kodeksi, 1/2-shakllar va milliy soliq deklaratsiyalari mutaxassisi." : "Chief Financial Officer (CFO & Tax Lead)\nCertified 21-BHMS auditor, Form 1/2 statutory reporting expert.", C_WHITE);
+        createCard(s20, 0.8, 4.4, 3.6, 2.4, isUz ? "Fintech & Bank Integratsiyasi" : "Fintech & Banking API Lead", isUz ? "Fintech & Bank API Lead\nDidox, E-IMZO, 1C:ClientBank va tijorat banklari skoring tizimlari boʻyicha muhandis." : "Head of Fintech & Banking Integrations\nDidox, E-IMZO, 1C:ClientBank, and bank scoring APIs.", C_CYAN);
+        createCard(s20, 4.8, 4.4, 3.6, 2.4, isUz ? "Sunʼiy Intellekt Muhandisi" : "AI & Machine Learning Lead", isUz ? "Head of AI & OCR Extraction\nCheklarni rasmga olib tanish (OCR), moliyaviy tahlil LLM modellari va algoritmik tahlil." : "Head of AI & OCR Extraction\nReceipt OCR extraction and predictive cash-flow models.", C_ROSE);
+        createCard(s20, 8.8, 4.4, 3.6, 2.4, isUz ? "Joriy Qilish & Xizmat" : "Customer Success Lead", isUz ? "Head of Customer Success & Support\n500+ korxonalarda ERP joriy qilish, xodimlarni oʻqitish va 24/7 tezkor texnik yordam." : "Head of Customer Success & Support\n500+ ERP corporate rollouts and 24/7 dedicated support.", C_MINT);
+
+        // ==========================================
+        // SLIDE 21: Summary & Contact
+        // ==========================================
+        let s21 = pptx.addSlide();
+        s21.background = { color: C_DARK };
+        s21.addText(isUz ? "Biznesingizni SAPAR Bilan Boshqaring!" : "Take Your Business to the Next Level with SAPAR!", { x: 0.8, y: 1.2, fontSize: 32, bold: true, color: C_WHITE, align: 'center', w: 11.7 });
+        s21.addText(isUz ? "Eskirgan va qimmat dasturlardan xalos boʻling. Yagona oynada barcha korxona jarayonlarini avtomatlashtiring." : "Ditch legacy desktop software. Unify your entire enterprise operations in a single modern window.", { x: 0.8, y: 2.0, fontSize: 16, color: C_CYAN, align: 'center', w: 11.7 });
+        createCard(s21, 0.8, 3.0, 3.6, 2.3, isUz ? "Rasmiy Veb-Sayt" : "Official Website", "https://sapar.uz\n" + (isUz ? "Onlayn roʻyxatdan oʻtish va tariflar." : "Online onboarding & pricing."), C_MINT);
+        createCard(s21, 4.8, 3.0, 3.6, 2.3, isUz ? "Elektron Pochta" : "Email Inquiries", "info@sapar.uz\n" + (isUz ? "Hamkorlik va korporativ xizmatlar." : "Enterprise inquiries & partnerships."), C_CYAN);
+        createCard(s21, 8.8, 3.0, 3.6, 2.3, isUz ? "Manzil & Aloqa" : "Headquarters", "Toshkent, IT Park Oʻzbekiston\n" + (isUz ? "Jonli demo va konsultatsiya." : "Live demo & implementation support."), C_WHITE);
+        
+        s21.addShape(pptx.ShapeType.roundRect, {
+          x: 3.8, y: 5.6, w: 5.7, h: 0.9,
+          fill: { color: C_MINT },
+          rectRadius: 0.15
+        });
+        s21.addText("DEMONI SINAB KOʻRISH (http://localhost:3000/admin)", {
+          x: 3.8, y: 5.6, w: 5.7, h: 0.9,
+          fontSize: 14, bold: true, color: C_DARK, align: 'center', valign: 'middle'
+        });
+
+        const exportFilename = `SAPAR_ERP_Enterprise_Presentation_2026_${isUz ? 'UZ' : 'EN'}.pptx`;
+        pptx.writeFile({ fileName: exportFilename });
+      } catch (err) {
+        console.error("PPTX error:", err);
+        window.location.href = '/SAPAR_ERP_Enterprise_Presentation_2026.pptx';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(TOTAL_SLIDES);
+      } else if (e.key.toLowerCase() === 'g') {
+        toggleGridModal();
+      } else if (e.key.toLowerCase() === 'n') {
+        toggleNotesDrawer();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) {
+        nextSlide();
+      } else if (touchEndX - touchStartX > 50) {
+        prevSlide();
+      }
+    });
+
+    updateSlide();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

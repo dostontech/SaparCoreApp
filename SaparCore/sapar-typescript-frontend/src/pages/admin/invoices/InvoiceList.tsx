@@ -354,11 +354,20 @@ const InvoiceList: React.FC = () => {
                     </>
                 )}
                 {hasPermission(permissions, 'invoices', 'create') && (
-                    <Button
-                        onClick={handleNewInvoiceClick}
-                        leftIcon={<CirclePlusIcon size={14} />}>
-                        New Invoice
-                    </Button>
+                    <>
+                        <Button
+                            onClick={() => navigate('/admin/pos')}
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
+                        >
+                            POS oyna
+                        </Button>
+                        <Button
+                            onClick={handleNewInvoiceClick}
+                            leftIcon={<CirclePlusIcon size={14} />}
+                        >
+                            New Invoice
+                        </Button>
+                    </>
                 )}
             </PageHeader>
 

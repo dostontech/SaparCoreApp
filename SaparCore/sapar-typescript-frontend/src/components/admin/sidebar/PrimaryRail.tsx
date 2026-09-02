@@ -25,6 +25,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     ChevronRight,
+    Sparkles,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@store/index";
@@ -44,7 +45,8 @@ export type PrimaryModuleKey =
     | "payroll"
     | "projects"
     | "support"
-    | "settings";
+    | "settings"
+    | "design_system";
 
 export interface PrimaryModuleItem {
     key: PrimaryModuleKey;
@@ -222,6 +224,14 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             icon: <Settings size={19} />,
             defaultRoute: "/admin/settings/company-settings",
             slug: "settings",
+        },
+        {
+            key: "design_system",
+            title: "UI Design System",
+            badge: "RADIX",
+            icon: <Sparkles size={19} className="text-purple-400" />,
+            defaultRoute: "/admin/design-system",
+            slug: "design_system",
         },
     ];
 

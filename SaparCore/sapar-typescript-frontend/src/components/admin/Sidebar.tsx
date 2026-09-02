@@ -25,6 +25,7 @@ import type { RootState } from "@store/index";
 import { Button } from "@components/ui";
 import { PrimaryRail, type PrimaryModuleKey } from "./sidebar/PrimaryRail";
 import { SecondarySubMenuPanel, type ModuleSubMenuConfig } from "./sidebar/SecondarySubMenuPanel";
+import { UnifiedSidebar } from "./sidebar/UnifiedSidebar";
 
 // Module visibility keys for customization
 export interface ModuleVisibility {
@@ -59,6 +60,9 @@ const DEFAULT_MODULE_VISIBILITY: ModuleVisibility = {
 
 export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
     const clean = pathname.toLowerCase();
+    if (clean.startsWith("/admin/design-system")) {
+        return "design_system";
+    }
     if (clean === "/admin" || clean === "/admin/" || clean.startsWith("/admin/business-loans")) {
         return "dashboard";
     }
@@ -956,119 +960,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
     const activeConfig = moduleConfigs[activeModule] || moduleConfigs.dashboard;
 
     return (
-        <>
-            <div className="flex h-screen shrink-0 relative">
-                {/* TIER 1: Bubble Primary Global Icon Rail (Expandable) */}
-                <PrimaryRail
-                    activeModule={activeModule}
-                    routeModule={routeModule}
-                    onSelectModule={handleSelectModule}
-                    isPinned={isPinned}
-                    onTogglePin={handleTogglePin}
-                    onOpenCustomizeModal={() => setIsCustomizeModalOpen(true)}
-                    isExpanded={isPrimaryExpanded}
-                    onToggleExpand={handleTogglePrimaryExpand}
-                />
-
-                {/* TIER 2: Contextual Bubble Secondary Submenu Panel */}
-                <SecondarySubMenuPanel
-                    config={activeConfig}
-                    isOpen={isSecondaryOpen && isOpen}
-                    isPinned={isPinned}
-                    onTogglePin={handleTogglePin}
-                    permissions={permissions}
-                    user={user}
-                />
-            </div>
-
-            {/* Modal: Customize Modules Visibility */}
-            {isCustomizeModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-lg border border-slate-200 space-y-4 shadow-2xl">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <div className="flex items-center gap-2">
-                                <SlidersHorizontal className="w-5 h-5 text-teal-700" />
-                                <h3 className="text-base font-bold text-slate-900">
-                                    {t("nav.customizeMenuTitle", "Menyu Modullarini Moslashtirish")}
-                                </h3>
-                            </div>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                    setVisibility(DEFAULT_MODULE_VISIBILITY);
-                                    localStorage.setItem(
-                                        "sapar_sidebar_modules",
-                                        JSON.stringify(DEFAULT_MODULE_VISIBILITY)
-                                    );
-                                }}
-                                className="text-xs text-slate-600 cursor-pointer"
-                            >
-                                {t("nav.enableAll", "Hammasini Yoqish")}
-                            </Button>
-                        </div>
-
-                        <p className="text-xs text-slate-500">
-                            {t("nav.customizeMenuDesc", "Korxonangiz faoliyatiga mos menyu modullarini tanlang yoki keraksizlarini yashiring:")}
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto p-1">
-                            {[
-                                { key: "pos", label: `🛒 ${t("workspace.pos", "POS Kassa")}`, desc: t("workspace.posDesc", "Chakana savdo va chek chiqarish") },
-                                { key: "crm", label: `💼 ${t("workspace.crm", "CRM & Bitimlar")}`, desc: t("workspace.crmDesc", "Mijozlar quvuri va savdo bitimlari") },
-                                { key: "sales", label: `🧾 ${t("workspace.sales", "Savdo & Fakturalar")}`, desc: t("workspace.salesDesc", "Fakturalar, TTN va takliflar") },
-                                { key: "purchases", label: `🛍️ ${t("workspace.purchases", "Xaridlar & Taʼminot")}`, desc: t("workspace.purchasesDesc", "Taʼminotchilar va xaridlar") },
-                                { key: "inventory", label: `📦 ${t("workspace.inventory", "Ombor & Tovar")}`, desc: t("workspace.inventoryDesc", "Qoldiqlar, FIFO tannarx va tovarlar") },
-                                { key: "banking", label: `🏦 ${t("nav.bankingGroup", "Bank & Kassa")}`, desc: t("workspace.financeDesc", "Hisoblar, naqd pul va xarajatlar") },
-                                { key: "accounting", label: `📖 ${t("nav.accounting", "Buxgalteriya")}`, desc: t("nav.chartOfAccounts", "Hisoblar rejasi va jurnallar") },
-                                { key: "reports", label: `📊 ${t("nav.financialReports", "Moliyaviy Hisobotlar")}`, desc: t("nav.allFinancialReports", "P&L, Balans va aylanma vedomost") },
-                                { key: "projects", label: `📁 ${t("workspace.projects", "Loyihalar & Vazifalar")}`, desc: t("workspace.projectsDesc", "Vazifalar Kanban va rentabellik") },
-                                { key: "payroll", label: `👥 ${t("workspace.hrm", "HRM & Xodimlar")}`, desc: t("workspace.hrmDesc", "Oylik tabel va maosh hisoblash") },
-                                { key: "helpdesk", label: `🎧 ${t("workspace.support", "Mijozlar Yordami")}`, desc: t("workspace.supportDesc", "Mijozlar murojaatlari va xizmat") },
-                                { key: "settings", label: `⚙️ ${t("nav.settings", "Tizim Sozlamalari")}`, desc: t("nav.companySettings", "E-IMZO, Payme, Click va rekvizitlar") },
-                            ].map((m) => {
-                                const isVisible = visibility[m.key as keyof ModuleVisibility];
-                                return (
-                                    <button
-                                        key={m.key}
-                                        type="button"
-                                        onClick={() => toggleModuleVisibility(m.key as keyof ModuleVisibility)}
-                                        className={`p-3 rounded-2xl border text-left transition flex items-center justify-between cursor-pointer ${
-                                            isVisible
-                                                ? "bg-teal-50/70 border-teal-300 shadow-xs"
-                                                : "bg-slate-50 border-slate-200 opacity-60"
-                                        }`}
-                                    >
-                                        <div className="space-y-0.5">
-                                            <h4 className="text-xs font-bold text-slate-900">{m.label}</h4>
-                                            <p className="text-[10px] text-slate-500">{m.desc}</p>
-                                        </div>
-                                        <div
-                                            className={`p-1.5 rounded-xl ${
-                                                isVisible
-                                                    ? "bg-teal-700 text-white"
-                                                    : "bg-slate-200 text-slate-400"
-                                            }`}
-                                        >
-                                            {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <div className="flex justify-end pt-3 border-t">
-                            <Button
-                                onClick={() => setIsCustomizeModalOpen(false)}
-                                className="bg-teal-700 hover:bg-teal-800 text-white font-bold px-6 cursor-pointer"
-                            >
-                                {t("nav.saveAndClose", "Saqlash va Yopish")}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        <UnifiedSidebar isOpen={isOpen} />
     );
 };
 
