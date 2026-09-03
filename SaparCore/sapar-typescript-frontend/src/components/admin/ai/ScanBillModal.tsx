@@ -412,7 +412,7 @@ const ScanBillModal: FC<ScanBillModalProps> = ({ isOpen, onClose, onConfirmed })
           {/* Vendor / invoice header */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Vendor name" value={data.vendorName ?? ''} onChange={(v) => setData({ ...data, vendorName: v })} />
-            <Field label="Vendor GSTIN" value={data.vendorGstin ?? ''} onChange={(v) => setData({ ...data, vendorGstin: v })} />
+            <Field label="Taʼminotchi STIR / ИНН" value={data.vendorGstin ?? ''} onChange={(v) => setData({ ...data, vendorGstin: v })} />
             <Field label="Invoice #" value={data.invoiceNumber ?? ''} onChange={(v) => setData({ ...data, invoiceNumber: v })} />
             <Field label="Currency" value={data.currency} onChange={(v) => setData({ ...data, currency: v })} />
             <Field label="Invoice date" type="date" value={data.invoiceDate ?? ''} onChange={(v) => setData({ ...data, invoiceDate: v })} />

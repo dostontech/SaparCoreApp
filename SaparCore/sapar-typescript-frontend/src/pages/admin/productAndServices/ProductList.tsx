@@ -5,8 +5,9 @@ import Constants from "@constants/api";
 import axios from "axios";
 import Table from "@components/admin/Table";
 import PaginationWrapper from "@components/admin/PaginationWrapper";
-import { CirclePlusIcon, Edit, Trash2Icon } from "lucide-react";
+import { CirclePlusIcon, Edit, Trash2Icon, Printer } from "lucide-react";
 import { toast } from "sonner";
+import BarcodeLabelPrintModal from "@components/admin/products/BarcodeLabelPrintModal";
 import { useSelector } from "react-redux";
 import TableRow from "@components/admin/TableRow";
 import type { Action } from "@components/admin/tableActions";
@@ -16,6 +17,7 @@ import { hasPermission } from "@utils/hasPermission";
 import LoaderSpinner from "@components/admin/LoaderSpinner";
 import { useCurrencyFormatter } from "@hooks/useCurrencyFormatter";
 import { useCurrencies } from "@hooks/useCurrencies";
+import { useTranslation } from "react-i18next";
 import type { RootState } from "@store/index";
 import Switch from "@components/admin/Switch";
 import ProfileCard from "@components/admin/ProfileImage";
@@ -68,6 +70,7 @@ const ProductList: FC = () => {
     // State
     const [products, setProducts] = useState<Product[]>([]);
     const [pagination, setPagination] = useState<ProductPagination>({ total: 0, page: 1, limit: 10, totalPages: 1 });
+    const [isBarcodePrintOpen, setIsBarcodePrintOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     // 'Product' = tracks inventory, 'Service' = no inventory (legacy item_type values, C2)
@@ -79,6 +82,7 @@ const ProductList: FC = () => {
     const page = Number(searchParams.get('page') || 1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
+    const { t } = useTranslation();
     const { locale } = useCurrencyFormatter();
     const { resolveCurrency } = useCurrencies();
     // Show each product's price in ITS OWN currency (not the global default).
@@ -143,14 +147,14 @@ const ProductList: FC = () => {
     // Permission gating is handled per-action by TableRow via `requirePermission`.
     const tableActions: Action<Product>[] = [
         {
-            label: 'Edit',
+            label: t('common.edit', 'Tahrirlash'),
             icon: <Edit size={14} />,
             primary: true,
             requirePermission: { moduleSlug: 'product-services', action: 'edit' },
             onClick: (item: Product) => { handleEditClick(item) }
         },
         {
-            label: 'Delete',
+            label: t('common.delete', 'Oʻchirish'),
             icon: <Trash2Icon size={14} />,
             primary: true,
             variant: 'danger',
@@ -160,7 +164,17 @@ const ProductList: FC = () => {
     ];
     const canEdit = hasPermission(permissions, 'product-services', 'edit');
     const canDelete = hasPermission(permissions, 'product-services', 'delete');
-    const tableHeaders = ["#", "Item", "Inventory", "Brand", "Category", "Price", "Stock", "Status", "Actions"];
+    const tableHeaders = [
+        "#",
+        t('products.item', 'Mahsulot / Tovar'),
+        t('products.inventoryType', 'Hisob'),
+        t('products.brand', 'Brend'),
+        t('products.category', 'Toifa'),
+        t('products.price', 'Narxi'),
+        t('products.stock', 'Qoldiq'),
+        t('products.status', 'Holati'),
+        t('common.actions', 'Amallar')
+    ];
     if (!canEdit && !canDelete) {
         tableHeaders.pop();
     }
@@ -216,45 +230,63 @@ const ProductList: FC = () => {
 
     return (
         <div className="space-y-4">
-            <PageHeader title="Items">
+            <PageHeader title={t('products.title', 'Mahsulotlar va Xizmatlar')}>
                 {hasPermission(permissions, 'product-services', 'view') &&
                     <ExportButton
                         url={Constants.EXPORT_PRODUCTS_URL}
                         filename="products.csv"
                     />
                 }
+                <Button
+                    variant="outline"
+                    onClick={() => setIsBarcodePrintOpen(true)}
+                    leftIcon={<Printer size={14} className="text-[#028090]" />}
+                    className="border-slate-300 font-bold text-xs cursor-pointer"
+                >
+                    Shtrix-kod Yorliqlar (Tsennik)
+                </Button>
                 {hasPermission(permissions, 'product-services', 'create') &&
                     <Button
                         onClick={() => navigate('/admin/products/new')}
                         leftIcon={<CirclePlusIcon size={14} />}
                         className="shadow"
                     >
-                        New Item
+                        {t('products.newItem', 'Yangi mahsulot')}
                     </Button>
                 }
             </PageHeader>
 
-            <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <input
                     type="text"
-                    placeholder="Search by name, code, brand, category..."
+                    placeholder={t('products.searchPlaceholder', 'Nomi, kodi, brendi yoki toifasi boʻyicha qidirish...')}
                     value={search}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-1/3    focus:outline-none focus:ring-2 focus:ring-purple-600 text-gray-950"
+                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-purple-600 text-gray-950"
                 />
-                <select
-                    value={limit}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
-                    className="border border-gray-300 px-3 py-2 rounded-md bg-white  text-gray-950   focus:outline-none focus:ring-2 focus:ring-purple-600"
-                >
-                    {[10, 25, 50].map((num) => <option key={num} value={num}>{num} / page</option>)}
-                </select>
+                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsBarcodePrintOpen(true)}
+                        leftIcon={<Printer size={14} className="text-[#028090]" />}
+                        className="border-slate-300 font-bold text-xs cursor-pointer"
+                    >
+                        Shtrix-kod Yorliqlar (Tsennik)
+                    </Button>
+                    <select
+                        value={limit}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
+                        className="border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    >
+                        {[10, 25, 50].map((num) => <option key={num} value={num}>{num} / {t('common.page', 'sahifa')}</option>)}
+                    </select>
+                </div>
             </div>
             <div className="flex items-center gap-2">
                 {([
-                    { value: 'all', label: 'All' },
-                    { value: 'Product', label: 'Tracks inventory' },
-                    { value: 'Service', label: 'No inventory' },
+                    { value: 'all', label: t('common.all', 'Barchasi') },
+                    { value: 'Product', label: t('products.tracksInventory', 'Zaxirasi hisoblanadigan') },
+                    { value: 'Service', label: t('products.noInventory', 'Zaxirasiz (Xizmatlar)') },
                 ] as const).map((opt) => (
                     <button
                         key={opt.value}
@@ -263,7 +295,7 @@ const ProductList: FC = () => {
                         className={
                             'px-3 py-1 text-sm rounded-full border cursor-pointer ' +
                             (inventoryFilter === opt.value
-                                ? 'bg-purple-600 text-white border-purple-600'
+                                ? 'bg-[#028090] text-white border-[#028090]'
                                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')
                         }
                     >
@@ -271,7 +303,11 @@ const ProductList: FC = () => {
                     </button>
                 ))}
             </div>
-            <Table headers={tableHeaders}>
+            <Table
+                fitWidth
+                headers={tableHeaders}
+                colWidths={['w-10', 'w-[28%]', 'w-20', 'w-24', 'w-28', 'w-28', 'w-16', 'w-16', 'min-w-[175px]']}
+            >
                 {!isLoading && products && products.map((product, index) => (
                     <TableRow
                         key={product.id}
@@ -284,10 +320,10 @@ const ProductList: FC = () => {
                                 email={product.code ?? ""}
                             />,
                             <Badge color={product.enable_inventory ? 'success' : 'gray'}>
-                                {product.enable_inventory ? 'Tracked' : '—'}
+                                {product.enable_inventory ? t('products.tracked', 'Zaxirada') : '—'}
                             </Badge>,
-                            <p className="capitalize">{product.brand?.brand_name || 'N/A'}</p>,
-                            <p className="capitalize">{product.category?.category_name || 'N/A'}</p>,
+                            <p className="capitalize">{product.brand?.brand_name || '—'}</p>,
+                            <p className="capitalize">{product.category?.category_name || '—'}</p>,
                             formatProductPrice(product.selling_price, product.currencyCode),
                             (() => {
                                 // Items that don't track inventory have no stock badge.
@@ -299,14 +335,14 @@ const ProductList: FC = () => {
                                 if (qty === 0) {
                                     return (
                                         <Badge color="danger">
-                                            Out of stock
+                                            {t('products.outOfStock', 'Qolmagan (0)')}
                                         </Badge>
                                     );
                                 }
                                 if (qty > 0 && qty <= alertQty) {
                                     return (
                                         <Badge color="warning">
-                                            Low stock
+                                            {t('products.lowStock', 'Kam qolgan')}
                                         </Badge>
                                     );
                                 }
@@ -319,7 +355,7 @@ const ProductList: FC = () => {
                     />
                 ))
                 }
-                {!isLoading && products.length === 0 && <tr><td colSpan={9} className="text-center py-4">No items found.</td></tr>}
+                {!isLoading && products.length === 0 && <tr><td colSpan={9} className="text-center py-4">{t('products.noItemsFound', 'Mahsulotlar topilmadi')}</td></tr>}
 
                 {isLoading && (
                     <tr key="table-loader">
@@ -343,11 +379,23 @@ const ProductList: FC = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
-                title="Confirm Deletion"
-                message="Are you sure you want to delete this item?"
+                title={t('products.confirmDeleteTitle', 'Oʻchirishni tasdiqlang')}
+                message={t('products.confirmDeleteMsg', 'Ushbu mahsulotni oʻchirishga ishonchingiz komilmi?')}
                 isDeleting={isDeleting}
             >
             </DeleteConfirmationModal>
+
+            <BarcodeLabelPrintModal
+                isOpen={isBarcodePrintOpen}
+                onClose={() => setIsBarcodePrintOpen(false)}
+                products={products.map((p) => ({
+                    id: p.id,
+                    name: p.name,
+                    code: p.code,
+                    selling_price: p.selling_price,
+                    barcode: p.code,
+                }))}
+            />
         </div>
     );
 };

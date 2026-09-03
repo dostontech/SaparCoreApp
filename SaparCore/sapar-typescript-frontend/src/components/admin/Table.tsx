@@ -41,8 +41,8 @@ const Table = ({ headers, children, fitWidth = false, colWidths }: TableProps) =
               <th
                 key={idx}
                 className={
-                  "px-4 py-3 text-left border-b border-gray-100" +
-                  (fitWidth ? ` ${colWidths?.[idx] ?? ""}` : "")
+                  "px-4 py-3 text-left border-b border-gray-100 whitespace-nowrap" +
+                  (colWidths?.[idx] ? ` ${colWidths[idx]}` : "")
                 }
               >
                 {header}

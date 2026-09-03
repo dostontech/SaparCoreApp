@@ -50,20 +50,13 @@ interface StateOption {
 }
 
 const REGIME_OPTIONS: { value: TaxRegime; label: string }[] = [
-    { value: 'GST_INDIA', label: 'GST (India)' },
-    { value: 'VAT_GENERIC', label: 'VAT (Generic)' },
-    { value: 'US_SALES_TAX', label: 'US Sales Tax' },
-    { value: 'NONE', label: 'None' },
+    { value: 'VAT_GENERIC', label: 'QQS (Oʻzbekiston Soliq QQS 12%)' },
+    { value: 'NONE', label: 'Soliqsiz (0% / Imtiyozli)' },
 ];
 
 const TAX_KIND_OPTIONS: { value: TaxKind; label: string }[] = [
-    { value: 'CGST', label: 'CGST' },
-    { value: 'SGST', label: 'SGST' },
-    { value: 'IGST', label: 'IGST' },
-    { value: 'UTGST', label: 'UTGST' },
-    { value: 'CESS', label: 'CESS' },
-    { value: 'VAT', label: 'VAT' },
-    { value: 'SALES_TAX', label: 'Sales Tax' },
+    { value: 'VAT', label: 'QQS (НДС — 12%)' },
+    { value: 'SALES_TAX', label: 'Aylanmadan olinadigan soliq (4%)' },
 ];
 
 const initialFormData: TaxRateFormData = {
@@ -315,7 +308,7 @@ const TaxRateForm: React.FC<TaxRateFormProps> = ({ taxRateData = null }) => {
                             label="Name"
                             value={formData.name}
                             onChange={(e) => handleFormChange('name', e.target.value)}
-                            placeholder="e.g. CGST 9%"
+                            placeholder="Masalan: QQS 12% (Standart)"
                             maxLength={50}
                             required
                             containerClassName="sm:col-span-3"

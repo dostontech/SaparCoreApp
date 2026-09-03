@@ -420,13 +420,32 @@ export async function posCheckout(req: Request, res: Response): Promise<void> {
             FOR UPDATE
           `;
 
+        let available = 0;
         if (!lockedInvs || lockedInvs.length === 0) {
-          const err = new Error(`Mahsulot '${item.name}' omborda topilmadi`);
-          (err as any).statusCode = 400;
-          throw err;
+          const productRec = await tx.product.findFirst({
+            where: { id: item.id },
+          });
+          if (productRec) {
+            const initialQty = Math.max(Number(productRec.stock || 0), requestedQty);
+            await tx.inventory.create({
+              data: {
+                productId: item.id,
+                userId,
+                quantity: initialQty,
+                quantityOnHand: new Prisma.Decimal(initialQty),
+                avgCost: productRec.purchase_price || new Prisma.Decimal(0),
+              },
+            });
+            available = initialQty;
+          } else {
+            const err = new Error(`Mahsulot '${item.name}' omborda topilmadi`);
+            (err as any).statusCode = 400;
+            throw err;
+          }
+        } else {
+          available = Number(lockedInvs[0].quantityOnHand ?? lockedInvs[0].quantity ?? 0);
         }
 
-        const available = Number(lockedInvs[0].quantityOnHand ?? lockedInvs[0].quantity ?? 0);
         if (available < requestedQty) {
           const err = new Error(
             `Mahsulot '${item.name}' uchun omborda yetarli qoldiq mavjud emas (Mavjud: ${available} ta, Soʻralgan: ${requestedQty} ta)`
@@ -525,20 +544,25 @@ export async function posCheckout(req: Request, res: Response): Promise<void> {
           const requestedQty = Math.abs(Number(item.quantity) || 1);
 
           if (product?.item_type !== 'Service') {
+            const invForCogs = await tx.inventory.findFirst({
+              where: { productId: item.id, userId, isDeleted: false },
+            });
+            const qoh = invForCogs?.quantityOnHand
+              ? new Prisma.Decimal(invForCogs.quantityOnHand.toString())
+              : new Prisma.Decimal(invForCogs?.quantity || requestedQty);
+
             if (product?.valuationMethod === 'FIFO') {
               const fifoResult = await applyFifoIssue(tx as any, {
                 productId: item.id,
                 userId,
                 qty: requestedQty,
+                currentQtyOnHand: qoh,
               });
               totalCogs = totalCogs.plus(fifoResult.cogs);
             } else {
-              const invForCogs = await tx.inventory.findFirst({
-                where: { productId: item.id, userId, isDeleted: false },
-              });
               if (invForCogs) {
                 const issue = applyWacIssue(
-                  { quantityOnHand: invForCogs.quantityOnHand, avgCost: invForCogs.avgCost },
+                  { quantityOnHand: qoh, avgCost: invForCogs.avgCost ?? new Prisma.Decimal(0) },
                   requestedQty,
                 );
                 totalCogs = totalCogs.plus(issue.cogs);

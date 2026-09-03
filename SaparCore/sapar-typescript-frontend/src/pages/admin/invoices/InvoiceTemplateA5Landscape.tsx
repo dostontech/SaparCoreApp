@@ -78,7 +78,7 @@ const InvoiceTemplateA5Landscape: React.FC<InvoiceDetailsProps> = ({ invoiceData
                         {' '}— {invoiceData?.billTo?.billingAddress?.addressLine1}, {invoiceData?.billTo?.billingAddress?.city}, {invoiceData?.billTo?.billingAddress?.state}, {invoiceData?.billTo?.billingAddress?.country}
                         {' '}· {invoiceData?.billTo?.email} {invoiceData?.billTo?.phone ?? ''}
                         {invoiceData?.billTo?.vatRegNumber && <> · VAT Reg: {invoiceData.billTo.vatRegNumber}</>}
-                        {invoiceData?.billTo?.gstin && <> · GSTIN: {invoiceData.billTo.gstin}</>}
+                        {invoiceData?.billTo?.gstin && <> · STIR / ИНН: {invoiceData.billTo.gstin}</>}
                     </span>
                 </div>
                 <div className="w-1/2 pl-4 border-l border-gray-200">

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import type { BankAccount } from "@models/bank-account";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/context/PageHeaderContext";
+import BankStatementImportModal from "@components/admin/banking/BankStatementImportModal";
 
 interface BalanceTrend {
     bankCurrentTotal: number;
@@ -33,6 +34,7 @@ const Banking: React.FC = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const [balanaceTrend, setBalanceTrend] = useState<BalanceTrend | null>(null);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     useEffect(() => {
         fetchChartData();
         fetchBankAccountWithBalance();
@@ -144,11 +146,29 @@ const Banking: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="Banking Overview" />
-            {/* Bank Balance & Chart */}
+            <PageHeader title="Bank & Kassa Boshqaruvi">
+                <button
+                    type="button"
+                    onClick={() => setIsImportModalOpen(true)}
+                    className="px-3.5 py-2 rounded-xl bg-[#028090] hover:bg-[#026b78] text-white font-bold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer"
+                >
+                    <LandmarkIcon className="w-4 h-4 text-[#02C39A]" />
+                    <span>1C:ClientBank Koʻchirma Importi</span>
+                </button>
+            </PageHeader>
             <div className="border border-gray-200 rounded-xl p-4">
-                <div className="flex justify-between">
-                    <h4 className="text-lg font-semibold text-gray-950">All Accounts</h4>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <h4 className="text-lg font-semibold text-gray-950">Bank & Kassa Hisoblari</h4>
+                        <button
+                            type="button"
+                            onClick={() => setIsImportModalOpen(true)}
+                            className="px-3.5 py-1.5 rounded-xl bg-[#028090] hover:bg-[#026b78] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition cursor-pointer"
+                        >
+                            <LandmarkIcon className="w-4 h-4 text-[#02C39A]" />
+                            <span>1C:ClientBank Import</span>
+                        </button>
+                    </div>
                     <div className="relative inline-block text-left" ref={dropdownRef}>
                         <button
                             type="button"
@@ -326,6 +346,11 @@ const Banking: React.FC = () => {
                     </table>
                 </div>
             </div>
+
+            <BankStatementImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+            />
         </div>
     );
 };

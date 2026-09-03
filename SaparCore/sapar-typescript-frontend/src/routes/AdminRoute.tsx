@@ -36,6 +36,7 @@ import LedgerSetupWizard from "@pages/admin/settings/financeSettings/LedgerSetup
 import DocumentDefaultsPage from "@pages/admin/settings/financeSettings/DocumentDefaults";
 import TransactionCategoriesPage from "@pages/admin/settings/financeSettings/TransactionCategories";
 import CompanySettings from "@pages/admin/settings/websiteSettings/CompanySettings";
+import BranchesPage from "@pages/admin/settings/branches/BranchesPage";
 import EditPurchaseOrder from "@pages/admin/purchases/EditPurchaseOrder";
 import PurchaseList from "@pages/admin/purchases/PurchaseList";
 import CreatePurchase from "@pages/admin/purchases/CreatePurchase";
@@ -193,6 +194,16 @@ import BhmsChartOfAccountsPage from "@pages/admin/accounting/BhmsChartOfAccounts
 import UzbekistanFinancialReportsPage from "@pages/admin/accounting/UzbekistanFinancialReportsPage";
 import BusinessLoansPage from "@pages/admin/financing/BusinessLoansPage";
 import DesignSystemPage from "@pages/admin/design-system/DesignSystemPage";
+import SaparDashboardPage from "@pages/admin/dashboard/SaparDashboardPage";
+import SaparSaleCreatePage from "@pages/admin/sales/SaparSaleCreatePage";
+import SaparSalesListPage from "@pages/admin/sales/SaparSalesListPage";
+import SaparGuidePage from "@pages/admin/guide/SaparGuidePage";
+import WarehousesPage from "@pages/admin/warehouses/WarehousesPage";
+import InventoryTransfersPage from "@pages/admin/inventory/InventoryTransfersPage";
+import InventoryAuditsPage from "@pages/admin/inventory/InventoryAuditsPage";
+import InventoryWriteOffsPage from "@pages/admin/inventory/InventoryWriteOffsPage";
+import ManufacturingOrdersPage from "@pages/admin/manufacturing/ManufacturingOrdersPage";
+import ManufacturingBomPage from "@pages/admin/manufacturing/ManufacturingBomPage";
 
 const AdminRoute = () => {
     return (
@@ -201,17 +212,36 @@ const AdminRoute = () => {
             <Route path="/register" element={<><Seo title="Register" /><AdminRegister /></>} />
 
             <Route element={<AdminLayout />}>
+                <Route path="/guide" element={<><Seo title="Foydalanuvchi Qoʻllanmasi" /><SaparGuidePage /></>} />
+                <Route path="/warehouses" element={<><Seo title="Omborlar" /><WarehousesPage /></>} />
+                <Route path="/inventory/transfers" element={<><Seo title="Omborlararo Koʻchirish" /><InventoryTransfersPage /></>} />
+                <Route path="/inventory/audits" element={<><Seo title="Inventarizatsiya" /><InventoryAuditsPage /></>} />
+                <Route path="/inventory/write-offs" element={<><Seo title="Hisobdan Chiqarish" /><InventoryWriteOffsPage /></>} />
+                <Route path="/manufacturing/orders" element={<><Seo title="Ishlab Chiqarish Buyurtmalari" /><ManufacturingOrdersPage /></>} />
+                <Route path="/manufacturing/bom" element={<><Seo title="Texnologik Xaritalar (BOM)" /><ManufacturingBomPage /></>} />
+
+                {/* Compatibility Aliases for Header & Sidebar Links */}
+                <Route path="/settings/company" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                <Route path="/settings/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
+                <Route path="/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
+                <Route path="/vendors" element={<Navigate to="/admin/contacts?view=suppliers" replace />} />
+                <Route path="/reports/accounts-payable" element={<Navigate to="/admin/accounting/reports/ap-aging" replace />} />
+                <Route path="/accounting/reports/profit-and-loss" element={<Navigate to="/admin/accounting/reports/uz-financial-statements" replace />} />
+                <Route path="/tax-reports" element={<Navigate to="/admin/accounting/reports/tax-summary" replace />} />
+
                 <Route path="/design-system" element={<><Seo title="Design System" /><DesignSystemPage /></>} />
                 {/* Dashboard */}
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
                     <Route
                         index
-                        element={<><Seo title="Dashboard" /><AdminDashboard /></>}
+                        element={<><Seo title="Bosh panel" /><SaparDashboardPage /></>}
                     />
                 </Route>
 
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
-                    <Route path="/dashboard" element={<><Seo title="Dashboard" /><AdminDashboard /></>} />
+                    <Route path="/dashboard" element={<><Seo title="Bosh panel" /><SaparDashboardPage /></>} />
+                    <Route path="/sales" element={<><Seo title="Sotuvlar" /><SaparSalesListPage /></>} />
+                    <Route path="/sales/create" element={<><Seo title="Sotuv (Yaratish)" /><SaparSaleCreatePage /></>} />
                     <Route path="/dashboard/hrm" element={<><Seo title="HRM & Xodimlar" /><HrmDashboard /></>} />
                     <Route path="/dashboard/inventory" element={<><Seo title="Ombor & Sklad" /><InventoryDashboard /></>} />
                     <Route path="/dashboard/crm" element={<><Seo title="CRM & Bitimlar" /><CrmDashboard /></>} />
@@ -293,7 +323,7 @@ const AdminRoute = () => {
 
                 {/* Customers — list redirects to Contacts; detail/edit/statement routes kept for deep links */}
                 <Route element={<ProtectedRoute moduleSlug="customers" action="view" />}>
-                    <Route path="/customers" element={<Navigate to="/admin/contacts" replace />} />
+                    <Route path="/customers" element={<Navigate to="/admin/contacts?view=clients" replace />} />
                     <Route path="/customers/new" element={<><Seo title="New Customer" /><CustomerForm /></>} />
                     <Route path="/customers/edit/:id" element={<><Seo title="Edit Customer" /><EditCustomer /></>} />
                     <Route path="/customers/:id/statement" element={<><Seo title="Customer Statement" /><CustomerStatement /></>} />
@@ -323,7 +353,9 @@ const AdminRoute = () => {
 
                 {/* Website Settings */}
                 <Route element={<ProtectedRoute moduleSlug="website-settings" action="view" />}>
-                    <Route path="/settings/company-settings" element={<><Seo title="Company Settings" /><CompanySettings /></>} />
+                    <Route path="/settings/company-settings" element={<><Seo title="Korxona Rekvizitlari | SAPAR" /><CompanySettings /></>} />
+                    <Route path="/settings/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
+                    <Route path="/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
                     <Route path="/settings/localization" element={<><Seo title="Localization Settings" /><LocalizationSettings /></>} />
                 </Route>
 
@@ -339,7 +371,7 @@ const AdminRoute = () => {
                 <Route element={<ProtectedRoute moduleSlug="module-settings" action="view" />}>
                     <Route path="/settings/module-settings/invoice" element={<><Seo title="Module Settings - Invoice" /><InvoiceSettings /></>} />
                     <Route path="/settings/module-settings/purchase" element={<><Seo title="Module Settings - Purchase" /><PurchaseSettings /></>} />
-                    <Route path="/settings/module-settings/purchase-order" element={<><Seo title="Module Settings - Purchase Order" /><PurchaseOrderSettings     /></>} />
+                    <Route path="/settings/module-settings/purchase-order" element={<><Seo title="Module Settings - Purchase Order" /><PurchaseOrderSettings /></>} />
                     <Route path="/settings/module-settings/expense" element={<><Seo title="Module Settings - Expense" /><ExpenseSettings /></>} />
                     <Route path="/settings/module-settings/quotations" element={<><Seo title="Module Settings - Quotations" /><QuotationSettings /></>} />
                     <Route path="/settings/module-settings/product" element={<><Seo title="Module Settings - Product" /><ProductSettings /></>} />
@@ -387,7 +419,7 @@ const AdminRoute = () => {
 
                 {/* Suppliers — list redirects to Contacts */}
                 <Route element={<ProtectedRoute moduleSlug="suppliers" action="view" />}>
-                    <Route path="/suppliers" element={<Navigate to="/admin/contacts" replace />} />
+                    <Route path="/suppliers" element={<Navigate to="/admin/contacts?view=suppliers" replace />} />
                 </Route>
 
                 <Route element={<ProtectedRoute moduleSlug="supplier-payments" action="view" />}>
@@ -472,8 +504,8 @@ const AdminRoute = () => {
                     <Route path="/accounting/reports/soliq-qqs" element={<><Seo title="Soliq QQS 12% Deklaratsiyasi" /><SoliqQqsReport /></>} />
                     <Route path="/accounting/reports/soliq-jshods" element={<><Seo title="Soliq JShODS va Ijtimoiy Soliq" /><SoliqJshodsReport /></>} />
                     <Route path="/accounting/reports/soliq-aylanma" element={<><Seo title="Soliq Aylanma Solig‘i 4%" /><SoliqAylanmaReport /></>} />
-                    <Route path="/accounting/reports/gstr-1" element={<><Seo title="GSTR-1" /><GSTR1Report /></>} />
-                    <Route path="/accounting/reports/gstr-3b" element={<><Seo title="GSTR-3B" /><GSTR3BReport /></>} />
+                    <Route path="/accounting/reports/gstr-1" element={<Navigate to="/admin/accounting/reports/soliq-qqs" replace />} />
+                    <Route path="/accounting/reports/gstr-3b" element={<Navigate to="/admin/accounting/reports/soliq-qqs" replace />} />
 
                     {/* Accounting Periods (slice F.4) */}
                     {/* (country tax returns route added separately below, gated on accounting-reports) */}
@@ -513,8 +545,10 @@ const AdminRoute = () => {
                 <Route path="/settings/payment-gateways" element={<><Seo title="Payment Gateways" /><PaymentGateways /></>} />
                 <Route path="/settings/subscription-plans" element={<><Seo title="Obuna va Tariflar" /><SubscriptionPlansPage /></>} />
                 <Route path="/saas/clients" element={<><Seo title="SaaS Mijozlar Boshqaruvi" /><SaasClientsPage /></>} />
-                <Route path="/business-loans" element={<><Seo title="Biznesingizni moliyalashtiring" /><BusinessLoansPage /></>} />
-                <Route path="/financing" element={<><Seo title="Biznesingizni moliyalashtiring" /><BusinessLoansPage /></>} />
+                <Route path="/business-loans" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />
+                <Route path="/financing" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />
+                <Route path="/finance/loans-scoring" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />
+                <Route path="/loans-scoring" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />
                 <Route path="/onboarding" element={<><Seo title="Onboarding Wizard" /><OnboardingWizardPage /></>} />
                 <Route path="/settings/payment-gateways/razorpay" element={<><Seo title="Razorpay Configuration" /><RazorpayConfig /></>} />
 
@@ -528,7 +562,7 @@ const AdminRoute = () => {
 
                 {/* Activity Log */}
                 <Route element={<ProtectedRoute moduleSlug="activity-log" action="view" />}>
-                  <Route path="/activity-log" element={<><Seo title="Activity Log" /><ActivityLogList /></>} />
+                    <Route path="/activity-log" element={<><Seo title="Activity Log" /><ActivityLogList /></>} />
                 </Route>
 
                 {/* Roles & Permissions */}

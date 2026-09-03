@@ -63,7 +63,7 @@ const QuotationTemplate: React.FC<InvoiceDetailsProps> = ({ quotationDeta, lineF
                     <p className="text-sm text-gray-600">{quotationDeta?.billTo?.email}</p>
                     <p className="text-sm text-gray-600">{quotationDeta?.billTo?.phone ?? ''}</p>
                     {quotationDeta?.billTo?.vatRegNumber && <p className="text-sm text-gray-600">VAT Reg: {quotationDeta.billTo.vatRegNumber}</p>}
-                    {quotationDeta?.billTo?.gstin && <p className="text-sm text-gray-600">GSTIN: {quotationDeta.billTo.gstin}</p>}
+                    {quotationDeta?.billTo?.gstin && <p className="text-sm text-gray-600">STIR / ИНН: {quotationDeta.billTo.gstin}</p>}
                 </div>
                 <div className="w-2/5">
                     <h2 className="font-bold text-purple-600 mb-2">Pay To :</h2>

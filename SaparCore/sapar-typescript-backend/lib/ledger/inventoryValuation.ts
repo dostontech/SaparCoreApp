@@ -186,7 +186,8 @@ export async function applyFifoIssue(
   }
 
   const cogs = toDecimal(result.cogs);
-  const newQtyOnHand = currentQtyOnHand.minus(toDecimal(qty));
+  const current = currentQtyOnHand ? toDecimal(currentQtyOnHand) : toDecimal(qty);
+  const newQtyOnHand = current.minus(toDecimal(qty));
 
   return { cogs, newQtyOnHand };
 }

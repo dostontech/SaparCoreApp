@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { FC, ChangeEvent, FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import Constants from "@constants/api";
 import axios from "axios";
 import Table from "@components/admin/Table";
@@ -54,6 +55,7 @@ interface FormErrors {
 }
 
 const BrandList: FC = () => {
+    const { t } = useTranslation();
     const { token } = useSelector((state: RootState) => state.auth);
     const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
     const permissions = systemSettings?.permissions || [];
@@ -264,17 +266,24 @@ const BrandList: FC = () => {
     const from = (pagination.page - 1) * pagination.limit + 1;
     const to = Math.min(pagination.page * pagination.limit, pagination.total);
 
-    const tableHeaders = ["#", "Brand Name", "Status", "Actions"];
+    const tableHeaders = [
+        "#",
+        t('brands.brandName', 'Brend nomi'),
+        t('brands.status', 'Holati'),
+        t('common.actions', 'Amallar')
+    ];
     const restrictedActions = ['edit', 'delete'];
     const tableActions = [
         {
-            label: 'Edit',
+            label: t('common.edit', 'Tahrirlash'),
+            actionType: 'edit',
             icon: <Edit size={14} />,
             primary: true,
             onClick: (item: Brand) => { handleEditClick(item) }
         },
         {
-            label: 'Delete',
+            label: t('common.delete', 'Oʻchirish'),
+            actionType: 'delete',
             icon: <Trash2Icon size={14} />,
             primary: true,
             variant: 'danger' as const,
@@ -283,7 +292,7 @@ const BrandList: FC = () => {
     ];
 
     const allowedActions = tableActions.filter((action) => {
-        const actionName = action.label.toLowerCase() as PermissionAction;
+        const actionName = ((action as any).actionType || action.label).toLowerCase() as PermissionAction;
 
         if (!restrictedActions.includes(actionName)) {
             return true;
@@ -297,35 +306,46 @@ const BrandList: FC = () => {
     }
     return (
         <div className="space-y-4">
-            <PageHeader title="Brands">
+            <PageHeader title={t('brands.title', 'Brendlar')}>
                 {hasPermission(permissions, 'product-services', 'create') && (
                     <Button
                         onClick={openCreateBrand}
                         leftIcon={<CirclePlusIcon size={14} />}
                         className="shadow"
                     >
-                        New Brand
+                        {t('brands.newBrand', 'Yangi brend')}
                     </Button>
                 )}
             </PageHeader>
 
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-                <input
-                    type="text"
-                    placeholder="Search by brand name..."
-                    value={search}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                />
-                <select
-                    value={limit}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
-                    className="border border-gray-300 px-3 py-2 rounded-md bg-white  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                >
-                    {[10, 25, 50].map((num) => (
-                        <option className="text-gray-950 " key={num} value={num}>{num} / page</option>
-                    ))}
-                </select>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <input
+                        type="text"
+                        placeholder={t('brands.searchPlaceholder', 'Brend nomi boʻyicha qidirish...')}
+                        value={search}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
+                        className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64 text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
+                    />
+                    <select
+                        value={limit}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
+                        className="border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
+                    >
+                        {[10, 25, 50].map((num) => (
+                            <option className="text-gray-950" key={num} value={num}>{num} / {t('common.page', 'sahifa')}</option>
+                        ))}
+                    </select>
+                </div>
+                {hasPermission(permissions, 'product-services', 'create') && (
+                    <Button
+                        onClick={openCreateBrand}
+                        leftIcon={<CirclePlusIcon size={16} />}
+                        className="bg-[#028090] hover:bg-[#026d7a] text-white shadow"
+                    >
+                        {t('brands.newBrand', 'Yangi brend')}
+                    </Button>
+                )}
             </div>
 
             <Table headers={tableHeaders}>
@@ -347,7 +367,7 @@ const BrandList: FC = () => {
                                     checked={brandItem.status}
                                     onChange={() => updateStatus(brandItem)}
                                 />
-                                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-purple-600 rounded-full peer-focus:ring-2 peer-focus:ring-purple-600 transition-all duration-300">
+                                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-[#028090] rounded-full peer-focus:ring-2 peer-focus:ring-[#028090] transition-all duration-300">
                                     <div className={`absolute top-0.5 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${brandItem.status ? 'translate-x-full' : ''}`}></div>
                                 </div>
                             </label>
@@ -358,13 +378,13 @@ const BrandList: FC = () => {
 
                 {!isLoading && brands.length === 0 &&
                     <tr>
-                        <td colSpan={tableHeaders.length} className="text-center py-4 font-semibold">No brands found.</td>
+                        <td colSpan={tableHeaders.length} className="text-center py-4 font-semibold text-gray-500">{t('brands.noBrandsFound', 'Brendlar topilmadi')}</td>
                     </tr>
                 }
 
                 {isLoading && (
                     <tr key="table-loader">
-                        <td className="text-center py-2 text-gray-950  font-semibold" colSpan={7}>
+                        <td className="text-center py-2 text-gray-950 font-semibold" colSpan={7}>
                             <LoaderSpinner />
                         </td>
                     </tr>
@@ -382,30 +402,30 @@ const BrandList: FC = () => {
                 paginationShape="rounded"
             />
 
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={isEditMode ? 'Edit Brand' : 'Add New Brand'}>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={isEditMode ? t('brands.editBrand', 'Brendni tahrirlash') : t('brands.addNewBrand', 'Yangi brend qoʻshish')}>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700  mb-1">Image <em className="text-red-600">*</em></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('brands.image', 'Rasm')} <em className="text-red-600">*</em></label>
                         <ImageCropperUpload
                             value={brand.brandImageUrl || undefined}
                             aspect={1}
-                            label="Upload Image"
+                            label={t('brands.uploadImage', 'Rasm yuklash')}
                             onCropped={handleCroppedBrandImage}
                         />
                         {formErrors.brand_image && <p className="text-red-500 text-xs mt-1">{formErrors.brand_image}</p>}
                     </div>
 
                     <div>
-                        <label htmlFor="brand_name" className="block text-sm font-medium text-gray-700  mb-1">
-                            Name <span className="text-red-500">*</span>
+                        <label htmlFor="brand_name" className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('brands.brandName', 'Brend nomi')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="brand_name"
                             type="text"
                             value={brand.brand_name || ''}
                             onChange={(e) => setBrand({ ...brand, brand_name: e.target.value })}
-                            placeholder="Enter brand name"
-                            className="w-full text-gray-950  bg-white  px-4 py-2 border border-gray-300  rounded-md text-sm focus:ring-purple-600 focus:border-purple-600"
+                            placeholder={t('brands.namePlaceholder', 'Brend nomini kiriting')}
+                            className="w-full text-gray-950 bg-white px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#028090] focus:border-[#028090]"
                         />
                         {formErrors.brand_name && <p className="text-red-500 text-xs mt-1">{formErrors.brand_name}</p>}
                     </div>
@@ -423,7 +443,7 @@ const BrandList: FC = () => {
                             disabled={isSubmitting}
                             onClick={() => setShowModal(false)}
                         >
-                            Cancel
+                            {t('common.cancel', 'Bekor qilish')}
                         </Button>
                         <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={isEditMode ? "edit" : "create"} />
                     </div>
@@ -434,8 +454,8 @@ const BrandList: FC = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
-                title="Confirm Deletion"
-                message="Are you sure you want to delete this brand?"
+                title={t('brands.confirmDeleteTitle', 'Oʻchirishni tasdiqlang')}
+                message={t('brands.confirmDeleteMsg', 'Ushbu brendni oʻchirishga ishonchingiz komilmi?')}
                 isDeleting={isDeleting}
             >
             </DeleteConfirmationModal>

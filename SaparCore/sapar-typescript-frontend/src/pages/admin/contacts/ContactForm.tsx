@@ -9,10 +9,7 @@ import InputField from '@components/admin/InputField';
 import CurrencySelect from '@components/admin/CurrencySelect';
 import { useCurrencies } from '@hooks/useCurrencies';
 import FullPageLoader from '@components/admin/FullPageLoader';
-import { PageHeader } from '@/context/PageHeaderContext';
-import { Button, Badge } from '@components/ui';
-import { Save } from 'lucide-react';
-import useDateFormatter from '@hooks/useDateFormatter';
+import { Save, Users, Building2, Phone, MapPin, Receipt, ArrowLeft } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,13 +40,11 @@ interface ContactFormData {
     region: string;
     postcode: string;
     countryId: string;
-    /** ISO-2 country code captured for EU cross-border reverse-charge detection */
     country: string;
     // Invoicing
     defaultPaymentTermDays: string;
     defaultTaxTreatment: DefaultTaxTreatment;
     vatRegNumber: string;
-    /** Customer VAT number (UK/EU) used by the server tax engine */
     vatNumber: string;
     gstin: string;
     invoiceLanguage: string;
@@ -66,11 +61,28 @@ type ErrorResponse = {
     message?: string;
 };
 
+const UZBEKISTAN_REGIONS = [
+    'Toshkent shahri',
+    'Toshkent viloyati',
+    'Samarqand viloyati',
+    'Buxoro viloyati',
+    'Fargʻona viloyati',
+    'Andijon viloyati',
+    'Namangan viloyati',
+    'Qashqadaryo viloyati',
+    'Surxondaryo viloyati',
+    'Jizzax viloyati',
+    'Sirdaryo viloyati',
+    'Navoiy viloyati',
+    'Xorazm viloyati',
+    'Qoraqalpogʻiston Respublikasi',
+];
+
 const initialFormData: ContactFormData = {
     firstName: '',
     lastName: '',
     organisation: '',
-    showNameOnInvoice: false,
+    showNameOnInvoice: true,
     email: '',
     billingEmail: '',
     telephone: '',
@@ -79,19 +91,19 @@ const initialFormData: ContactFormData = {
     addressLine2: '',
     addressLine3: '',
     town: '',
-    region: '',
+    region: 'Toshkent shahri',
     postcode: '',
     countryId: '',
-    country: '',
-    defaultPaymentTermDays: '',
+    country: 'UZ',
+    defaultPaymentTermDays: '15',
     defaultTaxTreatment: 'STANDARD',
     vatRegNumber: '',
     vatNumber: '',
     gstin: '',
-    invoiceLanguage: '',
-    invoiceSequencePrefix: '',
+    invoiceLanguage: 'uz',
+    invoiceSequencePrefix: 'SF-',
     useContactEmailSettings: false,
-    currencyCode: '',
+    currencyCode: 'UZS',
     status: 'ACTIVE',
 };
 
@@ -109,10 +121,6 @@ const ContactForm: React.FC = () => {
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isFetching, setIsFetching] = useState(isEditMode);
-    // VIES verification status (read-only; set server-side on save when VIES is enabled)
-    const [viesValid, setViesValid] = useState<boolean | null>(null);
-    const [viesCheckedAt, setViesCheckedAt] = useState<string | null>(null);
-    const { formatDate } = useDateFormatter();
 
     // Country dropdown
     const [countries, setCountries] = useState<CountryOption[]>([]);
@@ -122,10 +130,10 @@ const ContactForm: React.FC = () => {
 
     // Seed currency default for new contacts
     useEffect(() => {
-        if (!isEditMode && defaultCurrencyCode) {
+        if (!isEditMode) {
             setFormData((prev) => ({
                 ...prev,
-                currencyCode: prev.currencyCode || defaultCurrencyCode,
+                currencyCode: prev.currencyCode || defaultCurrencyCode || 'UZS',
             }));
         }
     }, [defaultCurrencyCode, isEditMode]);
@@ -143,6 +151,14 @@ const ContactForm: React.FC = () => {
                     name: c.name,
                 }));
                 setCountries(list);
+
+                // Default to Uzbekistan if available
+                if (!isEditMode && list.length > 0) {
+                    const uz = list.find((c) => c.name.toLowerCase().includes('uzbek') || c.name.toLowerCase().includes('oʻzbek'));
+                    if (uz) {
+                        setFormData((prev) => ({ ...prev, countryId: prev.countryId || uz.id, country: 'UZ' }));
+                    }
+                }
             } catch (error) {
                 console.error('Failed to load countries:', error);
             } finally {
@@ -150,7 +166,7 @@ const ContactForm: React.FC = () => {
             }
         };
         fetchCountries();
-    }, [token]);
+    }, [token, isEditMode]);
 
     // Load existing contact for edit mode
     useEffect(() => {
@@ -167,7 +183,7 @@ const ContactForm: React.FC = () => {
                         firstName: data.firstName || '',
                         lastName: data.lastName || '',
                         organisation: data.organisation || '',
-                        showNameOnInvoice: data.showNameOnInvoice ?? false,
+                        showNameOnInvoice: data.showNameOnInvoice ?? true,
                         email: data.email || '',
                         billingEmail: data.billingEmail || '',
                         telephone: data.telephone || '',
@@ -176,33 +192,31 @@ const ContactForm: React.FC = () => {
                         addressLine2: data.addressLine2 || '',
                         addressLine3: data.addressLine3 || '',
                         town: data.town || '',
-                        region: data.region || '',
+                        region: data.region || 'Toshkent shahri',
                         postcode: data.postcode || '',
                         countryId: data.countryId ? String(data.countryId) : '',
-                        country: data.country || '',
-                        defaultPaymentTermDays: data.defaultPaymentTermDays != null ? String(data.defaultPaymentTermDays) : '',
+                        country: data.country || 'UZ',
+                        defaultPaymentTermDays: data.defaultPaymentTermDays != null ? String(data.defaultPaymentTermDays) : '15',
                         defaultTaxTreatment: data.defaultTaxTreatment || 'STANDARD',
                         vatRegNumber: data.vatRegNumber || '',
                         vatNumber: data.vatNumber || '',
-                        gstin: data.gstin || '',
-                        invoiceLanguage: data.invoiceLanguage || '',
-                        invoiceSequencePrefix: data.invoiceSequencePrefix || '',
+                        gstin: data.gstin || data.vatRegNumber || '',
+                        invoiceLanguage: data.invoiceLanguage || 'uz',
+                        invoiceSequencePrefix: data.invoiceSequencePrefix || 'SF-',
                         useContactEmailSettings: data.useContactEmailSettings ?? false,
-                        currencyCode: data.currencyCode || defaultCurrencyCode || '',
+                        currencyCode: data.currencyCode || defaultCurrencyCode || 'UZS',
                         status: data.status || 'ACTIVE',
                     });
-                    setViesValid(data.viesValid ?? null);
-                    setViesCheckedAt(data.viesCheckedAt ?? null);
                 }
             } catch (error) {
                 console.error('Error fetching contact:', error);
-                toast.error('Failed to load contact.');
+                toast.error('Kontakt maʼlumotlarini yuklab boʻlmadi.');
             } finally {
                 setIsFetching(false);
             }
         };
         fetchContact();
-    }, [id, isEditMode, token]);
+    }, [id, isEditMode, token, defaultCurrencyCode]);
 
     const handleFormChange = (field: keyof ContactFormData, value: string | boolean) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -221,21 +235,28 @@ const ContactForm: React.FC = () => {
         const hasLastName = formData.lastName.trim().length > 0;
 
         if (!hasOrg && !(hasFirstName && hasLastName)) {
-            errors.identity = 'Provide an organisation name, or both a first name and last name.';
+            errors.identity = 'Kompaniya / korxona nomini yoki masʼul shaxsning ism va familiyasini kiriting.';
         }
 
         if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errors.email = 'Email is not valid.';
+            errors.email = 'Elektron pochta manzili notoʻgʻri formatda.';
         }
 
         if (formData.billingEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.billingEmail)) {
-            errors.billingEmail = 'Billing email is not valid.';
+            errors.billingEmail = 'Hisob-faktura uchun email notoʻgʻri formatda.';
         }
 
         if (formData.defaultPaymentTermDays.trim()) {
             const days = Number(formData.defaultPaymentTermDays);
             if (!Number.isInteger(days) || days < 0) {
-                errors.defaultPaymentTermDays = 'Payment terms must be a non-negative whole number.';
+                errors.defaultPaymentTermDays = 'Toʻlov muddati butun musbat son boʻlishi kerak.';
+            }
+        }
+
+        if (formData.gstin.trim()) {
+            const digits = formData.gstin.trim().replace(/\D/g, '');
+            if (digits.length !== 9 && digits.length !== 14) {
+                errors.gstin = 'STIR 9 xonali (yuridik shaxs) yoki JShShIR 14 xonali (jismoniy shaxs) boʻlishi kerak.';
             }
         }
 
@@ -244,41 +265,44 @@ const ContactForm: React.FC = () => {
             if (errors.identity) {
                 toast.error(errors.identity);
             } else {
-                toast.error('Please fix the errors in the form.');
+                toast.error('Iltimos, shakldagi xatoliklarni toʻgʻrilang.');
             }
             return false;
         }
         return true;
     };
 
-    const buildPayload = () => ({
-        firstName: formData.firstName.trim() || null,
-        lastName: formData.lastName.trim() || null,
-        organisation: formData.organisation.trim() || null,
-        showNameOnInvoice: formData.showNameOnInvoice,
-        email: formData.email.trim() || null,
-        billingEmail: formData.billingEmail.trim() || null,
-        telephone: formData.telephone.trim() || null,
-        mobile: formData.mobile.trim() || null,
-        addressLine1: formData.addressLine1.trim() || null,
-        addressLine2: formData.addressLine2.trim() || null,
-        addressLine3: formData.addressLine3.trim() || null,
-        town: formData.town.trim() || null,
-        region: formData.region.trim() || null,
-        postcode: formData.postcode.trim() || null,
-        countryId: formData.countryId || null,
-        country: formData.country.trim().toUpperCase() || null,
-        defaultPaymentTermDays: formData.defaultPaymentTermDays.trim() ? Number(formData.defaultPaymentTermDays) : null,
-        defaultTaxTreatment: formData.defaultTaxTreatment,
-        vatRegNumber: formData.vatRegNumber.trim() || null,
-        vatNumber: formData.vatNumber.trim() || null,
-        gstin: formData.gstin.trim() || null,
-        invoiceLanguage: formData.invoiceLanguage.trim() || null,
-        invoiceSequencePrefix: formData.invoiceSequencePrefix.trim() || null,
-        useContactEmailSettings: formData.useContactEmailSettings,
-        currencyCode: formData.currencyCode || null,
-        status: formData.status,
-    });
+    const buildPayload = () => {
+        const stirClean = formData.gstin.trim() || null;
+        return {
+            firstName: formData.firstName.trim() || null,
+            lastName: formData.lastName.trim() || null,
+            organisation: formData.organisation.trim() || null,
+            showNameOnInvoice: formData.showNameOnInvoice,
+            email: formData.email.trim() || null,
+            billingEmail: formData.billingEmail.trim() || null,
+            telephone: formData.telephone.trim() || null,
+            mobile: formData.mobile.trim() || null,
+            addressLine1: formData.addressLine1.trim() || null,
+            addressLine2: formData.addressLine2.trim() || null,
+            addressLine3: formData.addressLine3.trim() || null,
+            town: formData.town.trim() || null,
+            region: formData.region.trim() || 'Toshkent shahri',
+            postcode: formData.postcode.trim() || null,
+            countryId: formData.countryId || null,
+            country: formData.country.trim().toUpperCase() || 'UZ',
+            defaultPaymentTermDays: formData.defaultPaymentTermDays.trim() ? Number(formData.defaultPaymentTermDays) : 15,
+            defaultTaxTreatment: formData.defaultTaxTreatment,
+            vatRegNumber: stirClean,
+            vatNumber: stirClean,
+            gstin: stirClean,
+            invoiceLanguage: formData.invoiceLanguage.trim() || 'uz',
+            invoiceSequencePrefix: formData.invoiceSequencePrefix.trim() || 'SF-',
+            useContactEmailSettings: formData.useContactEmailSettings,
+            currencyCode: formData.currencyCode || 'UZS',
+            status: formData.status,
+        };
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -292,12 +316,12 @@ const ContactForm: React.FC = () => {
                 await axios.put(`${CONTACTS_URL}/${id}`, payload, {
                     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 });
-                toast.success('Contact updated successfully');
+                toast.success('Kontakt muvaffaqiyatli yangilandi!');
             } else {
                 await axios.post(CONTACTS_URL, payload, {
                     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 });
-                toast.success('Contact created successfully');
+                toast.success('Yangi kontakt muvaffaqiyatli yaratildi!');
             }
             navigate('/admin/contacts');
         } catch (error) {
@@ -308,204 +332,177 @@ const ContactForm: React.FC = () => {
                 if (data.errors.identity) {
                     toast.error(data.errors.identity);
                 } else {
-                    toast.error('Please fix the errors in the form.');
+                    toast.error('Shaklni toʻldirishda xatolik yuz berdi.');
                 }
             } else {
-                toast.error(data?.message || 'Something went wrong. Please try again.');
+                toast.error(data?.message || 'Xatolik yuz berdi. Iltimos qayta urinib koʻring.');
             }
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // ── Shared select class ───────────────────────────────────────────────────
-
-    const selectClass = 'mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-600 focus:border-purple-600 sm:text-sm text-gray-950 disabled:bg-gray-50';
-
-    // ── Render ────────────────────────────────────────────────────────────────
+    const selectClass = 'mt-1 block w-full px-3 py-2 border border-slate-300 bg-white rounded-lg shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent text-sm text-slate-800 disabled:bg-slate-50';
 
     return (
-        <>
-            <PageHeader title={isEditMode ? 'Edit Contact' : 'New Contact'}>
-                <Button
-                    variant="white"
-                    onClick={() => navigate('/admin/contacts')}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    type="submit"
-                    form="contact-form"
-                    disabled={isSubmitting}
-                    leftIcon={<Save size={16} />}
-                >
-                    {isEditMode ? 'Save Changes' : 'Create'}
-                </Button>
-            </PageHeader>
-            <div className="p-6 bg-white rounded-card shadow-card border border-border">
+        <div className="space-y-5 max-w-5xl mx-auto pb-12">
+            {/* Top Page Banner with Title and Action Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                <div className="flex items-center gap-3.5">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/contacts')}
+                        className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 transition cursor-pointer"
+                        title="Orqaga"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </button>
+                    <div>
+                        <h1 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                            <Users className="w-5 h-5 text-[#028090]" />
+                            {isEditMode ? 'Kontaktni tahrirlash' : 'Yangi kontakt / mijoz qoʻshish'}
+                        </h1>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Oʻzbekiston rekvizitlari, STIR (9 xonali), QQS 12% va hisob-kitob parametrlari
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/contacts')}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Bekor qilish
+                    </button>
+                    <button
+                        type="submit"
+                        form="contact-form"
+                        disabled={isSubmitting}
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#028090] to-[#02C39A] hover:brightness-105 transition shadow-sm cursor-pointer disabled:opacity-50"
+                    >
+                        <Save className="w-4 h-4" />
+                        {isSubmitting ? 'Saqlanmoqda...' : isEditMode ? 'Oʻzgarishlarni saqlash' : 'Kontaktni saqlash'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Form Card */}
+            <div className="p-6 bg-white rounded-2xl shadow-xs border border-slate-200">
                 <form id="contact-form" className="space-y-8" onSubmit={handleSubmit}>
 
-                    {/* ── Identity ──────────────────────────────────────────── */}
+                    {/* ── 1. Shaxs va Korxona (Identity) ───────────────────── */}
                     <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Identity
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 mb-5 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-[#028090]" />
+                            1. Shaxs va Korxona maʼlumotlari
                         </h3>
                         {formErrors.identity && (
-                            <p className="mb-4 text-sm text-red-500">{formErrors.identity}</p>
+                            <p className="mb-4 text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                                {formErrors.identity}
+                            </p>
                         )}
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-6">
+                            <InputField
+                                id="contactOrganisation"
+                                label="Kompaniya / Korxona nomi (Yuridik shaxs)"
+                                value={formData.organisation}
+                                onChange={(e) => handleFormChange('organisation', e.target.value)}
+                                placeholder="Masalan: OOO 'MEGA SAVDO' yoki YaTT 'Aliyev'"
+                                className="sm:col-span-3"
+                                error={formErrors.organisation}
+                            />
                             <InputField
                                 id="contactFirstName"
-                                label="First Name"
+                                label="Masʼul shaxs ismi"
                                 value={formData.firstName}
                                 onChange={(e) => handleFormChange('firstName', e.target.value)}
-                                placeholder="Enter first name"
-                                className="sm:col-span-2"
+                                placeholder="Ismni kiriting"
+                                className="sm:col-span-3"
                                 error={formErrors.firstName}
                             />
                             <InputField
                                 id="contactLastName"
-                                label="Last Name"
+                                label="Masʼul shaxs familiyasi"
                                 value={formData.lastName}
                                 onChange={(e) => handleFormChange('lastName', e.target.value)}
-                                placeholder="Enter last name"
-                                className="sm:col-span-2"
+                                placeholder="Familiyani kiriting"
+                                className="sm:col-span-3"
                                 error={formErrors.lastName}
                             />
-                            <InputField
-                                id="contactOrganisation"
-                                label="Organisation"
-                                value={formData.organisation}
-                                onChange={(e) => handleFormChange('organisation', e.target.value)}
-                                placeholder="Enter organisation name"
-                                className="sm:col-span-2"
-                                error={formErrors.organisation}
-                            />
-                            <div className="sm:col-span-6 flex items-center gap-3">
+                            <div className="sm:col-span-6 flex items-center gap-3 pt-1">
                                 <input
                                     id="contactShowNameOnInvoice"
                                     type="checkbox"
                                     checked={formData.showNameOnInvoice}
                                     onChange={(e) => handleFormChange('showNameOnInvoice', e.target.checked)}
-                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-600"
+                                    className="h-4 w-4 rounded border-slate-300 text-[#028090] focus:ring-[#028090]"
                                 />
-                                <label htmlFor="contactShowNameOnInvoice" className="text-sm text-gray-700">
-                                    Show name on invoice
+                                <label htmlFor="contactShowNameOnInvoice" className="text-xs font-medium text-slate-700 cursor-pointer">
+                                    Hisob-fakturada kompaniya / masʼul shaxs nomini chop etish
                                 </label>
                             </div>
                         </div>
                     </section>
 
-                    {/* ── Communications ────────────────────────────────────── */}
+                    {/* ── 2. Aloqa maʼlumotlari (Communications) ───────────── */}
                     <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Communications
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 mb-5 flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-[#028090]" />
+                            2. Aloqa maʼlumotlari (Telefon & Email)
                         </h3>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
-                            <InputField
-                                id="contactEmail"
-                                label="Email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => handleFormChange('email', e.target.value)}
-                                placeholder="Enter email address"
-                                className="sm:col-span-3"
-                                error={formErrors.email}
-                            />
-                            <InputField
-                                id="contactBillingEmail"
-                                label="Billing Email"
-                                type="email"
-                                value={formData.billingEmail}
-                                onChange={(e) => handleFormChange('billingEmail', e.target.value)}
-                                placeholder="Enter billing email"
-                                className="sm:col-span-3"
-                                error={formErrors.billingEmail}
-                            />
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-6">
                             <InputField
                                 id="contactTelephone"
-                                label="Telephone"
+                                label="Telefon raqami (Asosiy)"
                                 value={formData.telephone}
                                 onChange={(e) => handleFormChange('telephone', e.target.value)}
-                                placeholder="Enter telephone number"
+                                placeholder="+998 71 123 45 67"
                                 className="sm:col-span-3"
                                 error={formErrors.telephone}
                             />
                             <InputField
                                 id="contactMobile"
-                                label="Mobile"
+                                label="Mobil / Qoʻshimcha telefon"
                                 value={formData.mobile}
                                 onChange={(e) => handleFormChange('mobile', e.target.value)}
-                                placeholder="Enter mobile number"
+                                placeholder="+998 90 123 45 67"
                                 className="sm:col-span-3"
                                 error={formErrors.mobile}
+                            />
+                            <InputField
+                                id="contactEmail"
+                                label="Elektron pochta (Asosiy email)"
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => handleFormChange('email', e.target.value)}
+                                placeholder="pochta@kompaniya.uz"
+                                className="sm:col-span-3"
+                                error={formErrors.email}
+                            />
+                            <InputField
+                                id="contactBillingEmail"
+                                label="Hisob-fakturalar uchun email (Buxgalteriya)"
+                                type="email"
+                                value={formData.billingEmail}
+                                onChange={(e) => handleFormChange('billingEmail', e.target.value)}
+                                placeholder="buxgalteriya@kompaniya.uz"
+                                className="sm:col-span-3"
+                                error={formErrors.billingEmail}
                             />
                         </div>
                     </section>
 
-                    {/* ── Address ───────────────────────────────────────────── */}
+                    {/* ── 3. Manzil (Address) ──────────────────────────────── */}
                     <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Address
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 mb-5 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-[#028090]" />
+                            3. Manzil maʼlumotlari
                         </h3>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
-                            <InputField
-                                id="contactAddressLine1"
-                                label="Address Line 1"
-                                value={formData.addressLine1}
-                                onChange={(e) => handleFormChange('addressLine1', e.target.value)}
-                                placeholder="Enter address line 1"
-                                className="sm:col-span-6"
-                                error={formErrors.addressLine1}
-                            />
-                            <InputField
-                                id="contactAddressLine2"
-                                label="Address Line 2"
-                                value={formData.addressLine2}
-                                onChange={(e) => handleFormChange('addressLine2', e.target.value)}
-                                placeholder="Enter address line 2"
-                                className="sm:col-span-6"
-                                error={formErrors.addressLine2}
-                            />
-                            <InputField
-                                id="contactAddressLine3"
-                                label="Address Line 3"
-                                value={formData.addressLine3}
-                                onChange={(e) => handleFormChange('addressLine3', e.target.value)}
-                                placeholder="Enter address line 3"
-                                className="sm:col-span-6"
-                                error={formErrors.addressLine3}
-                            />
-                            <InputField
-                                id="contactTown"
-                                label="Town / City"
-                                value={formData.town}
-                                onChange={(e) => handleFormChange('town', e.target.value)}
-                                placeholder="Enter town or city"
-                                className="sm:col-span-2"
-                                error={formErrors.town}
-                            />
-                            <InputField
-                                id="contactRegion"
-                                label="Region / State"
-                                value={formData.region}
-                                onChange={(e) => handleFormChange('region', e.target.value)}
-                                placeholder="Enter region or state"
-                                className="sm:col-span-2"
-                                error={formErrors.region}
-                            />
-                            <InputField
-                                id="contactPostcode"
-                                label="Postcode"
-                                value={formData.postcode}
-                                onChange={(e) => handleFormChange('postcode', e.target.value)}
-                                placeholder="Enter postcode"
-                                className="sm:col-span-2"
-                                error={formErrors.postcode}
-                            />
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-6">
                             <div className="sm:col-span-3">
-                                <label htmlFor="contactCountry" className="block text-sm font-medium text-gray-700">
-                                    Country
+                                <label htmlFor="contactCountry" className="block text-xs font-semibold text-slate-700">
+                                    Mamlakat (Davlat)
                                 </label>
                                 <select
                                     id="contactCountry"
@@ -515,7 +512,7 @@ const ContactForm: React.FC = () => {
                                     className={selectClass}
                                 >
                                     <option value="">
-                                        {isLoadingCountries ? 'Loading...' : '— Select country —'}
+                                        {isLoadingCountries ? 'Yuklanmoqda...' : 'Oʻzbekiston (Default)'}
                                     </option>
                                     {countries.map((c) => (
                                         <option key={c.id} value={c.id}>
@@ -523,43 +520,88 @@ const ContactForm: React.FC = () => {
                                         </option>
                                     ))}
                                 </select>
-                                {formErrors.countryId && (
-                                    <p className="mt-1 text-sm text-red-500">{formErrors.countryId}</p>
-                                )}
                             </div>
+
+                            <div className="sm:col-span-3">
+                                <label htmlFor="contactRegionSelect" className="block text-xs font-semibold text-slate-700">
+                                    Viloyat / Shahar (Oʻzbekiston)
+                                </label>
+                                <select
+                                    id="contactRegionSelect"
+                                    value={formData.region}
+                                    onChange={(e) => handleFormChange('region', e.target.value)}
+                                    className={selectClass}
+                                >
+                                    {UZBEKISTAN_REGIONS.map((r) => (
+                                        <option key={r} value={r}>
+                                            {r}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <InputField
-                                id="contactCountryCode"
-                                label="Country Code (ISO-2)"
-                                value={formData.country}
-                                onChange={(e) => handleFormChange('country', e.target.value.toUpperCase())}
-                                placeholder="e.g. GB, DE, AU"
+                                id="contactTown"
+                                label="Tuman / Shahar"
+                                value={formData.town}
+                                onChange={(e) => handleFormChange('town', e.target.value)}
+                                placeholder="Masalan: Mirzo Ulugʻbek tumani"
                                 className="sm:col-span-3"
-                                maxLength={2}
-                                error={formErrors.country}
+                                error={formErrors.town}
+                            />
+
+                            <InputField
+                                id="contactPostcode"
+                                label="Pochta indeksi"
+                                value={formData.postcode}
+                                onChange={(e) => handleFormChange('postcode', e.target.value)}
+                                placeholder="Masalan: 100000"
+                                className="sm:col-span-3"
+                                error={formErrors.postcode}
+                            />
+
+                            <InputField
+                                id="contactAddressLine1"
+                                label="Koʻcha va bino (Manzil 1-qator)"
+                                value={formData.addressLine1}
+                                onChange={(e) => handleFormChange('addressLine1', e.target.value)}
+                                placeholder="Masalan: Mustaqillik shoh koʻchasi, 45-uy"
+                                className="sm:col-span-3"
+                                error={formErrors.addressLine1}
+                            />
+
+                            <InputField
+                                id="contactAddressLine2"
+                                label="Xonadon / Ofis (Manzil 2-qator)"
+                                value={formData.addressLine2}
+                                onChange={(e) => handleFormChange('addressLine2', e.target.value)}
+                                placeholder="Masalan: 4-qavat, 402-ofis"
+                                className="sm:col-span-3"
+                                error={formErrors.addressLine2}
                             />
                         </div>
                     </section>
 
-                    {/* ── Invoicing ─────────────────────────────────────────── */}
+                    {/* ── 4. Soliq va Hisob-faktura (Invoicing & Taxes) ───────── */}
                     <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Invoicing
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 mb-5 flex items-center gap-2">
+                            <Receipt className="w-4 h-4 text-[#028090]" />
+                            4. Soliq va Hisob-faktura sozlamalari
                         </h3>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-6">
                             <InputField
-                                id="contactPaymentTermDays"
-                                label="Default Payment Terms (days)"
-                                type="number"
-                                value={formData.defaultPaymentTermDays}
-                                onChange={(e) => handleFormChange('defaultPaymentTermDays', e.target.value)}
-                                placeholder="e.g. 30"
-                                className="sm:col-span-2"
-                                error={formErrors.defaultPaymentTermDays}
+                                id="contactGstin"
+                                label="STIR / ИНН (9 xonali) yoki JShShIR (14 xonali PINFL)"
+                                value={formData.gstin}
+                                onChange={(e) => handleFormChange('gstin', e.target.value)}
+                                placeholder="Masalan: 308123456 yoki 31204958271049"
+                                className="sm:col-span-3"
+                                error={formErrors.gstin}
                             />
 
-                            <div className="sm:col-span-2">
-                                <label htmlFor="contactDefaultTaxTreatment" className="block text-sm font-medium text-gray-700">
-                                    Default Tax Treatment
+                            <div className="sm:col-span-3">
+                                <label htmlFor="contactDefaultTaxTreatment" className="block text-xs font-semibold text-slate-700">
+                                    QQS soliq rejimi
                                 </label>
                                 <select
                                     id="contactDefaultTaxTreatment"
@@ -567,118 +609,86 @@ const ContactForm: React.FC = () => {
                                     onChange={(e) => handleFormChange('defaultTaxTreatment', e.target.value as DefaultTaxTreatment)}
                                     className={selectClass}
                                 >
-                                    <option value="STANDARD">Standard</option>
-                                    <option value="ZERO_RATED">Zero-rated</option>
-                                    <option value="EXEMPT">Exempt</option>
-                                    <option value="REVERSE_CHARGE">Reverse charge</option>
-                                    <option value="OUT_OF_SCOPE">Out of scope</option>
+                                    <option value="STANDARD">Standart QQS 12% (QQS toʻlovchi)</option>
+                                    <option value="ZERO_RATED">0% stavka (Eksport tovarlari)</option>
+                                    <option value="EXEMPT">QQSdan ozod qilingan / Imtiyozli</option>
+                                    <option value="OUT_OF_SCOPE">Aylanma soliq / QQS toʻlovchi emas (4%)</option>
+                                    <option value="REVERSE_CHARGE">Teskari soliq solish</option>
                                 </select>
-                                {formErrors.defaultTaxTreatment && (
-                                    <p className="mt-1 text-sm text-red-500">{formErrors.defaultTaxTreatment}</p>
-                                )}
                             </div>
 
                             <InputField
-                                id="contactVatRegNumber"
-                                label="VAT Reg. Number"
-                                value={formData.vatRegNumber}
-                                onChange={(e) => handleFormChange('vatRegNumber', e.target.value)}
-                                placeholder="Enter VAT registration number"
+                                id="contactPaymentTermDays"
+                                label="Standart toʻlov muddati (kunlar)"
+                                type="number"
+                                value={formData.defaultPaymentTermDays}
+                                onChange={(e) => handleFormChange('defaultPaymentTermDays', e.target.value)}
+                                placeholder="15"
                                 className="sm:col-span-2"
-                                error={formErrors.vatRegNumber}
+                                error={formErrors.defaultPaymentTermDays}
                             />
-                            <div className="sm:col-span-2">
-                                <InputField
-                                    id="contactVatNumber"
-                                    label="VAT Number (UK/EU)"
-                                    value={formData.vatNumber}
-                                    onChange={(e) => handleFormChange('vatNumber', e.target.value)}
-                                    placeholder="e.g. DE123456789"
-                                    error={formErrors.vatNumber}
-                                />
-                                {viesCheckedAt && (
-                                    <p className="mt-1.5">
-                                        {viesValid === true && (
-                                            <Badge color="success">
-                                                VIES verified
-                                                <span className="text-xs font-normal opacity-80"> · {formatDate(viesCheckedAt)}</span>
-                                            </Badge>
-                                        )}
-                                        {viesValid === false && (
-                                            <Badge color="warning">
-                                                VIES: not found
-                                                <span className="text-xs font-normal opacity-80"> · {formatDate(viesCheckedAt)}</span>
-                                            </Badge>
-                                        )}
-                                    </p>
-                                )}
-                            </div>
-                            <InputField
-                                id="contactGstin"
-                                label="GSTIN"
-                                value={formData.gstin}
-                                onChange={(e) => handleFormChange('gstin', e.target.value)}
-                                placeholder="Enter GSTIN"
-                                className="sm:col-span-2"
-                                error={formErrors.gstin}
-                            />
-                            <InputField
-                                id="contactInvoiceLanguage"
-                                label="Invoice Language"
-                                value={formData.invoiceLanguage}
-                                onChange={(e) => handleFormChange('invoiceLanguage', e.target.value)}
-                                placeholder="e.g. en"
-                                className="sm:col-span-2"
-                                error={formErrors.invoiceLanguage}
-                            />
+
                             <InputField
                                 id="contactInvoiceSequencePrefix"
-                                label="Invoice Sequence Prefix"
+                                label="Faktura prefiksi (Sequence Prefix)"
                                 value={formData.invoiceSequencePrefix}
                                 onChange={(e) => handleFormChange('invoiceSequencePrefix', e.target.value)}
-                                placeholder="e.g. INV-"
+                                placeholder="Masalan: SF-"
                                 className="sm:col-span-2"
                                 error={formErrors.invoiceSequencePrefix}
                             />
+
+                            <div className="sm:col-span-2">
+                                <label htmlFor="contactInvoiceLanguage" className="block text-xs font-semibold text-slate-700">
+                                    Faktura hujjati tili
+                                </label>
+                                <select
+                                    id="contactInvoiceLanguage"
+                                    value={formData.invoiceLanguage}
+                                    onChange={(e) => handleFormChange('invoiceLanguage', e.target.value)}
+                                    className={selectClass}
+                                >
+                                    <option value="uz">Oʻzbekcha (uz)</option>
+                                    <option value="ru">Русский (ru)</option>
+                                    <option value="en">English (en)</option>
+                                </select>
+                            </div>
+
                             <div className="sm:col-span-6 flex items-center gap-3">
                                 <input
                                     id="contactUseContactEmailSettings"
                                     type="checkbox"
                                     checked={formData.useContactEmailSettings}
                                     onChange={(e) => handleFormChange('useContactEmailSettings', e.target.checked)}
-                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-600"
+                                    className="h-4 w-4 rounded border-slate-300 text-[#028090] focus:ring-[#028090]"
                                 />
-                                <label htmlFor="contactUseContactEmailSettings" className="text-sm text-gray-700">
-                                    Use contact-level email settings
+                                <label htmlFor="contactUseContactEmailSettings" className="text-xs font-medium text-slate-700 cursor-pointer">
+                                    Mijozga fakturalar va toʻlov bildirishnomalarini avtomatik email orqali yuborish
                                 </label>
                             </div>
                         </div>
                     </section>
 
-                    {/* ── Currency ──────────────────────────────────────────── */}
+                    {/* ── 5. Valyuta va Holat (Currency & Status) ─────────────── */}
                     <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Currency
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 mb-5 flex items-center gap-2">
+                            <Receipt className="w-4 h-4 text-[#028090]" />
+                            5. Hisob-kitob valyutasi va Holati
                         </h3>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
-                            <div className="sm:col-span-2">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-6">
+                            <div className="sm:col-span-3">
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                    Asosiy hisob-kitob valyutasi
+                                </label>
                                 <CurrencySelect
                                     value={formData.currencyCode}
                                     onChange={(code) => handleFormChange('currencyCode', code)}
                                 />
                             </div>
-                        </div>
-                    </section>
 
-                    {/* ── Status ────────────────────────────────────────────── */}
-                    <section>
-                        <h3 className="text-lg font-semibold leading-6 text-gray-950 border-b border-gray-200 pb-2 mb-6">
-                            Status
-                        </h3>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-6">
-                            <div className="sm:col-span-2">
-                                <label htmlFor="contactStatus" className="block text-sm font-medium text-gray-700">
-                                    Contact Status
+                            <div className="sm:col-span-3">
+                                <label htmlFor="contactStatus" className="block text-xs font-semibold text-slate-700 mb-1">
+                                    Kontakt holati
                                 </label>
                                 <select
                                     id="contactStatus"
@@ -686,18 +696,37 @@ const ContactForm: React.FC = () => {
                                     onChange={(e) => handleFormChange('status', e.target.value as ContactStatus)}
                                     className={selectClass}
                                 >
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="HIDDEN">Hidden</option>
+                                    <option value="ACTIVE">Faol (Active)</option>
+                                    <option value="HIDDEN">Yashirilgan / Nofaol (Hidden)</option>
                                 </select>
                             </div>
                         </div>
                     </section>
 
+                    {/* ── Bottom Form Action Bar ───────────────────────────────── */}
+                    <div className="pt-6 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/admin/contacts')}
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                        >
+                            Bekor qilish
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#028090] to-[#02C39A] hover:brightness-105 transition shadow-sm cursor-pointer disabled:opacity-50"
+                        >
+                            <Save className="w-4 h-4" />
+                            {isSubmitting ? 'Saqlanmoqda...' : isEditMode ? 'Oʻzgarishlarni saqlash' : 'Kontaktni saqlash'}
+                        </button>
+                    </div>
+
                 </form>
             </div>
 
             {isFetching && <FullPageLoader />}
-        </>
+        </div>
     );
 };
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Constants from '../../../constants/api';
 import { toast } from "sonner";
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Package, Wrench, Barcode, Sparkles, ShieldCheck, Coins } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import ImageCropperUpload from '@components/common/ImageCropperUpload';
 import type { RootState } from '../../../store';
@@ -15,6 +15,7 @@ import CreateBrandModal from './CreateBrandModal';
 import CreateUnitModal from './CreateUnitModal';
 import CurrencySelect from '@components/admin/CurrencySelect';
 import { useCurrencies } from '@hooks/useCurrencies';
+import { useTranslation } from 'react-i18next';
 import DynamicCustomFields from '@components/admin/DynamicCustomFields';
 import { Button } from '@components/ui';
 import type { ProductTaxRate } from '@models/product';
@@ -23,6 +24,7 @@ import { validateProductForm } from '@utils/productValidation';
 import {
     generateProductCode as generateNewProductCode,
     generateRandomBarcode as generateNewBarcode,
+    generateEan13Barcode,
 } from '@utils/productGenerators';
 
 interface OptionType {
@@ -81,6 +83,7 @@ interface IFormData {
     productImageUrl?: string;
     valuationMethod: 'WAC' | 'FIFO';
     currencyCode: string;
+    ikpu?: string;
 }
 
 // For form validation errors
@@ -88,7 +91,7 @@ type FormErrors = Partial<Record<keyof IFormData | 'product_image', string>>;
 
 // Sentinel so the Unit dropdown can represent "no unit chosen" as a real,
 // selectable, clearable row instead of an empty placeholder state.
-const NO_UNIT = { id: '', name: '-no unit-' };
+const NO_UNIT = { id: '', name: '— Birliksiz —' };
 
 // --- Component ---
 
@@ -97,6 +100,7 @@ export default function ProductForm({ productData }: ProductFormProps) {
     const { token } = useSelector((state: RootState) => state.auth);
     const isEditMode = Boolean(productData);
     const { defaultCurrencyCode } = useCurrencies();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState<IFormData>({
         name: '',
@@ -116,6 +120,7 @@ export default function ProductForm({ productData }: ProductFormProps) {
         description: '',
         valuationMethod: 'WAC',
         currencyCode: defaultCurrencyCode,
+        ikpu: '01111001001000000',
     });
 
     const [productImage, setProductImage] = useState<File | null>(null);
@@ -456,54 +461,96 @@ export default function ProductForm({ productData }: ProductFormProps) {
     return (
         <>
             <form onSubmit={handleSubmit} className="space-y-4 bg-white">
+                {/* --- Top Action Bar --- */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
+                    <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl max-w-md border border-slate-200">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, enable_inventory: true }))}
+                            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                                formData.enable_inventory
+                                    ? 'bg-[#028090] text-white shadow-xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
+                            <Package className="w-4 h-4" />
+                            <span>{t('products.itemTypeProduct', 'Tovar / Mahsulot (Ombor zaxirasi)')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, enable_inventory: false }))}
+                            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                                !formData.enable_inventory
+                                    ? 'bg-[#028090] text-white shadow-xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
+                            <Wrench className="w-4 h-4" />
+                            <span>{t('products.itemTypeService', 'Xizmat (Zaxirasiz)')}</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="white" onClick={() => navigate('/admin/products')}>
+                            {t('common.cancel', 'Bekor qilish')}
+                        </Button>
+                        {!isEditMode && (
+                            <Button type="submit" variant="white" disabled={isSubmitting} onClick={() => { addAnotherRef.current = true; }}>
+                                {t('products.createAndAddAnother', 'Saqlash va yangisini kiritish')}
+                            </Button>
+                        )}
+                        <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={isEditMode ? 'edit' : 'create'} />
+                    </div>
+                </div>
+
                 {/* --- Form Grid --- */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                     {/* Name */}
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-red-500">Name *</label>
-                        <input type="text" name="name" id="name" maxLength={255} value={formData.name} onChange={handleInputChange} className="mt-1 block text-gray-700 p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600" />
+                        <label htmlFor="name" className="block text-sm font-medium text-red-500">{t('products.name', 'Mahsulot nomi *')}</label>
+                        <input type="text" name="name" id="name" maxLength={255} placeholder={t('products.namePlaceholder', 'Masalan: Armatura A500C d-12mm yoki Xizmat')} value={formData.name} onChange={handleInputChange} className="mt-1 block text-gray-700 p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090]" />
                         {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                     </div>
 
                     {/* Unit */}
                     <div>
-                        <label htmlFor="unit" className="block text-sm font-medium text-gray-600">Unit</label>
+                        <label htmlFor="unit" className="block text-sm font-medium text-gray-600">{t('products.unit', 'Oʻlchov birligi')}</label>
                         <SmartDropdown
                             items={[NO_UNIT, ...units]}
                             value={unitSearchInput}
                             onChange={(value) => setUnitSearchInput(value)}
                             onSelect={(selected) => setFormData(prev => ({ ...prev, unit: (selected?.id || '') as string }))}
-                            placeholder="Type to search unit..."
+                            placeholder={t('products.unitPlaceholder', 'Oʻlchov birligini tanlang...')}
                             selectedItem={units.find(unit => unit.id === formData.unit) || NO_UNIT}
                             onAddNew={() => { setIsCreateUnitModalOpen(true) }}
-                            addNewLabel='New Unit'
+                            addNewLabel={t('products.newUnit', 'Yangi oʻlchov birligi')}
                         />
                         {formErrors.unit && <p className="text-red-500 text-xs mt-1">{formErrors.unit}</p>}
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-600">Description</label>
-                        <textarea name="description" id="description" rows={2} value={formData.description} onChange={handleInputChange} className="mt-1 block text-gray-700 p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600" />
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-600">{t('products.description', 'Tavsif / Izoh')}</label>
+                        <textarea name="description" id="description" rows={2} placeholder={t('products.descriptionPlaceholder', 'Mahsulot haqida qisqacha maʼlumot...')} value={formData.description} onChange={handleInputChange} className="mt-1 block text-gray-700 p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090]" />
                         {formErrors.description && <p className="text-red-500 text-xs mt-1">{formErrors.description}</p>}
                     </div>
 
                     {/* Unit Price */}
                     <div>
-                        <label htmlFor="selling_price" className="block text-sm font-medium text-gray-600">Unit Price</label>
-                        <input type="number" name="selling_price" id="selling_price" value={formData.selling_price} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 border border-gray-200 rounded-md " />
+                        <label htmlFor="selling_price" className="block text-sm font-medium text-gray-600">{t('products.sellingPrice', 'Sotish narxi')}</label>
+                        <input type="number" name="selling_price" id="selling_price" value={formData.selling_price} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] border border-gray-200 rounded-md" />
                         {formErrors.selling_price && <p className="text-red-500 text-xs mt-1">{formErrors.selling_price}</p>}
                     </div>
 
                     {/* Tax */}
                     <div>
-                        <label htmlFor="tax" className="block text-sm font-medium text-gray-600">Tax</label>
+                        <label htmlFor="tax" className="block text-sm font-medium text-gray-600">{t('products.tax', 'QQS / Soliq')}</label>
                         <SmartDropdown
                             items={taxes}
                             value={taxSearchInput}
                             onChange={(value) => setTaxSearchInput(value)}
                             onSelect={(s) => setFormData(prev => ({ ...prev, taxRateId: (s?.id || '') as string }))}
-                            placeholder="Type to search tax..."
+                            placeholder={t('products.taxPlaceholder', 'Soliq turini tanlang...')}
                             selectedItem={taxes.find(t => t.id === formData.taxRateId) || (formData.taxRateId === '' && isEditMode && productData?.tax_rate ? { id: '', name: `${productData.tax_rate.name} (${productData.tax_rate.rate}%)` } : null)}
                         />
                         {formErrors.taxRateId && <p className="text-red-500 text-xs mt-1">{formErrors.taxRateId}</p>}
@@ -511,16 +558,16 @@ export default function ProductForm({ productData }: ProductFormProps) {
                 </div>
 
                 {/* --- More Options (optional fields) --- */}
-                <details className="mt-2 rounded-md border border-gray-200 p-4">
-                    <summary className="cursor-pointer text-sm font-medium text-gray-700">More options</summary>
+                <details className="mt-2 rounded-md border border-gray-200 p-4" open={isEditMode}>
+                    <summary className="cursor-pointer text-sm font-medium text-gray-700">{t('products.moreOptions', 'Qoʻshimcha parametrlar va rasm')}</summary>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         {/* Product Image */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Product Image</label>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">{t('products.productImage', 'Asosiy rasm')}</label>
                             <ImageCropperUpload
                                 value={productImagePreview || undefined}
                                 aspect={1}
-                                label="Upload Image"
+                                label={t('products.uploadImage', 'Rasm yuklash')}
                                 onCropped={handleCroppedProductImage}
                             />
                             {formErrors.product_image && <p className="text-red-500 text-xs mt-1">{formErrors.product_image}</p>}
@@ -528,76 +575,94 @@ export default function ProductForm({ productData }: ProductFormProps) {
 
                         {/* Code */}
                         <div>
-                            <label htmlFor="code" className="block text-sm font-medium text-gray-600">Code </label>
+                            <label htmlFor="code" className="block text-sm font-medium text-gray-600">{t('products.code', 'Mahsulot kodi / Artikul')}</label>
                             <div className="mt-1 flex">
-                                <input type="text" name="code" id="code" value={formData.code} onChange={handleInputChange} className="flex-grow block text-gray-700 p-2 w-full border border-gray-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600" />
-                                <button type="button" onClick={generateProductCode} className="px-3 py-2 bg-gray-200 text-gray-700 border border-l-0 border-gray-200 rounded-r-md hover:bg-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600">Generate</button>
+                                <input type="text" name="code" id="code" value={formData.code} onChange={handleInputChange} className="flex-grow block text-gray-700 p-2 w-full border border-gray-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090]" />
+                                <button type="button" onClick={generateProductCode} className="px-3 py-2 bg-gray-100 text-gray-700 border border-l-0 border-gray-200 rounded-r-md hover:bg-gray-200 text-sm font-medium focus:outline-none cursor-pointer">{t('common.generate', 'Generatsiya')}</button>
                             </div>
                             {formErrors.code && <p className="text-red-500 text-xs mt-1">{formErrors.code}</p>}
                         </div>
 
                         {/* Category */}
                         <div>
-                            <label htmlFor="category" className="block text-sm font-medium text-gray-600">Category</label>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-600">{t('products.category', 'Toifa / Kategoriya')}</label>
                             <SmartDropdown
                                 items={categories}
                                 value={categorySearchInput}
                                 onChange={(value) => setCategorySearchInput(value)}
                                 onSelect={(selected) => setFormData(prev => ({ ...prev, category: (selected?.id || '') as string }))}
-                                placeholder="Type to search category..."
+                                placeholder={t('products.categoryPlaceholder', 'Toifani tanlang...')}
                                 selectedItem={categories.find(cat => cat.id === formData.category) || null}
                                 onAddNew={() => { setIsCategoryCreateModalOpen(true) }}
-                                addNewLabel='New Category'
+                                addNewLabel={t('products.newCategory', 'Yangi toifa')}
                             />
                             {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
                         </div>
 
                         {/* Brand */}
                         <div>
-                            <label htmlFor="brand" className="block text-sm font-medium text-gray-600">Brand</label>
+                            <label htmlFor="brand" className="block text-sm font-medium text-gray-600">{t('products.brand', 'Brend / Ishlab chiqaruvchi')}</label>
                             <SmartDropdown
                                 items={brands}
                                 value={brandSearchInput}
                                 onChange={(value) => setBrandSearchInput(value)}
                                 onSelect={(selected) => setFormData(prev => ({ ...prev, brand: (selected?.id || '') as string }))}
-                                placeholder="Type to search brand..."
+                                placeholder={t('products.brandPlaceholder', 'Brendni tanlang...')}
                                 selectedItem={brands.find(brand => brand.id === formData.brand) || null}
                                 onAddNew={() => { setIsCreateBrandModalOpen(true) }}
-                                addNewLabel='New Brand'
+                                addNewLabel={t('products.newBrand', 'Yangi brend')}
                             />
                             {formErrors.brand && <p className="text-red-500 text-xs mt-1">{formErrors.brand}</p>}
                         </div>
 
                         {/* Purchase Price */}
                         <div>
-                            <label htmlFor="purchase_price" className="block text-sm font-medium text-gray-600">Purchase Price</label>
-                            <input type="number" name="purchase_price" id="purchase_price" value={formData.purchase_price} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 border border-gray-200 rounded-md " />
+                            <label htmlFor="purchase_price" className="block text-sm font-medium text-gray-600">{t('products.purchasePrice', 'Tannarx (Xarid narxi)')}</label>
+                            <input type="number" name="purchase_price" id="purchase_price" value={formData.purchase_price} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] border border-gray-200 rounded-md" />
                             {formErrors.purchase_price && <p className="text-red-500 text-xs mt-1">{formErrors.purchase_price}</p>}
                         </div>
 
                         {/* Discount Type */}
                         <div>
-                            <label htmlFor="discount_type" className="block text-sm font-medium text-gray-600">Discount Type</label>
-                            <select name="discount_type" id="discount_type" value={formData.discount_type} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full border border-gray-200 rounded-md ">
-                                <option value="Fixed">Fixed</option>
-                                <option value="Percentage">Percentage</option>
+                            <label htmlFor="discount_type" className="block text-sm font-medium text-gray-600">{t('products.discountType', 'Chegirma turi')}</label>
+                            <select name="discount_type" id="discount_type" value={formData.discount_type} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block w-full border border-gray-200 rounded-md">
+                                <option value="Fixed">{t('products.discountFixed', 'Aniq summa (soʻm)')}</option>
+                                <option value="Percentage">{t('products.discountPercentage', 'Foiz (%)')}</option>
                             </select>
                             {formErrors.discount_type && <p className="text-red-500 text-xs mt-1">{formErrors.discount_type}</p>}
                         </div>
 
                         {/* Discount Value */}
                         <div>
-                            <label htmlFor="discount_value" className="block text-sm font-medium text-gray-500">Discount Value </label>
-                            <input type="number" name="discount_value" id="discount_value" value={formData.discount_value} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 block w-full border border-gray-200 rounded-md " />
+                            <label htmlFor="discount_value" className="block text-sm font-medium text-gray-500">{t('products.discountValue', 'Chegirma qiymati')}</label>
+                            <input type="number" name="discount_value" id="discount_value" value={formData.discount_value} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] block w-full border border-gray-200 rounded-md" />
                             {formErrors.discount_value && <p className="text-red-500 text-xs mt-1">{formErrors.discount_value}</p>}
                         </div>
 
-                        {/* Barcode */}
+                        {/* Barcode with Uzbekistan GS1 EAN-13 Generator */}
                         <div>
-                            <label htmlFor="barcode" className="block text-sm font-medium text-gray-600">Barcode </label>
+                            <label htmlFor="barcode" className="block text-sm font-medium text-gray-600">
+                                {t('products.barcodeUz', 'Shtrix-kod (EAN-13 Oʻzbekiston)')}
+                            </label>
                             <div className="mt-1 flex">
-                                <input type="text" name="barcode" id="barcode" value={formData.barcode} onChange={handleInputChange} className="flex-grow block text-gray-700 p-2 w-full focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 border border-gray-200 rounded-l-md " />
-                                <button type="button" onClick={generateBarcode} className="px-3 py-2 bg-gray-200 text-gray-700 border border-l-0 border-gray-200 rounded-r-md hover:bg-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600">Generate</button>
+                                <input
+                                    type="text"
+                                    name="barcode"
+                                    id="barcode"
+                                    value={formData.barcode}
+                                    onChange={handleInputChange}
+                                    placeholder="478000..."
+                                    className="flex-grow block font-mono text-gray-700 p-2 w-full focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] border border-gray-200 rounded-l-md text-xs font-bold"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, barcode: generateEan13Barcode() }))}
+                                    className="px-3 py-2 bg-teal-50 text-teal-700 font-bold border border-l-0 border-teal-200 rounded-r-md hover:bg-teal-100 text-xs flex items-center gap-1 cursor-pointer"
+                                    title="Oʻzbekiston 478 EAN-13 shtrix-kodini generatsiya qilish"
+                                >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>EAN-13</span>
+                                </button>
                             </div>
                             {formErrors.barcode && <p className="text-red-500 text-xs mt-1">{formErrors.barcode}</p>}
                         </div>
@@ -610,42 +675,42 @@ export default function ProductForm({ productData }: ProductFormProps) {
                                     name="enable_inventory"
                                     checked={formData.enable_inventory}
                                     onChange={(e) => setFormData(prev => ({ ...prev, enable_inventory: e.target.checked }))}
-                                    className="h-4 w-4 text-purple-600 border-gray-200 rounded focus:ring-purple-600"
+                                    className="h-4 w-4 text-[#028090] border-gray-200 rounded focus:ring-[#028090]"
                                 />
-                                <span className="ml-2 text-sm text-gray-700">Track inventory in stock</span>
+                                <span className="ml-2 text-sm text-gray-700">{t('products.trackInventoryCheck', 'Omborda zaxira hisobini yuritish')}</span>
                             </label>
                         </div>
 
                         {/* Opening Stock, Alert Quantity, Valuation Method — only meaningful when tracking inventory */}
                         {formData.enable_inventory && (
                             <div>
-                                <label htmlFor="stock" className="block text-sm font-medium text-gray-600">Opening stock quantity</label>
-                                <input type="number" name="stock" id="stock" value={formData.stock} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 w-full border border-gray-200 rounded-md " />
-                                <p className="text-xs text-gray-400 mt-1">Creates an inventory record so this product appears in Inventory.</p>
+                                <label htmlFor="stock" className="block text-sm font-medium text-gray-600">{t('products.openingStock', 'Boshlangʻich qoldiq miqdori')}</label>
+                                <input type="number" name="stock" id="stock" value={formData.stock} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] w-full border border-gray-200 rounded-md" />
+                                <p className="text-xs text-gray-400 mt-1">{t('products.openingStockHelp', 'Ushbu mahsulot uchun Ombor qoldigʻi avtomatik shakllantiriladi.')}</p>
                                 {formErrors.stock && <p className="text-red-500 text-xs mt-1">{formErrors.stock}</p>}
                             </div>
                         )}
 
                         {formData.enable_inventory && (
                             <div>
-                                <label htmlFor="alert_quantity" className="block text-sm font-medium text-gray-600">Alert Quantity </label>
-                                <input type="number" name="alert_quantity" id="alert_quantity" value={formData.alert_quantity} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 w-full border border-gray-200 rounded-md " />
+                                <label htmlFor="alert_quantity" className="block text-sm font-medium text-gray-600">{t('products.alertQuantity', 'Minimal qoldiq signali (Kam qolganda ogohlantirish)')}</label>
+                                <input type="number" name="alert_quantity" id="alert_quantity" value={formData.alert_quantity} onChange={handleInputChange} className="mt-1 text-gray-700 p-2 block focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090] w-full border border-gray-200 rounded-md" />
                                 {formErrors.alert_quantity && <p className="text-red-500 text-xs mt-1">{formErrors.alert_quantity}</p>}
                             </div>
                         )}
 
                         {formData.enable_inventory && (
                             <div>
-                                <label htmlFor="valuationMethod" className="block text-sm font-medium text-gray-600">Valuation Method</label>
+                                <label htmlFor="valuationMethod" className="block text-sm font-medium text-gray-600">{t('products.valuationMethod', 'Tannarxni hisoblash usuli')}</label>
                                 <select
                                     name="valuationMethod"
                                     id="valuationMethod"
                                     value={formData.valuationMethod}
                                     onChange={handleInputChange}
-                                    className="mt-1 text-gray-700 p-2 block w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600"
+                                    className="mt-1 text-gray-700 p-2 block w-full border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#028090] focus:border-[#028090]"
                                 >
-                                    <option value="WAC">WAC (Weighted Average Cost)</option>
-                                    <option value="FIFO">FIFO (First In, First Out)</option>
+                                    <option value="WAC">{t('products.wac', 'Oʻrtacha tortilgan tannarx (WAC)')}</option>
+                                    <option value="FIFO">{t('products.fifo', 'FIFO (Birinchi kirgan birinchi chiqadi)')}</option>
                                 </select>
                             </div>
                         )}
@@ -653,7 +718,7 @@ export default function ProductForm({ productData }: ProductFormProps) {
                         {/* Currency */}
                         <div>
                             <CurrencySelect
-                                label="Currency"
+                                label={t('products.currency', 'Hisob-kitob valyutasi')}
                                 value={formData.currencyCode}
                                 onChange={(code) => setFormData(prev => ({ ...prev, currencyCode: code }))}
                             />
@@ -661,12 +726,12 @@ export default function ProductForm({ productData }: ProductFormProps) {
 
                         {/* Gallery Images */}
                         <div className="md:col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('products.galleryImages', 'Qoʻshimcha rasmlar galereyasi')}</label>
                             <div className="mt-1 flex items-center space-x-4">
                                 <label className="cursor-pointer bg-gray-50 text-gray-500 flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-200 rounded-md hover:bg-gray-100">
                                     <Upload />
-                                    <span>Browse Images</span>
-                                    <p className="text-xs text-gray-400 mt-1">Supported formats: PNG, JPEG, WEBP</p>
+                                    <span>{t('products.browseImages', 'Rasmlarni tanlash')}</span>
+                                    <p className="text-xs text-gray-400 mt-1">{t('products.supportedFormats', 'Qoʻllab-quvvatlanadigan formatlar: PNG, JPEG, WEBP')}</p>
                                     <input type="file" className="hidden" onChange={handleGalleryImagesChange} accept="image/png, image/jpeg, image/webp" multiple />
                                 </label>
                             </div>
@@ -674,7 +739,7 @@ export default function ProductForm({ productData }: ProductFormProps) {
                                 {galleryImagePreviews.map((preview, index) => (
                                     <div key={index} className="relative w-24 h-24">
                                         <img src={preview} alt="Gallery preview" className="w-full h-full object-cover rounded-md" />
-                                        <button type="button" onClick={() => removeGalleryImage(index)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 leading-none">
+                                        <button type="button" onClick={() => removeGalleryImage(index)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 leading-none cursor-pointer">
                                             <X size={14} />
                                         </button>
                                     </div>
@@ -692,12 +757,12 @@ export default function ProductForm({ productData }: ProductFormProps) {
                     onFieldsLoaded={setActiveCustomFields}
                 />
 
-                {/* --- Action Buttons --- */}
-                <div className="flex justify-end space-x-4 pt-6 ">
-                    <Button variant="white" onClick={() => navigate('/admin/products')}>Cancel</Button>
+                {/* --- Bottom Action Buttons --- */}
+                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100">
+                    <Button variant="white" onClick={() => navigate('/admin/products')}>{t('common.cancel', 'Bekor qilish')}</Button>
                     {!isEditMode && (
                         <Button type="submit" variant="white" disabled={isSubmitting} onClick={() => { addAnotherRef.current = true; }}>
-                            Create &amp; Add Another
+                            {t('products.createAndAddAnother', 'Saqlash va yangisini kiritish')}
                         </Button>
                     )}
                     <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={isEditMode ? 'edit' : 'create'} />

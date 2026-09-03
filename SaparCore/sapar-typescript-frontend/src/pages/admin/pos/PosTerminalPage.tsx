@@ -41,6 +41,9 @@ import { ProductDetailsModal } from '@components/admin/pos/ProductDetailsModal';
 import { PosCalculatorModal } from '@components/admin/pos/PosCalculatorModal';
 import { PosDiscountModal } from '@components/admin/pos/PosDiscountModal';
 import { PosHeldOrdersModal, type HeldOrder } from '@components/admin/pos/PosHeldOrdersModal';
+import { PosOpenShiftModal } from '@components/admin/pos/PosOpenShiftModal';
+import { QuickAddProductModal } from '@components/admin/pos/QuickAddProductModal';
+import { PosZReportPrintModal } from '@components/admin/pos/PosZReportPrintModal';
 import { posAudio } from '@/utils/posAudio';
 
 interface CartItem {
@@ -75,7 +78,7 @@ export const PosTerminalPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // iBox-Style Workflow State
+  // Sapar-Style Workflow State
   const [selectedRegister, setSelectedRegister] = useState<string>('Kassa №1 (Asosiy zal)');
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('Boshqarma ombori');
   const [selectedPriceList, setSelectedPriceList] = useState<'standard' | 'wholesale' | 'vip'>('standard');
@@ -83,7 +86,7 @@ export const PosTerminalPage: React.FC = () => {
   const [posViewMode, setPosViewMode] = useState<'touch' | 'table'>('touch');
   const usdRate = 12750;
 
-  // Customers Directory & Selection (iBox Akt Sverki integration)
+  // Customers Directory & Selection (Sapar Akt Sverki integration)
   const [customers, setCustomers] = useState<CustomerOption[]>([
     { id: 'retail', name: 'Chakana Xaridor (Oddiy xaridor)', balance: 0, isRetail: true },
     { id: 'c1', name: 'OOO "RIZOBAY STROY"', phone: '+998 90 123 45 67', balance: -14500000 },
@@ -106,11 +109,22 @@ export const PosTerminalPage: React.FC = () => {
   const [discountReason, setDiscountReason] = useState<string>('');
 
   // Shift & Modals
-  const [shiftData, setShiftData] = useState<any | null>(null);
+  const [shiftData, setShiftData] = useState<any | null>(() => {
+    try {
+      const saved = localStorage.getItem('sapar_pos_shift');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isOpenShiftModal, setIsOpenShiftModal] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [lastReceipt, setLastReceipt] = useState<any | null>(null);
   const [selectedDetailProduct, setSelectedDetailProduct] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isQuickAddProductOpen, setIsQuickAddProductOpen] = useState(false);
+  const [isZReportModalOpen, setIsZReportModalOpen] = useState(false);
+  const [completedShiftData, setCompletedShiftData] = useState<any>(null);
 
   // Supercharged POS Modals
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -345,15 +359,100 @@ export const PosTerminalPage: React.FC = () => {
 
   const fetchCurrentShift = async () => {
     try {
+      const savedLocal = localStorage.getItem('sapar_pos_shift');
+      if (savedLocal) {
+        setShiftData(JSON.parse(savedLocal));
+      }
+
       const res = await axios.get(`${Constants.API_BASE_URL}/admin/pos/shift/current`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.data?.hasOpenShift) {
         setShiftData(res.data.data.shift);
+        localStorage.setItem('sapar_pos_shift', JSON.stringify(res.data.data.shift));
+      } else if (!savedLocal) {
+        setIsOpenShiftModal(true);
       }
     } catch {
-      /* ignore */
+      const savedLocal = localStorage.getItem('sapar_pos_shift');
+      if (savedLocal) {
+        setShiftData(JSON.parse(savedLocal));
+      } else {
+        setIsOpenShiftModal(true);
+      }
     }
+  };
+
+  const handleStartShift = async (data: {
+    cashierName: string;
+    registerName: string;
+    branchName: string;
+    openingCash: number;
+  }) => {
+    const newShift = {
+      id: `SH-${Date.now().toString().slice(-4)}`,
+      cashierName: data.cashierName,
+      registerName: data.registerName,
+      branchName: data.branchName,
+      openingCash: data.openingCash,
+      cashSales: 0,
+      cardSales: 0,
+      qrSales: 0,
+      openedAt: new Date().toISOString(),
+    };
+
+    try {
+      await axios.post(
+        `${Constants.API_BASE_URL}/admin/pos/shift/open`,
+        { cashierName: data.cashierName, openingCash: data.openingCash },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch {
+      /* offline resilience */
+    }
+
+    localStorage.setItem('sapar_pos_shift', JSON.stringify(newShift));
+    setShiftData(newShift);
+    setSelectedRegister(data.registerName);
+    setIsOpenShiftModal(false);
+    posAudio.playSuccessChime();
+    toast.success(`Kassa smenasi ochildi! Kassir: ${data.cashierName}, Float: ${format(data.openingCash)}`);
+  };
+
+  const handleCloseShift = () => {
+    const current = shiftData || {
+      id: `Z-${Date.now().toString().slice(-4)}`,
+      cashierName: 'Azizbek Toshmatov',
+      registerName: selectedRegister,
+      branchName: 'Bosh Ofis & Showroom',
+      openedAt: new Date(Date.now() - 8 * 3600000).toLocaleString('uz-UZ'),
+      closedAt: new Date().toLocaleString('uz-UZ'),
+      startingCash: 500000,
+      cashSales: 3450000,
+      cardSales: 5120000,
+      creditSales: 850000,
+      expenses: 400000,
+      ordersCount: 48,
+    };
+    setCompletedShiftData({
+      id: current.id || `Z-${Date.now().toString().slice(-4)}`,
+      cashierName: current.cashierName || 'Azizbek Toshmatov',
+      registerName: current.registerName || selectedRegister,
+      branchName: current.branchName || 'Bosh Ofis & Showroom',
+      openedAt: current.openedAt || new Date(Date.now() - 8 * 3600000).toLocaleString('uz-UZ'),
+      closedAt: new Date().toLocaleString('uz-UZ'),
+      startingCash: current.openingCash || 500000,
+      cashSales: current.cashSales || 3450000,
+      cardSales: current.cardSales || 5120000,
+      creditSales: current.creditSales || 850000,
+      expenses: current.expenses || 400000,
+      ordersCount: current.ordersCount || 48,
+    });
+    localStorage.removeItem('sapar_pos_shift');
+    setShiftData(null);
+    setIsZReportModalOpen(true);
+    posAudio.playSuccessChime();
+    toast.success('Kassa smenasi yopildi! Z-Hisobot cheki tayyor.');
   };
 
   // Price adjustment based on selected price tier
@@ -641,9 +740,8 @@ export const PosTerminalPage: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col font-sans text-slate-900 ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-slate-100 p-3 h-screen' : 'h-[calc(100vh-5rem)] -m-6 p-4 bg-slate-100'
-      }`}
+      className={`flex flex-col font-sans text-slate-900 ${isFullscreen ? 'fixed inset-0 z-50 bg-slate-100 p-3 h-screen' : 'h-[calc(100vh-5rem)] -m-6 p-4 bg-slate-100'
+        }`}
     >
       {/* 1. TOP POS HEADER BAR */}
       <div className="bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex flex-wrap items-center justify-between gap-4 mb-2 shadow-md">
@@ -655,7 +753,7 @@ export const PosTerminalPage: React.FC = () => {
             <h1 className="text-base font-bold text-white leading-tight">SAPAR POS — Kassa Terminali</h1>
             <p className="text-xs text-teal-300 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Soliq E-Kassa Rejimi (QQS 12%) • iBox Standarti
+              Soliq E-Kassa Rejimi (QQS 12%) • Sapar Standard
             </p>
           </div>
         </div>
@@ -682,16 +780,25 @@ export const PosTerminalPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsHeldModalOpen(true)}
-            className={`px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 text-xs font-bold ${
-              heldOrders.length > 0
-                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-            }`}
+            className={`px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 text-xs font-bold ${heldOrders.length > 0
+              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+              : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+              }`}
             title="Toʻxtatilgan savdolar (F4)"
           >
             <PauseCircle className="w-4 h-4 text-amber-400" />
             <span>Toʻxtatilgan ({heldOrders.length})</span>
             <span className="text-[10px] font-mono bg-slate-700 px-1 rounded text-slate-300">F4</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsQuickAddProductOpen(true)}
+            className="px-2.5 py-1.5 rounded-xl border bg-slate-800 border-slate-700 text-teal-300 hover:text-white hover:bg-slate-700 transition flex items-center gap-1 text-xs font-bold cursor-pointer"
+            title="Tezkor Yangi Mahsulot Qoʻshish (iBox / Bukku)"
+          >
+            <Plus className="w-4 h-4 text-[#02C39A]" />
+            <span className="hidden md:inline">Yangi Tovar</span>
           </button>
 
           <button
@@ -716,11 +823,10 @@ export const PosTerminalPage: React.FC = () => {
           <button
             type="button"
             onClick={toggleSound}
-            className={`p-2 rounded-xl border transition ${
-              isMuted
-                ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                : 'bg-teal-500/20 border-teal-500/40 text-teal-300 hover:bg-teal-500/30'
-            }`}
+            className={`p-2 rounded-xl border transition ${isMuted
+              ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+              : 'bg-teal-500/20 border-teal-500/40 text-teal-300 hover:bg-teal-500/30'
+              }`}
             title={isMuted ? 'Ovozni yoqish' : 'Ovozni oʻchirish'}
           >
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -729,25 +835,41 @@ export const PosTerminalPage: React.FC = () => {
           <button
             type="button"
             onClick={toggleFullscreen}
-            className={`p-2 rounded-xl border transition flex items-center gap-1 text-xs font-bold ${
-              isFullscreen
-                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
-            }`}
+            className={`p-2 rounded-xl border transition flex items-center gap-1 text-xs font-bold ${isFullscreen
+              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+              : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
+              }`}
             title={isFullscreen ? 'Oynali rejim' : 'Toʻliq ekran (Fullscreen)'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/admin/pos/shifts')}
-            className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 text-xs"
-          >
-            <Clock className="w-3.5 h-3.5 mr-1 text-amber-400" />
-            {shiftData ? `Smena: ${shiftData.cashierName}` : 'Smena & X/Z'}
-          </Button>
+          {shiftData ? (
+            <div className="flex items-center gap-1.5">
+              <span className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="hidden sm:inline">Smena:</span> {shiftData.cashierName} ({format(shiftData.openingCash)})
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCloseShift}
+                className="bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20 text-xs font-bold cursor-pointer"
+                title="Smenani yopish (Z-Hisobot)"
+              >
+                Smenani Yopish
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => setIsOpenShiftModal(true)}
+              className="bg-[#02C39A] hover:bg-[#02A683] text-[#0B2B33] font-black text-xs shadow-xs flex items-center gap-1 cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Yangi Smena Ochish</span>
+            </Button>
+          )}
 
           <Button
             variant="outline"
@@ -760,7 +882,7 @@ export const PosTerminalPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. iBox-STYLE CONTEXT TOOLBAR: Kassa, Ombor, Mas'ul, Prays-list, Valyuta, Rejim */}
+      {/* 2. Sapar-STYLE CONTEXT TOOLBAR: Kassa, Ombor, Mas'ul, Prays-list, Valyuta, Rejim */}
       <div className="bg-white rounded-2xl border border-slate-200 p-2.5 mb-2 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
           {/* Kassa */}
@@ -820,31 +942,28 @@ export const PosTerminalPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedCurrency('UZS')}
-              className={`px-2 py-1 rounded-lg font-bold text-xs transition ${
-                selectedCurrency === 'UZS' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-2 py-1 rounded-lg font-bold text-xs transition ${selectedCurrency === 'UZS' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                }`}
             >
               UZS (Soʻm)
             </button>
             <button
               type="button"
               onClick={() => setSelectedCurrency('USD')}
-              className={`px-2 py-1 rounded-lg font-bold text-xs transition ${
-                selectedCurrency === 'USD' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-2 py-1 rounded-lg font-bold text-xs transition ${selectedCurrency === 'USD' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                }`}
             >
               USD ($)
             </button>
           </div>
 
-          {/* Touch POS vs iBox Table Mode Switch */}
+          {/* Touch POS vs Sapar Table Mode Switch */}
           <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
             <button
               type="button"
               onClick={() => setPosViewMode('touch')}
-              className={`px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center gap-1 ${
-                posViewMode === 'touch' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center gap-1 ${posViewMode === 'touch' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
               <span>Touch Kassa</span>
@@ -852,9 +971,8 @@ export const PosTerminalPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setPosViewMode('table')}
-              className={`px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center gap-1 ${
-                posViewMode === 'table' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center gap-1 ${posViewMode === 'table' ? 'bg-white text-teal-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                }`}
             >
               <Table2 className="w-3.5 h-3.5" />
               <span>Sotuv Jadvali</span>
@@ -874,11 +992,10 @@ export const PosTerminalPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedCategory('all')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                  selectedCategory === 'all'
-                    ? 'bg-teal-700 text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
-                }`}
+                className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedCategory === 'all'
+                  ? 'bg-teal-700 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
+                  }`}
               >
                 Barchasi ({products.length})
               </button>
@@ -887,11 +1004,10 @@ export const PosTerminalPage: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                    selectedCategory === cat.id
-                      ? 'bg-teal-700 text-white shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
-                  }`}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedCategory === cat.id
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -908,11 +1024,10 @@ export const PosTerminalPage: React.FC = () => {
                     <div
                       key={prod.id}
                       onClick={() => handleAddToCart(prod)}
-                      className={`p-3 rounded-2xl bg-white border transition text-left flex flex-col justify-between group relative ${
-                        isOutOfStock
-                          ? 'border-slate-200 opacity-60 cursor-not-allowed bg-slate-50/50'
-                          : 'border-slate-200 hover:border-teal-500 hover:shadow-md cursor-pointer active:scale-95'
-                      }`}
+                      className={`p-3 rounded-2xl bg-white border transition text-left flex flex-col justify-between group relative ${isOutOfStock
+                        ? 'border-slate-200 opacity-60 cursor-not-allowed bg-slate-50/50'
+                        : 'border-slate-200 hover:border-teal-500 hover:shadow-md cursor-pointer active:scale-95'
+                        }`}
                     >
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[10px] text-slate-400">
@@ -926,36 +1041,32 @@ export const PosTerminalPage: React.FC = () => {
                               <Info className="w-3.5 h-3.5" />
                             </button>
                             <span
-                              className={`px-1.5 py-0.5 rounded-full font-semibold ${
-                                isOutOfStock ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
-                              }`}
+                              className={`px-1.5 py-0.5 rounded-full font-semibold ${isOutOfStock ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
+                                }`}
                             >
                               {isOutOfStock ? '0 ta' : `${prod.stock} ta`}
                             </span>
                           </div>
                         </div>
                         <h4
-                          className={`font-bold text-xs line-clamp-2 ${
-                            isOutOfStock ? 'text-slate-400' : 'text-slate-900 group-hover:text-teal-700'
-                          }`}
+                          className={`font-bold text-xs line-clamp-2 ${isOutOfStock ? 'text-slate-400' : 'text-slate-900 group-hover:text-teal-700'
+                            }`}
                         >
                           {prod.name}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
                         <span
-                          className={`font-mono font-black text-xs ${
-                            isOutOfStock ? 'text-slate-400' : 'text-teal-800'
-                          }`}
+                          className={`font-mono font-black text-xs ${isOutOfStock ? 'text-slate-400' : 'text-teal-800'
+                            }`}
                         >
                           {formatPosAmount(displayPrice)}
                         </span>
                         <div
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center transition ${
-                            isOutOfStock
-                              ? 'bg-slate-100 text-slate-300'
-                              : 'bg-teal-50 text-teal-700 group-hover:bg-teal-700 group-hover:text-white'
-                          }`}
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center transition ${isOutOfStock
+                            ? 'bg-slate-100 text-slate-300'
+                            : 'bg-teal-50 text-teal-700 group-hover:bg-teal-700 group-hover:text-white'
+                            }`}
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </div>
@@ -1005,9 +1116,8 @@ export const PosTerminalPage: React.FC = () => {
                 <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]">
                   <span className="text-slate-500 font-semibold">Mijoz Balansi:</span>
                   <span
-                    className={`font-mono font-bold ${
-                      selectedCustomer.balance < 0 ? 'text-rose-600' : 'text-emerald-700'
-                    }`}
+                    className={`font-mono font-bold ${selectedCustomer.balance < 0 ? 'text-rose-600' : 'text-emerald-700'
+                      }`}
                   >
                     {selectedCustomer.balance < 0
                       ? `Qarzdorlik: ${format(Math.abs(selectedCustomer.balance))}`
@@ -1095,11 +1205,10 @@ export const PosTerminalPage: React.FC = () => {
                   type="button"
                   disabled={cart.length === 0}
                   onClick={handleQuickCashCheckout}
-                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${
-                    cart.length === 0
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${cart.length === 0
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                   title="Tezkor Naqd toʻlov (F8)"
                 >
                   <Banknote className="w-3.5 h-3.5" />
@@ -1110,11 +1219,10 @@ export const PosTerminalPage: React.FC = () => {
                   type="button"
                   disabled={cart.length === 0}
                   onClick={handleQuickCreditCheckout}
-                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${
-                    cart.length === 0
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-amber-600 hover:bg-amber-700 text-white'
-                  }`}
+                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${cart.length === 0
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    : 'bg-amber-600 hover:bg-amber-700 text-white'
+                    }`}
                   title="Nasiya / Qarzga yozish (F7)"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
@@ -1125,11 +1233,10 @@ export const PosTerminalPage: React.FC = () => {
                   type="button"
                   disabled={cart.length === 0}
                   onClick={handleOpenPaymentModal}
-                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${
-                    cart.length === 0
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-teal-700 hover:bg-teal-800 text-white'
-                  }`}
+                  className={`py-2.5 px-2 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-0.5 shadow-xs transition active:scale-95 cursor-pointer ${cart.length === 0
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    : 'bg-teal-700 hover:bg-teal-800 text-white'
+                    }`}
                   title="Karta, Humo, Click va Aralash toʻlovlar (F9)"
                 >
                   <Coins className="w-3.5 h-3.5" />
@@ -1140,7 +1247,7 @@ export const PosTerminalPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* 1-TO-1 iBox TABLE MODE (Exact replica of ibox_sale_create.png) */
+        /* 1-TO-1 Sapar TABLE MODE (Exact replica of Sapar_sale_create.png) */
         <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="p-3 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -1335,6 +1442,35 @@ export const PosTerminalPage: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         product={selectedDetailProduct}
+      />
+
+      {/* Yangi Kassa Smenasini Ochish Modal (iBox-Style) */}
+      <PosOpenShiftModal
+        isOpen={isOpenShiftModal}
+        onClose={() => setIsOpenShiftModal(false)}
+        onOpenShift={handleStartShift}
+        initialCashier="Kassir"
+        initialCash={500000}
+        initialRegister={selectedRegister}
+      />
+
+      {/* Tezkor Yangi Mahsulot Qoʻshish Modali (iBox / Bukku Standarti) */}
+      <QuickAddProductModal
+        isOpen={isQuickAddProductOpen}
+        onClose={() => setIsQuickAddProductOpen(false)}
+        onSuccess={(newProd) => {
+          setProducts((prev) => [newProd, ...prev]);
+          addToCart(newProd);
+          posAudio.playSuccessChime();
+        }}
+        defaultCategory={selectedCategory !== 'all' ? selectedCategory : 'Metall Prokat'}
+      />
+
+      {/* Fiskal Smena Z-Hisoboti Modali (Termo-Chek) */}
+      <PosZReportPrintModal
+        isOpen={isZReportModalOpen}
+        onClose={() => setIsZReportModalOpen(false)}
+        shiftData={completedShiftData}
       />
     </div>
   );

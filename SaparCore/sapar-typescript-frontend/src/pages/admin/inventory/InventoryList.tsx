@@ -11,6 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import type { InventoryData } from "@models/inventory";
 import { useCurrencyFormatter } from "@hooks/useCurrencyFormatter";
 import { useCurrencies } from "@hooks/useCurrencies";
+import { useTranslation } from "react-i18next";
 import Modal from "@components/admin/Modal";
 import NewInventoryModal from "./NewInventoryModal";
 import PermissionGuard from "@components/admin/PermissionGuard";
@@ -37,6 +38,7 @@ interface InventoryFormData {
 
 const initialFormData: InventoryFormData = { productId: '', quantity: 0, type: '', notes: null };
 const InventoryList: React.FC = () => {
+    const { t } = useTranslation();
     const { token } = useSelector((state: RootState) => state.auth);
     const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
     const permissions = systemSettings?.permissions || [];
@@ -118,10 +120,12 @@ const InventoryList: React.FC = () => {
 
     const validateForm = (): boolean => {
         const newErrors: { [key: string]: string } = {};
-        if (formData.quantity <= 0) newErrors.quantity = 'Quantity must be greater than 0.';
-        if (formData.quantity > 100000) newErrors.quantity = 'Quantity cannot exceed 100000.';
+        if (formData.quantity <= 0) newErrors.quantity = t('inventory.errorQtyPositive', 'Miqdor 0 dan katta boʻlishi kerak.');
+        if (formData.quantity > 100000) newErrors.quantity = t('inventory.errorQtyMax', 'Miqdor 100 000 dan oshmasligi kerak.');
         // if remove type is selected don't allow quantity greater than itemToUpdate.quantity
-        if (stockUpdateType === 'stock_out' && itemToUpdate?.quantity && formData.quantity > itemToUpdate.quantity) newErrors.quantity = `Quantity cannot exceed item quantity (${itemToUpdate.quantity}).`;
+        if (stockUpdateType === 'stock_out' && itemToUpdate?.quantity && formData.quantity > itemToUpdate.quantity) {
+            newErrors.quantity = `${t('inventory.quantityLabel', 'Miqdori')} ombordagi qoldiqdan (${itemToUpdate.quantity}) oshib ketmasligi kerak.`;
+        }
         setFormErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }
@@ -168,13 +172,13 @@ const InventoryList: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            <PageHeader title="Inventory">
+            <PageHeader title={t('inventory.title', 'Ombor qoldiqlari')}>
                 {hasPermission(permissions, 'inventory', 'create') && (
                     <Button
                         onClick={handleNewInventoryClick}
                         leftIcon={<CirclePlusIcon size={14} />}
                         className="shadow">
-                        New Inventory
+                        {t('inventory.newInventory', 'Yangi qoldiq kiritish')}
                     </Button>
                 )}
             </PageHeader>
@@ -183,23 +187,37 @@ const InventoryList: React.FC = () => {
             <div className="flex justify-between items-center">
                 <input
                     type="text"
-                    placeholder="Search..."
+                    placeholder={t('common.search', 'Qidirish...')}
                     value={search}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64 text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
                 />
                 <select
                     value={limit}
                     onChange={(e) => handlePageLengthChange(Number(e.target.value))}
-                    className="border border-gray-300 px-3 py-2 rounded-md bg-white  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
                 >
                     {[10, 25, 50].map((num) => (
-                        <option className="text-gray-950 " key={num} value={num}>{num} / page</option>
+                        <option className="text-gray-950" key={num} value={num}>
+                            {num} / {t('common.page', 'sahifa')}
+                        </option>
                     ))}
                 </select>
             </div>
             {/* Invoice Table */}
-            <Table headers={["#", "Product/Service", "Unit", "Quantity", "Selling Price", "Purchase Price", "Stock Actions"]}>
+            <Table
+                fitWidth
+                headers={[
+                    "#",
+                    t('inventory.productService', 'Mahsulot / Xizmat'),
+                    t('inventory.unit', 'Oʻlchov birligi'),
+                    t('inventory.quantity', 'Qoldiq miqdori'),
+                    t('inventory.sellingPrice', 'Sotish narxi'),
+                    t('inventory.purchasePrice', 'Tannarx (Xarid)'),
+                    t('inventory.stockActions', 'Ombor amallari')
+                ]}
+                colWidths={['w-12', 'min-w-[240px]', 'w-36', 'w-36', 'w-36', 'w-36', 'w-[230px]']}
+            >
                 {!isLoading && inventories && inventories.map((inventory, index) => (
                     <TableRow
                         key={inventory.id}
@@ -215,22 +233,22 @@ const InventoryList: React.FC = () => {
                             inventory.quantity,
                             formatProductPrice(inventory.productDetails.selling_price, inventory.productDetails.currencyCode),
                             formatProductPrice(inventory.productDetails.purchase_price, inventory.productDetails.currencyCode),
-                            < div className="flex gap-2" >
+                            <div className="flex items-center gap-1.5 whitespace-nowrap min-w-[210px]">
                                 {/* History */}
                                 <span
                                     onClick={(e) => { e.stopPropagation(); handleView(inventory); }}
-                                    className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-2 py-1 text-xs font-medium text-purple-600 cursor-pointer">
-                                    <HistoryIcon className="h-4 w-4" />
-                                    History
+                                    className="inline-flex items-center gap-1 shrink-0 whitespace-nowrap rounded-md bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-200 transition cursor-pointer">
+                                    <HistoryIcon className="h-3.5 w-3.5" />
+                                    {t('inventory.history', 'Tarix')}
                                 </span>
 
                                 {/* Stock In */}
                                 <PermissionGuard moduleSlug="inventory" action="edit">
                                     <span
                                         onClick={(e) => { e.stopPropagation(); handleStockUpdate(inventory, 'stock_in'); }}
-                                        className="inline-flex items-center gap-1 rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-700 cursor-pointer">
-                                        <PlusCircleIcon className="h-4 w-4" />
-                                        Stock In
+                                        className="inline-flex items-center gap-1 shrink-0 whitespace-nowrap rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 transition cursor-pointer">
+                                        <PlusCircleIcon className="h-3.5 w-3.5" />
+                                        {t('inventory.stockIn', 'Kirim')}
                                     </span>
                                 </PermissionGuard>
 
@@ -238,9 +256,9 @@ const InventoryList: React.FC = () => {
                                 <PermissionGuard moduleSlug="inventory" action="edit">
                                     <span
                                         onClick={(e) => { e.stopPropagation(); handleStockUpdate(inventory, 'stock_out'); }}
-                                        className="inline-flex items-center gap-1 rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-700 cursor-pointer">
-                                        <MinusCircle className="h-4 w-4" />
-                                        Stock Out
+                                        className="inline-flex items-center gap-1 shrink-0 whitespace-nowrap rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-200 transition cursor-pointer">
+                                        <MinusCircle className="h-3.5 w-3.5" />
+                                        {t('inventory.stockOut', 'Chiqim')}
                                     </span>
                                 </PermissionGuard>
                             </div>
@@ -252,8 +270,8 @@ const InventoryList: React.FC = () => {
                 {
                     !isLoading && inventories.length === 0 && (
                         <tr key="no-quotations">
-                            <td className="text-center py-2 text-gray-950  font-semibold" colSpan={10}>
-                                No Items Found
+                            <td className="text-center py-6 text-gray-500 font-medium" colSpan={10}>
+                                {t('inventory.noItemsFound', 'Omborda tovarlar topilmadi')}
                             </td>
                         </tr>
                     )
@@ -262,7 +280,7 @@ const InventoryList: React.FC = () => {
                 {
                     isLoading && (
                         <tr key="table-loader">
-                            <td className="text-center py-2 text-gray-950  font-semibold" colSpan={10}>
+                            <td className="text-center py-6 text-gray-500 font-medium" colSpan={10}>
                                 <LoaderSpinner />
                             </td>
                         </tr>
@@ -286,54 +304,57 @@ const InventoryList: React.FC = () => {
             {/* Stock Update Modal */}
             < Modal isOpen={isStockUpdateModalOpen}
                 onClose={() => setStockUpdateModalOpen(false)}
-                title={stockUpdateType === 'stock_in' ? 'Add Stock' : 'Remove Stock'}>
+                title={stockUpdateType === 'stock_in' ? t('inventory.addStockTitle', 'Omborga kirim qilish') : t('inventory.removeStockTitle', 'Ombordan chiqim qilish')}>
                 <form onSubmit={handleStockUpdateSubmit}>
                     <div className="mb-4">
-                        <label className="block text-gray-700  font-semibold mb-2">Product Name</label>
+                        <label className="block text-gray-700 font-semibold mb-1 text-sm">{t('inventory.productName', 'Mahsulot nomi')}</label>
                         <input
                             type="text"
                             value={itemToUpdate?.productDetails.name}
                             readOnly
-                            className="border border-gray-300 bg-gray-100 mt-1 rounded-md px-4 py-2 w-full  text-gray-950  focus:outline-none focus:ring-1 focus:ring-purple-600"
+                            className="border border-gray-300 bg-gray-100 mt-1 rounded-md px-4 py-2 w-full text-gray-950 focus:outline-none"
                         />
                     </div>
                     <div className="flex gap-4">
                         <div className="mb-4 w-1/2">
-                            <label className="block text-gray-700  font-semibold mb-2">Quantity</label>
+                            <label className="block text-gray-700 font-semibold mb-1 text-sm">{t('inventory.quantityLabel', 'Miqdori')}</label>
                             <input
                                 type="number"
                                 value={Number(formData.quantity) || 0}
                                 onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
-                                className="border border-gray-300 mt-1 rounded-md px-4 py-2 w-full  text-gray-950  focus:outline-none focus:ring-1 focus:ring-purple-600"
+                                className="border border-gray-300 mt-1 rounded-md px-4 py-2 w-full text-gray-950 focus:outline-none focus:ring-1 focus:ring-[#028090]"
                             />
                             {formErrors.quantity && <p className="text-red-500 text-xs mt-1">{formErrors.quantity}</p>}
                         </div>
                         <div className="mb-4 w-1/2">
-                            <label className="block text-gray-700  font-semibold mb-2">Unit <em className="text-red-500">*</em></label>
+                            <label className="block text-gray-700 font-semibold mb-1 text-sm">{t('inventory.unit', 'Oʻlchov birligi')} <em className="text-red-500">*</em></label>
                             <input
                                 type="text"
                                 value={itemToUpdate?.productDetails.unit_name}
                                 readOnly
-                                className="border border-gray-300 bg-gray-100 mt-1 rounded-md px-4 py-2 w-full  text-gray-950  focus:outline-none focus:ring-1 focus:ring-purple-600"
+                                className="border border-gray-300 bg-gray-100 mt-1 rounded-md px-4 py-2 w-full text-gray-950 focus:outline-none"
                             />
                         </div>
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700  font-semibold mb-2">Notes</label>
+                        <label className="block text-gray-700 font-semibold mb-1 text-sm">{t('inventory.notes', 'Izoh / Sabab')}</label>
                         <textarea
                             value={formData.notes || ''}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            className="border border-gray-300 mt-1 rounded-md px-4 py-2 w-full  text-gray-950  focus:outline-none focus:ring-1 focus:ring-purple-600"
+                            className="border border-gray-300 mt-1 rounded-md px-4 py-2 w-full text-gray-950 focus:outline-none focus:ring-1 focus:ring-[#028090]"
+                            rows={3}
                         />
                     </div>
-                    <div className="flex justify-end gap-4">
+                    <div className="flex justify-end gap-3 pt-2">
                         <Button
                             variant="white"
                             onClick={() => setStockUpdateModalOpen(false)}
                         >
-                            Cancel
+                            {t('common.cancel', 'Bekor qilish')}
                         </Button>
-                        <SubmitButton isDisabled={isSaving} isLoading={isSaving}>{stockUpdateType === 'stock_in' ? 'Add Stock' : 'Remove Stock'}</SubmitButton>
+                        <SubmitButton isDisabled={isSaving} isLoading={isSaving}>
+                            {stockUpdateType === 'stock_in' ? t('inventory.addStock', 'Kirimni saqlash') : t('inventory.removeStock', 'Chiqimni saqlash')}
+                        </SubmitButton>
                     </div>
                 </form>
             </Modal >

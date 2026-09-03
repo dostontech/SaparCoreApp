@@ -67,7 +67,7 @@ const InvoiceTemplateA: React.FC<InvoiceDetailsProps> = ({ invoiceData, lineFiel
                     <p className="text-sm text-gray-600">{invoiceData?.billTo?.email}</p>
                     <p className="text-sm text-gray-600">{invoiceData?.billTo?.phone ?? ''}</p>
                     {invoiceData?.billTo?.vatRegNumber && <p className="text-sm text-gray-600">VAT Reg: {invoiceData.billTo.vatRegNumber}</p>}
-                    {invoiceData?.billTo?.gstin && <p className="text-sm text-gray-600">GSTIN: {invoiceData.billTo.gstin}</p>}
+                    {invoiceData?.billTo?.gstin && <p className="text-sm text-gray-600">STIR / ИНН: {invoiceData.billTo.gstin}</p>}
                 </div>
                 <div className="w-2/5">
                     <h2 className="font-bold text-purple-600 mb-2">Pay To :</h2>
