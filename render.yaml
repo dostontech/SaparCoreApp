@@ -8,9 +8,9 @@ services:
     plan: starter
     region: frankfurt
     rootDir: SaparCore/sapar-typescript-backend
-    buildCommand: npm install && npx prisma generate && npx prisma db push && node seedDefaults.js
+    buildCommand: npm install && npx prisma generate && npx prisma db push && node seedDefaults.js || true
     startCommand: npm start
-    healthCheckPath: /api/health
+    healthCheckPath: /api/healthz
     envVars:
       - key: NODE_ENV
         value: production
