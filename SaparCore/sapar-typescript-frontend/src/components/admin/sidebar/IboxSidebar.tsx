@@ -361,7 +361,6 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
           { id: 'set-currencies', title: 'Valyutalar & Kurslar', to: '/admin/settings/currencies' },
           { id: 'set-translations', title: 'Tarjimalar studiyasi', to: '/admin/settings/translations' },
           { id: 'set-guide', title: 'Qoʻllanma & Yordam', to: '/admin/guide' },
-          { id: 'set-design', title: 'Design System', to: '/admin/design-system' },
         ],
       },
     ],

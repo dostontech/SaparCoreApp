@@ -225,14 +225,6 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             defaultRoute: "/admin/settings/company-settings",
             slug: "settings",
         },
-        {
-            key: "design_system",
-            title: "UI Design System",
-            badge: "RADIX",
-            icon: <Sparkles size={19} className="text-purple-400" />,
-            defaultRoute: "/admin/design-system",
-            slug: "design_system",
-        },
     ];
 
     const saparEmblemSvg = (

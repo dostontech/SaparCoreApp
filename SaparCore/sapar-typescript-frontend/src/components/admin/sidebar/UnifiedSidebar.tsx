@@ -309,16 +309,6 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                             { title: "Foydalanuvchilar va rollar", to: "/admin/settings/users" },
                         ],
                     },
-                    {
-                        id: "design_system",
-                        title: "UI Design System",
-                        icon: <Sparkles size={16} className="text-purple-400" />,
-                        defaultRoute: "/admin/design-system",
-                        badge: "RADIX",
-                        items: [
-                            { title: "Radix UI Komponentlar", to: "/admin/design-system" },
-                        ],
-                    },
                 ],
             },
         ],
@@ -761,15 +751,6 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                             >
                                 <Building size={15} className="text-slate-400" />
                                 <span>Korxona sozlamalari</span>
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link
-                                to="/admin/design-system"
-                                className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-purple-700 hover:text-purple-900"
-                            >
-                                <Sparkles size={15} className="text-purple-600" />
-                                <span>Radix UI Design System</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
