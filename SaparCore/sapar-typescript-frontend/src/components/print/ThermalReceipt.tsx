@@ -89,7 +89,7 @@ const ThermalReceipt = forwardRef<HTMLDivElement, ThermalReceiptProps>(
                             <div style={{ fontSize: 10 }}>{doc.party.address}</div>
                         )}
                         {doc.party.gstin && (
-                            <div style={{ fontSize: 10 }}>GSTIN: {doc.party.gstin}</div>
+                            <div style={{ fontSize: 10 }}>STIR / ИНН: {doc.party.gstin}</div>
                         )}
                     </div>
                 )}

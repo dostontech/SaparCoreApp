@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { CirclePlusIcon, Edit, LayoutGrid, List, Trash2, Upload, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { RootState } from '@store/index';
 import Constants from '@constants/api';
 import type { Contact, ContactView } from '@models/contact';
@@ -42,39 +43,40 @@ interface ContactImportPreviewRow {
     error?: string;
 }
 
-const VIEW_LABELS: Record<ContactView, string> = {
-    'all-active': 'All active',
-    'clients': 'Clients',
-    'suppliers': 'Suppliers',
-    'clients-open-invoices': 'Clients — open invoices',
-    'suppliers-open-bills': 'Suppliers — open bills',
-    'hidden': 'Hidden',
-    'all': 'All',
-};
-
-const VIEW_OPTIONS: ContactView[] = [
-    'all-active',
-    'clients',
-    'suppliers',
-    'clients-open-invoices',
-    'suppliers-open-bills',
-    'hidden',
-    'all',
-];
-
-const statusBadge = (status?: string) => {
+const statusBadge = (status?: string, t?: any) => {
     if (status === 'HIDDEN') {
-        return <Badge color="gray">Hidden</Badge>;
+        return <Badge color="gray">{t ? t('contacts.hidden', 'Yashirilgan') : 'Yashirilgan'}</Badge>;
     }
-    return <Badge color="success">Active</Badge>;
+    return <Badge color="success">{t ? t('common.active', 'Faol') : 'Faol'}</Badge>;
 };
 
 const ContactList: React.FC = () => {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const { token } = useSelector((state: RootState) => state.auth);
     const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
     const permissions = systemSettings?.permissions || [];
+
+    const VIEW_OPTIONS: ContactView[] = [
+        'all-active',
+        'clients',
+        'suppliers',
+        'clients-open-invoices',
+        'suppliers-open-bills',
+        'hidden',
+        'all',
+    ];
+
+    const VIEW_LABELS: Record<ContactView, string> = {
+        'all-active': t('contacts.allActive', 'Barcha faollar'),
+        'clients': t('contacts.clients', 'Mijozlar'),
+        'suppliers': t('contacts.suppliers', 'Taʼminotchilar'),
+        'clients-open-invoices': t('contacts.clientsOpenInvoices', 'Mijozlar — ochiq hisob-fakturalar'),
+        'suppliers-open-bills': t('contacts.suppliersOpenBills', 'Taʼminotchilar — ochiq hisoblar'),
+        'hidden': t('contacts.hidden', 'Yashirilganlar'),
+        'all': t('common.all', 'Barchasi'),
+    };
 
     const q = searchParams.get('q') || '';
     const page = Number(searchParams.get('page') || 1);
@@ -265,14 +267,14 @@ const ContactList: React.FC = () => {
     const canDelete = hasPermission(permissions, 'customers', 'delete');
     const tableActions: Action<Contact>[] = [
         {
-            label: 'Edit',
+            label: t('common.edit', 'Tahrirlash'),
             icon: <Edit size={14} />,
             primary: true,
             requirePermission: { moduleSlug: 'customers', action: 'edit' },
             onClick: (item) => handleEditClick(item),
         },
         {
-            label: 'Delete',
+            label: t('common.delete', 'Oʻchirish'),
             icon: <Trash2 size={14} />,
             primary: true,
             variant: 'danger',
@@ -284,14 +286,21 @@ const ContactList: React.FC = () => {
     const from = (pagination.page - 1) * pagination.pageSize + 1;
     const to = Math.min(pagination.page * pagination.pageSize, pagination.total);
 
-    const tableHeaders = ['#', 'Display Name', 'Person', 'Email', 'Phone', 'Status'];
+    const tableHeaders = [
+        '#',
+        t('contacts.displayName', 'Nomi (Kompaniya / Shaxs)'),
+        t('contacts.person', 'Masʼul shaxs'),
+        t('contacts.email', 'Elektron pochta'),
+        t('contacts.phone', 'Telefon raqami'),
+        t('common.status', 'Holati'),
+    ];
     if (canEdit || canDelete) {
-        tableHeaders.push('Actions');
+        tableHeaders.push(t('common.actions', 'Amallar'));
     }
 
     return (
         <div className="space-y-4">
-            <PageHeader title="Contacts">
+            <PageHeader title={t('contacts.title', 'Kontaktlar')}>
                 {hasPermission(permissions, 'customers', 'view') && (
                     <ExportButton
                         url={Constants.EXPORT_CONTACTS_URL}
@@ -304,14 +313,14 @@ const ContactList: React.FC = () => {
                         onClick={() => setImportStep('upload')}
                         leftIcon={<Upload size={14} />}
                     >
-                        Import CSV
+                        {t('common.importCsv', 'CSV Import')}
                     </Button>
                 )}
                 <Button
                     onClick={() => navigate('/admin/contacts/new')}
                     leftIcon={<CirclePlusIcon size={14} />}
                 >
-                    New Contact
+                    {t('contacts.newContact', 'Yangi kontakt')}
                 </Button>
             </PageHeader>
 
@@ -337,7 +346,7 @@ const ContactList: React.FC = () => {
             <div className="flex justify-between items-center gap-2">
                 <input
                     type="text"
-                    placeholder="Search contacts..."
+                    placeholder={t('contacts.searchPlaceholder', 'Kontaktlarni qidirish...')}
                     value={q}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
@@ -345,7 +354,7 @@ const ContactList: React.FC = () => {
                 <div className="flex items-center gap-1 border border-gray-300 rounded-md overflow-hidden">
                     <button
                         type="button"
-                        title="List view"
+                        title={t('common.listView', 'Jadval koʻrinishi')}
                         onClick={() => setParam({ display: 'list' })}
                         className={`px-2 py-1.5 transition-colors ${
                             displayMode === 'list' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -355,7 +364,7 @@ const ContactList: React.FC = () => {
                     </button>
                     <button
                         type="button"
-                        title="Grid view"
+                        title={t('common.gridView', 'Karta koʻrinishi')}
                         onClick={() => setParam({ display: 'grid' })}
                         className={`px-2 py-1.5 transition-colors ${
                             displayMode === 'grid' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -375,7 +384,7 @@ const ContactList: React.FC = () => {
                         </div>
                     )}
                     {!isLoading && contacts.length === 0 && (
-                        <p className="text-center text-gray-500 py-8">No contacts found.</p>
+                        <p className="text-center text-gray-500 py-8">{t('contacts.noContactsFound', 'Kontaktlar topilmadi.')}</p>
                     )}
                     {!isLoading && contacts.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -396,7 +405,7 @@ const ContactList: React.FC = () => {
                                     {contact.email && (
                                         <p className="text-xs text-gray-400 truncate">{contact.email}</p>
                                     )}
-                                    <div className="pt-1">{statusBadge(contact.status)}</div>
+                                    <div className="pt-1">{statusBadge(contact.status, t)}</div>
                                     {(canEdit || canDelete) && (
                                         <div
                                             className="flex items-center gap-2 pt-2"
@@ -409,7 +418,7 @@ const ContactList: React.FC = () => {
                                                     leftIcon={<Edit size={14} />}
                                                     onClick={() => handleEditClick(contact)}
                                                 >
-                                                    Edit
+                                                    {t('common.edit', 'Tahrirlash')}
                                                 </Button>
                                             )}
                                             {canDelete && (
@@ -419,7 +428,7 @@ const ContactList: React.FC = () => {
                                                     leftIcon={<Trash2 size={14} />}
                                                     onClick={() => handleDeleteClick(contact)}
                                                 >
-                                                    Delete
+                                                    {t('common.delete', 'Oʻchirish')}
                                                 </Button>
                                             )}
                                         </div>
@@ -446,14 +455,14 @@ const ContactList: React.FC = () => {
                                 [contact.firstName, contact.lastName].filter(Boolean).join(' ') || '—',
                                 contact.email || '—',
                                 contact.telephone || contact.mobile || '—',
-                                statusBadge(contact.status),
+                                statusBadge(contact.status, t),
                             ]}
                             actions={canEdit || canDelete ? tableActions : undefined}
                             onRowClick={(item) => handleRowClick(item as Contact)}
                         />
                     ))}
                     {!isLoading && contacts.length === 0 && (
-                        <NoRecords colSpan={tableHeaders.length} message="No contacts found" />
+                        <NoRecords colSpan={tableHeaders.length} message={t('contacts.noContactsFound', 'Kontaktlar topilmadi')} />
                     )}
                     {isLoading && (
                         <tr key="table-loader">
@@ -483,8 +492,8 @@ const ContactList: React.FC = () => {
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={confirmDelete}
                 isDeleting={isDeleting}
-                title="Confirm Deletion"
-                message="Are you sure you want to delete this contact? This action cannot be undone."
+                title={t('contacts.confirmDeleteTitle', 'Oʻchirishni tasdiqlang')}
+                message={t('contacts.confirmDeleteMessage', 'Haqiqatan ham ushbu kontaktni oʻchirmoqchimisiz? Ushbu amalni ortga qaytarib boʻlmaydi.')}
             />
 
             {/* CSV Import modal (salvaged from owner's WIP customer import wizard) */}
@@ -493,9 +502,9 @@ const ContactList: React.FC = () => {
                     <div className="bg-white rounded-md shadow-lg w-full max-w-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center">
                             <h2 className="text-lg font-semibold text-gray-800">
-                                {importStep === 'upload' && 'Import Contacts (CSV)'}
-                                {importStep === 'preview' && 'Review Contact Rows'}
-                                {importStep === 'done' && 'Import Complete'}
+                                {importStep === 'upload' && t('contacts.importTitle', 'Kontaktlarni import qilish (CSV)')}
+                                {importStep === 'preview' && t('contacts.previewTitle', 'Kontakt qatorlarini koʻrib chiqish')}
+                                {importStep === 'done' && t('contacts.doneTitle', 'Import yakunlandi')}
                             </h2>
                             <button
                                 type="button"
@@ -510,7 +519,7 @@ const ContactList: React.FC = () => {
                         {importStep === 'upload' && (
                             <div className="space-y-3">
                                 <div>
-                                    <label className="block text-sm text-gray-700 mb-1">CSV file</label>
+                                    <label className="block text-sm text-gray-700 mb-1">{t('contacts.csvFile', 'CSV fayli')}</label>
                                     <input
                                         type="file"
                                         accept=".csv,text/csv"
@@ -520,8 +529,7 @@ const ContactList: React.FC = () => {
                                         className="border border-gray-300 rounded-md px-3 py-2 w-full bg-white text-gray-800"
                                     />
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Expected columns: organisation (or firstName + lastName), email, telephone
-                                        (optional: town, region, postcode, currencyCode).
+                                        {t('contacts.expectedCols', 'Kutilayotgan ustunlar: organisation (yoki firstName + lastName), email, telephone (ixtiyoriy: town, region, postcode, currencyCode).')}
                                     </p>
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
@@ -530,7 +538,7 @@ const ContactList: React.FC = () => {
                                         onClick={resetImportState}
                                         className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
                                     >
-                                        Cancel
+                                        {t('common.cancel', 'Bekor qilish')}
                                     </button>
                                     <button
                                         type="button"
@@ -538,7 +546,7 @@ const ContactList: React.FC = () => {
                                         onClick={submitImportUpload}
                                         className="px-3 py-1 rounded-md bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
                                     >
-                                        {isPreviewing ? 'Parsing...' : 'Preview'}
+                                        {isPreviewing ? t('contacts.parsing', 'Tahlil qilinmoqda...') : t('contacts.preview', 'Koʻrib chiqish')}
                                     </button>
                                 </div>
                             </div>
@@ -548,10 +556,10 @@ const ContactList: React.FC = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-sm">
                                     <span className="inline-flex items-center px-2 py-1 rounded-sm bg-green-100 text-green-700">
-                                        {validImportCount} valid
+                                        {validImportCount} ta toʻgʻri
                                     </span>
                                     <span className="inline-flex items-center px-2 py-1 rounded-sm bg-red-100 text-red-700">
-                                        {invalidImportCount} invalid (skipped)
+                                        {invalidImportCount} ta xato (oʻtkazib yuboriladi)
                                     </span>
                                 </div>
                                 <div className="border border-gray-200 rounded-md overflow-x-auto">
@@ -559,10 +567,10 @@ const ContactList: React.FC = () => {
                                         <thead className="bg-gray-50 text-gray-700">
                                             <tr>
                                                 <th className="px-3 py-2 text-left">#</th>
-                                                <th className="px-3 py-2 text-left">Name</th>
-                                                <th className="px-3 py-2 text-left">Email</th>
-                                                <th className="px-3 py-2 text-left">Phone</th>
-                                                <th className="px-3 py-2 text-left">Status</th>
+                                                <th className="px-3 py-2 text-left">{t('contacts.displayName', 'Nomi')}</th>
+                                                <th className="px-3 py-2 text-left">{t('contacts.email', 'Elektron pochta')}</th>
+                                                <th className="px-3 py-2 text-left">{t('contacts.phone', 'Telefon')}</th>
+                                                <th className="px-3 py-2 text-left">{t('common.status', 'Holati')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -595,7 +603,7 @@ const ContactList: React.FC = () => {
                                         onClick={() => setImportStep('upload')}
                                         className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
                                     >
-                                        Back
+                                        {t('common.back', 'Orqaga')}
                                     </button>
                                     <button
                                         type="button"
@@ -603,7 +611,7 @@ const ContactList: React.FC = () => {
                                         onClick={submitImportConfirm}
                                         className="px-3 py-1 rounded-md bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
                                     >
-                                        {isConfirming ? 'Importing...' : `Confirm Import (${validImportCount})`}
+                                        {isConfirming ? t('contacts.importing', 'Import qilinmoqda...') : `${t('contacts.confirmImport', 'Importni tasdiqlash')} (${validImportCount})`}
                                     </button>
                                 </div>
                             </div>
@@ -612,14 +620,14 @@ const ContactList: React.FC = () => {
                         {importStep === 'done' && (
                             <div className="space-y-3">
                                 <div className="text-center py-4 text-gray-700">
-                                    <p className="text-base">Import complete.</p>
+                                    <p className="text-base font-semibold text-emerald-700">{t('contacts.doneTitle', 'Import yakunlandi.')}</p>
                                     {importResult && (
                                         <div className="mt-3 flex justify-center gap-3 text-sm">
                                             <span className="inline-flex items-center px-2 py-1 rounded-sm bg-green-100 text-green-700">
-                                                {importResult.createdCount} created
+                                                {importResult.createdCount} ta yaratildi
                                             </span>
                                             <span className="inline-flex items-center px-2 py-1 rounded-sm bg-gray-100 text-gray-700">
-                                                {importResult.skippedCount} skipped
+                                                {importResult.skippedCount} ta oʻtkazib yuborildi
                                             </span>
                                         </div>
                                     )}
@@ -630,7 +638,7 @@ const ContactList: React.FC = () => {
                                         onClick={resetImportState}
                                         className="px-3 py-1 rounded-md bg-purple-600 text-white hover:bg-purple-700"
                                     >
-                                        Close
+                                        {t('common.close', 'Yopish')}
                                     </button>
                                 </div>
                             </div>

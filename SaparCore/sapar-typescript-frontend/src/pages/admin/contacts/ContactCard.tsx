@@ -237,7 +237,7 @@ function SummaryTab({
         <DetailRow label="Currency" value={contact.currencyCode} />
         <DetailRow label="Default Tax Treatment" value={contact.defaultTaxTreatment} />
         <DetailRow label="VAT Reg. Number" value={contact.vatRegNumber} />
-        <DetailRow label="GSTIN" value={contact.gstin} />
+        <DetailRow label="STIR / ИНН" value={contact.gstin} />
         <DetailRow
           label="Payment Terms"
           value={

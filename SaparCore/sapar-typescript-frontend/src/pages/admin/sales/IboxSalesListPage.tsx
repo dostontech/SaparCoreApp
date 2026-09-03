@@ -13,7 +13,7 @@ import {
 import { Button, Badge } from '@components/ui';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
 
-export const IboxSalesListPage: React.FC = () => {
+export const SaparSalesListPage: React.FC = () => {
   const navigate = useNavigate();
   const { format } = useCurrencyFormatter();
 
@@ -60,7 +60,7 @@ export const IboxSalesListPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto font-sans text-slate-800 pb-16 space-y-4 animate-fade-in text-xs">
-      {/* Top Header matching iBox structure with SAPAR brand colors */}
+      {/* Top Header matching Sapar structure with SAPAR brand colors */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-black text-[#0B2B33]">Sotuvlar</h1>
@@ -185,4 +185,4 @@ export const IboxSalesListPage: React.FC = () => {
   );
 };
 
-export default IboxSalesListPage;
+export default SaparSalesListPage;

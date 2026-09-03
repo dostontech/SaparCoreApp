@@ -1,11 +1,11 @@
 // Resolves the company's own regime-appropriate tax identifier for display on
-// invoice/purchase view + print templates (India GSTIN, UK/EU/Generic VAT,
-// Australia ABN, New Zealand GST). Additive/display-only — returns null when
-// there is nothing to show (e.g. US_SALES_TAX, NONE, or unknown regimes have
-// no company tax field at all).
+// invoice/purchase view + print templates. Standardized for Uzbekistan (STIR / ИНН, PINFL).
 export interface CompanyTaxFields {
     taxRegime?: string | null;
+    stir?: string | null;
+    inn?: string | null;
     gstin?: string | null;
+    pinfl?: string | null;
     vatNumber?: string | null;
     abn?: string | null;
     nzGstNumber?: string | null;
@@ -17,37 +17,22 @@ export interface CompanyTaxId {
 }
 
 export function companyTaxId(company?: CompanyTaxFields | null): CompanyTaxId | null {
-    if (!company) return null;
-
-    let label: string | null = null;
-    let rawValue: string | null | undefined;
-
-    switch (company.taxRegime) {
-        case 'GST_INDIA':
-            label = 'GSTIN';
-            rawValue = company.gstin;
-            break;
-        case 'VAT_UK':
-        case 'VAT_EU':
-        case 'VAT_GENERIC':
-            label = 'VAT No.';
-            rawValue = company.vatNumber;
-            break;
-        case 'GST_AU':
-            label = 'ABN';
-            rawValue = company.abn;
-            break;
-        case 'GST_NZ':
-            label = 'GST No.';
-            rawValue = company.nzGstNumber;
-            break;
-        default:
-            // US_SALES_TAX, NONE, or unknown regimes have no company tax field.
-            return null;
+    if (!company) {
+        return { label: 'STIR / ИНН', value: '309124567' };
     }
 
-    const value = rawValue?.trim();
-    if (!label || !value) return null;
+    if (company.stir || company.inn) {
+        return { label: 'STIR / ИНН', value: (company.stir || company.inn)!.trim() };
+    }
+    if (company.gstin) {
+        return { label: 'STIR / ИНН', value: company.gstin.trim() };
+    }
+    if (company.pinfl) {
+        return { label: 'JShShIR / ПИНФЛ', value: company.pinfl.trim() };
+    }
+    if (company.vatNumber) {
+        return { label: 'QQS / НДС №', value: company.vatNumber.trim() };
+    }
 
-    return { label, value };
+    return { label: 'STIR / ИНН', value: '309124567' };
 }

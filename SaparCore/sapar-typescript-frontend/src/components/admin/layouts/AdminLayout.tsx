@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import IboxHeader from './IboxHeader';
-import IboxSidebar from '../sidebar/IboxSidebar';
+import SaparHeader from './SaparHeader';
+import SaparSidebar from '../sidebar/SaparSidebar';
 import AiChatFab from '../ai/AiChatFab';
 import DemoBanner from '../DemoBanner';
 import { PageHeaderProvider } from '../../../context/PageHeaderContext';
@@ -12,37 +12,67 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  // Sidebar state persisted in localStorage
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 768) return false;
+      const saved = localStorage.getItem('sapar_sidebar_open');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
+  });
+
   const { pathname } = useLocation();
   const isSettingsPage = pathname.includes('/settings');
   const mainRef = useRef<HTMLElement>(null);
 
-  // Scroll the main content area back to the top on every route change.
+  // Toggle sidebar and persist preference
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => {
+      const next = !prev;
+      if (window.innerWidth >= 768) {
+        try {
+          localStorage.setItem('sapar_sidebar_open', String(next));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  };
+
+  // Scroll to top and auto-close drawer on mobile when navigating
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   }, [pathname]);
 
-  // On smaller screens, the sidebar should be closed by default.
+  // Only trigger resize changes when crossing the 768px breakpoint boundary
   useEffect(() => {
+    let prevWidth = window.innerWidth;
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      const currentWidth = window.innerWidth;
+      if (prevWidth >= 768 && currentWidth < 768) {
         setIsSidebarOpen(false);
-      } else {
-        setIsSidebarOpen(true);
+      } else if (prevWidth < 768 && currentWidth >= 768) {
+        const saved = localStorage.getItem('sapar_sidebar_open');
+        setIsSidebarOpen(saved !== null ? saved === 'true' : true);
       }
+      prevWidth = currentWidth;
     };
     window.addEventListener('resize', handleResize);
-    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
     <PageHeaderProvider>
       <div className="flex flex-col h-screen bg-slate-50 font-sans print:block print:h-auto overflow-hidden">
-        {/* Top: 1-to-1 iBox Royal Blue Header */}
+        {/* Top: 1-to-1 Sapar Royal Blue Header */}
         <div className="print:hidden">
-          <IboxHeader
-            toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          <SaparHeader
+            toggleSidebar={toggleSidebar}
             isSidebarOpen={isSidebarOpen}
           />
         </div>
@@ -50,7 +80,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         {/* Bottom: Sidebar + Content */}
         <div className="flex-1 flex overflow-hidden">
           <div className="print:hidden">
-            <IboxSidebar isOpen={isSidebarOpen} />
+            <SaparSidebar
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              onToggle={toggleSidebar}
+            />
           </div>
           <main
             ref={mainRef}

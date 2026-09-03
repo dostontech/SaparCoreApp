@@ -1,5 +1,6 @@
 import { useEffect, useState, type FC, type ChangeEvent, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
@@ -45,6 +46,7 @@ interface FormErrors {
 }
 
 const UnitList: FC = () => {
+    const { t } = useTranslation();
     const [units, setUnits] = useState<Unit[]>([]);
     const [pagination, setPagination] = useState<UnitPagination>({ total: 0, page: 1, limit: 10, totalPages: 1 });
     const [searchParams, setSearchParams] = useSearchParams();
@@ -253,23 +255,31 @@ const UnitList: FC = () => {
 
     const tableActions = [
         {
-            label: 'Edit',
+            label: t('common.edit', 'Tahrirlash'),
+            actionType: 'edit',
             icon: <Edit size={14} />,
             primary: true,
             onClick: (item: Unit) => { handleEditClick(item) }
         },
         {
-            label: 'Delete',
+            label: t('common.delete', 'Oʻchirish'),
+            actionType: 'delete',
             icon: <Trash2Icon size={14} />,
             primary: true,
             variant: 'danger' as const,
             onClick: (item: Unit) => { handleDeleteClick(item) }
         }
     ];
-    const tableHeaders = ['#', 'Unit Name', 'Short Name', 'Status', 'Action'];
+    const tableHeaders = [
+        '#',
+        t('units.unitName', 'Birlik nomi'),
+        t('units.shortName', 'Qisqa nomi / Belgisi'),
+        t('units.status', 'Holati'),
+        t('common.actions', 'Amallar')
+    ];
     const restrictedActions = ['edit', 'delete'];
     const allowedActions = tableActions.filter((action) => {
-        const actionLabel = action.label.toLowerCase() as PermissionAction;
+        const actionLabel = ((action as any).actionType || action.label).toLowerCase() as PermissionAction;
 
         if (!restrictedActions.includes(actionLabel)) {
             return true;
@@ -284,35 +294,46 @@ const UnitList: FC = () => {
 
     return (
         <div className="space-y-4">
-            <PageHeader title="Units">
+            <PageHeader title={t('units.title', 'Oʻlchov birliklari')}>
                 {hasPermission(permissions, 'product-services', 'create') && (
                     <Button
                         onClick={openCreateUnit}
                         leftIcon={<CirclePlusIcon size={14} />}
                         className="shadow"
                     >
-                        New Unit
+                        {t('units.newUnit', 'Yangi oʻlchov birligi')}
                     </Button>
                 )}
             </PageHeader>
 
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-                <input
-                    type="text"
-                    placeholder="Search by name or short name.."
-                    value={search}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
-                    className="border border-gray-300 px-4 py-2 rounded-md w-full md:w-64 bg-white  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                />
-                <select
-                    value={limit}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
-                    className="border border-gray-300 px-3 py-2 rounded-md bg-white  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                >
-                    {[10, 25, 50].map((num) => (
-                        <option className="text-gray-950 " key={num} value={num}>{num} / page</option>
-                    ))}
-                </select>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <input
+                        type="text"
+                        placeholder={t('units.searchPlaceholder', 'Nomi yoki qisqartmasi boʻyicha qidirish...')}
+                        value={search}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
+                        className="border border-gray-300 px-4 py-2 rounded-md w-full md:w-64 bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
+                    />
+                    <select
+                        value={limit}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => handlePageLengthChange(Number(e.target.value))}
+                        className="border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090] focus:border-transparent"
+                    >
+                        {[10, 25, 50].map((num) => (
+                            <option className="text-gray-950" key={num} value={num}>{num} / {t('common.page', 'sahifa')}</option>
+                        ))}
+                    </select>
+                </div>
+                {hasPermission(permissions, 'product-services', 'create') && (
+                    <Button
+                        onClick={openCreateUnit}
+                        leftIcon={<CirclePlusIcon size={16} />}
+                        className="bg-[#028090] hover:bg-[#026d7a] text-white shadow"
+                    >
+                        {t('units.newUnit', 'Yangi oʻlchov birligi')}
+                    </Button>
+                )}
             </div>
 
             <Table headers={tableHeaders}>
@@ -323,8 +344,8 @@ const UnitList: FC = () => {
                             index={(page - 1) * limit + index + 1}
                             row={unit}
                             columns={[
-                                <p className="capitalize text-indigo-600">{unit.unit_name}</p>,
-                                unit.short_name,
+                                <p className="capitalize text-teal-700 font-medium">{unit.unit_name}</p>,
+                                <span className="font-semibold text-gray-800">{unit.short_name}</span>,
                                 <Switch name={`status-${unit.id}`} checked={unit.status} onChange={() => toggleStatus(unit)} />
                             ]}
                             actions={allowedActions.length > 0 ? allowedActions : undefined}
@@ -334,14 +355,14 @@ const UnitList: FC = () => {
 
                 {!isLoading && units.length === 0 && (
                     <tr>
-                        <td colSpan={5} className="text-center py-2 text-gray-500 font-semibold">
-                            No Units Found
+                        <td colSpan={5} className="text-center py-4 text-gray-500 font-semibold">
+                            {t('units.noUnitsFound', 'Oʻlchov birliklari topilmadi')}
                         </td>
                     </tr>
                 )}
                 {isLoading && (
                     <tr key="table-loader">
-                        <td className="text-center py-2 text-gray-950  font-semibold" colSpan={5}>
+                        <td className="text-center py-2 text-gray-950 font-semibold" colSpan={5}>
                             <LoaderSpinner />
                         </td>
                     </tr>
@@ -359,16 +380,17 @@ const UnitList: FC = () => {
                 paginationShape="rounded"
             />
 
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingUnit ? 'Edit Unit' : 'Add New Unit'}>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingUnit ? t('units.editUnit', 'Oʻlchov birligini tahrirlash') : t('units.addNewUnit', 'Yangi oʻlchov birligi qoʻshish')}>
                 <form onSubmit={handleNewUnitSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 ">Unit Name <em className="text-red-600">*</em></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('units.unitName', 'Birlik nomi')} <em className="text-red-600">*</em></label>
                         <input
                             type="text"
                             name="unit_name"
+                            placeholder={t('units.unitNamePlaceholder', 'Masalan: Kilogramm, Metr, Dona')}
                             value={newUnit.unit_name}
                             onChange={handleNewUnitChange}
-                            className="mt-1 block w-full border border-gray-300  rounded-md p-2 bg-white  text-gray-950 "
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white text-gray-950 focus:ring-[#028090] focus:border-[#028090]"
                         />
                         {formErrors.unit_name && (
                             <p className="text-sm text-red-600 mt-1">{formErrors.unit_name}</p>
@@ -376,13 +398,14 @@ const UnitList: FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 ">Short Name <em className="text-red-600">*</em></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('units.shortName', 'Qisqa nomi / Belgisi')} <em className="text-red-600">*</em></label>
                         <input
                             type="text"
                             name="short_name"
+                            placeholder={t('units.shortNamePlaceholder', 'Masalan: kg, m, dona, tn')}
                             value={newUnit.short_name}
                             onChange={handleNewUnitChange}
-                            className="mt-1 block w-full border border-gray-300  rounded-md p-2 bg-white  text-gray-950 "
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white text-gray-950 focus:ring-[#028090] focus:border-[#028090]"
                         />
                         {formErrors.short_name && (
                             <p className="text-sm text-red-600 mt-1">{formErrors.short_name}</p>
@@ -402,7 +425,7 @@ const UnitList: FC = () => {
                             disabled={isSubmitting}
                             onClick={() => setShowModal(false)}
                         >
-                            Cancel
+                            {t('common.cancel', 'Bekor qilish')}
                         </Button>
                         <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={editingUnit ? "edit" : "create"} />
                     </div>
@@ -413,8 +436,8 @@ const UnitList: FC = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
-                title="Confirm Deletion"
-                message="Are you sure you want to delete this unit?"
+                title={t('units.confirmDeleteTitle', 'Oʻchirishni tasdiqlang')}
+                message={t('units.confirmDeleteMsg', 'Ushbu oʻlchov birligini oʻchirishga ishonchingiz komilmi?')}
                 isDeleting={isDeleting}
             >
             </DeleteConfirmationModal>

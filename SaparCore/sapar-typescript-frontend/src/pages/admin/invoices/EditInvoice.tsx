@@ -1933,8 +1933,8 @@ const EditInvoice: React.FC = () => {
                             </div>
 
                             {partyStateMissing && (
-                                <p className="text-xs text-warning mt-1">
-                                    No customer state set — taxed as inter-state (IGST).
+                                <p className="text-xs text-amber-600 mt-1">
+                                    Mijoz viloyati tanlanmagan — standart QQS 12% hisoblanadi.
                                 </p>
                             )}
 

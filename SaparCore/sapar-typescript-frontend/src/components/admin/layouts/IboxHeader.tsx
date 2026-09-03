@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw,
@@ -6,11 +6,15 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronLeft,
-  Zap,
+  Search,
   User,
   LogOut,
   Settings,
+  Store,
+  MapPin,
+  CheckCircle2,
 } from 'lucide-react';
+import { GlobalSearchModal } from '../header/GlobalSearchModal';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,17 +23,120 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@components/ui';
-import { LanguageSwitcher } from '@components/admin/header/LanguageSwitcher';
+import { toast } from 'sonner';
 
-interface IboxHeaderProps {
+interface SaparHeaderProps {
   toggleSidebar: () => void;
   isSidebarOpen: boolean;
 }
 
-export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
+interface CompanyItem {
+  id: string;
+  name: string;
+  tin: string;
+}
+
+interface HeaderBranchItem {
+  id: string;
+  name: string;
+  code: string;
+  region: string;
+}
+
+const DEFAULT_COMPANIES: CompanyItem[] = [
+  { id: 'comp-1', name: 'OOO "RIZOBAY STROY"', tin: '308123456' },
+  { id: 'comp-2', name: 'YaTT "Rizoyev Shokirjon"', tin: '512034981' },
+  { id: 'comp-3', name: 'OOO "SAPAR LOGISTICS"', tin: '309982104' },
+];
+
+const DEFAULT_HEADER_BRANCHES: HeaderBranchItem[] = [
+  { id: 'br-1', name: 'Bosh Ofis & Showroom', code: 'FIL-01', region: 'Toshkent shahri' },
+  { id: 'br-2', name: 'Chilonzor Savdo Doʻkoni', code: 'FIL-02', region: 'Toshkent shahri' },
+  { id: 'br-3', name: 'Samarqand Mintaqaviy Filiali', code: 'FIL-03', region: 'Samarqand viloyati' },
+  { id: 'br-4', name: 'Qoʻyliq Logistika Bazasi', code: 'FIL-04', region: 'Toshkent viloyati' },
+  { id: 'br-5', name: 'Fargʻona Yetkazib Berish Punkti', code: 'FIL-05', region: 'Fargʻona viloyati' },
+];
+
+export const SaparHeader: React.FC<SaparHeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName') || 'Shokirjon Turgʻunboyev';
-  const companyName = 'Rizobay*';
+
+  // Companies
+  const [companies] = useState<CompanyItem[]>(DEFAULT_COMPANIES);
+  const [activeCompanyId, setActiveCompanyId] = useState<string>(() => {
+    return localStorage.getItem('sapar_active_company_id') || 'comp-1';
+  });
+  const activeCompany = companies.find((c) => c.id === activeCompanyId) || companies[0];
+
+  // Branches
+  const [branches, setBranches] = useState<HeaderBranchItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('sapar_branches_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_HEADER_BRANCHES;
+  });
+
+  const [activeBranchId, setActiveBranchId] = useState<string>(() => {
+    return localStorage.getItem('sapar_active_branch_id') || 'br-1';
+  });
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Keep branch list fresh if storage updates
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('sapar_branches_data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setBranches(parsed);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('storage', handleSync);
+    return () => window.removeEventListener('storage', handleSync);
+  }, []);
+
+  const activeBranch = branches.find((b) => b.id === activeBranchId) || branches[0];
+
+  const handleSelectCompany = (comp: CompanyItem) => {
+    setActiveCompanyId(comp.id);
+    try {
+      localStorage.setItem('sapar_active_company_id', comp.id);
+    } catch {
+      // ignore
+    }
+    toast.success(`«${comp.name}» korxonasiga oʻtildi`);
+  };
+
+  const handleSelectBranch = (b: HeaderBranchItem) => {
+    setActiveBranchId(b.id);
+    try {
+      localStorage.setItem('sapar_active_branch_id', b.id);
+    } catch {
+      // ignore
+    }
+    toast.success(`«${b.name}» filialiga oʻtildi`);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -84,7 +191,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
         <button
           type="button"
           onClick={toggleSidebar}
-          className="w-7 h-7 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 flex items-center justify-center text-white transition text-xs shadow-xs"
+          className="w-7 h-7 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 flex items-center justify-center text-white transition text-xs shadow-xs cursor-pointer"
           title={isSidebarOpen ? 'Menyuni yigʻish' : 'Menyuni ochish'}
         >
           <ChevronLeft
@@ -93,52 +200,156 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
         </button>
       </div>
 
-      {/* Center Section: Enterprise Edition Status */}
-      <div className="hidden lg:flex items-center">
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D3B46] border border-[#02C39A]/30 text-xs font-semibold text-[#02C39A] shadow-xs">
-          <Zap className="w-3.5 h-3.5 fill-[#02C39A]" />
-          <span>Enterprise Edition • Oʻzbekiston & Markaziy Osiyo</span>
-        </div>
+      {/* Center Section: Global Search Bar */}
+      <div className="flex-1 max-w-md mx-4 hidden sm:flex items-center">
+        <button
+          type="button"
+          onClick={() => setIsSearchOpen(true)}
+          className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#082026] hover:bg-[#06181D] text-slate-300 hover:text-white transition border border-[#028090]/40 text-xs font-medium cursor-pointer shadow-2xs group"
+          title="Tizim boʻyicha qidirish (Ctrl+K)"
+        >
+          <div className="flex items-center gap-2">
+            <Search className="w-3.5 h-3.5 text-[#02C39A] group-hover:scale-110 transition-transform" />
+            <span className="truncate">Tizim boʻyicha qidirish (Mijozlar, Fakturalar, Tovarlar)...</span>
+          </div>
+          <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold text-[#02C39A] bg-[#0D3B46] rounded border border-[#028090]/40 shadow-xs">
+            ⌘K
+          </kbd>
+        </button>
       </div>
 
-      {/* Right Section: Language Switcher, Currency rates, Company switcher, Help, User */}
+      {/* Right Section: Currency rates, Filiallar & Korxonalar Switcher, Help, User */}
       <div className="flex items-center gap-2 sm:gap-2.5">
-        {/* Language Switcher Dropdown (Uzbek, Russian, English) */}
-        <div className="flex items-center">
-          <LanguageSwitcher variant="header" />
-        </div>
-
         {/* Currency Rates Widget */}
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0D3B46] border border-[#028090]/40 text-xs font-bold text-slate-100">
           <RefreshCw className="w-3 h-3 text-[#02C39A]" />
           <span>1 USD = 12 750 UZS, 1 RUB = 140 UZS</span>
         </div>
 
-        {/* Company / Branch Switcher */}
+        {/* Filiallar va Korxonalar Switcher Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 text-xs font-bold transition text-white"
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/40 text-xs font-bold transition text-white shadow-xs group cursor-pointer"
+              title="Filial va korxonani almashtirish"
             >
-              <Building2 className="w-3.5 h-3.5 text-[#02C39A]" />
-              <span>{companyName}</span>
-              <ChevronDown className="w-3 h-3 text-slate-300" />
+              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#028090] to-[#02C39A] text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-2xs">
+                <Building2 className="w-3 h-3 text-[#0B2B33]" />
+              </div>
+              <div className="text-left flex flex-col min-w-0 max-w-[120px] sm:max-w-[160px]">
+                <span className="truncate text-xs font-bold text-white leading-tight">
+                  {activeBranch?.name || activeCompany.name}
+                </span>
+                <span className="truncate text-[10px] text-[#02C39A] font-medium leading-tight">
+                  {activeCompany.name}
+                </span>
+              </div>
+              <ChevronDown className="w-3 h-3 text-slate-300 group-hover:text-white shrink-0 ml-0.5" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-[#0B2B33] text-slate-100 border-[#028090]/40">
-            <DropdownMenuLabel className="text-slate-300 font-bold">Filiallar va Korxonalar</DropdownMenuLabel>
-            <DropdownMenuItem className="font-bold text-[#02C39A] focus:bg-[#0D3B46] focus:text-[#02C39A]">
-              ✓ OOO "RIZOBAY STROY" (Asosiy)
+
+          <DropdownMenuContent align="end" className="w-72 bg-[#0B2B33] text-slate-100 border border-[#028090]/40 shadow-xl p-1.5 rounded-xl">
+            {/* 1. Korxonalar */}
+            <div className="px-2.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-300">
+                <Building2 className="w-3.5 h-3.5 text-[#02C39A]" /> Korxonalar ({companies.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/settings/company-settings')}
+                className="text-[10px] font-bold text-[#02C39A] hover:underline cursor-pointer"
+              >
+                Rekvizitlar
+              </button>
+            </div>
+
+            <div className="space-y-0.5 mb-1.5">
+              {companies.map((comp) => (
+                <DropdownMenuItem
+                  key={comp.id}
+                  onClick={() => handleSelectCompany(comp)}
+                  className={`px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-between text-xs font-bold transition ${comp.id === activeCompany.id
+                      ? 'bg-[#0D3B46] text-[#02C39A] ring-1 ring-[#02C39A]/40'
+                      : 'text-slate-200 hover:bg-[#0D3B46]/70 hover:text-white'
+                    }`}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <div className="w-6 h-6 rounded-md bg-[#028090]/20 flex items-center justify-center text-[#02C39A] font-bold text-[10px] shrink-0">
+                      {comp.name.charAt(0)}
+                    </div>
+                    <div className="truncate">
+                      <div className="truncate">{comp.name}</div>
+                      <div className="text-[10px] text-slate-400 font-mono font-normal">STIR: {comp.tin}</div>
+                    </div>
+                  </div>
+                  {comp.id === activeCompany.id && (
+                    <CheckCircle2 className="w-4 h-4 text-[#02C39A] shrink-0 ml-2" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </div>
+
+            <DropdownMenuSeparator className="bg-[#028090]/30 my-1.5" />
+
+            {/* 2. Filiallar */}
+            <div className="px-2.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-300">
+                <Store className="w-3.5 h-3.5 text-[#02C39A]" /> Filiallar ({branches.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/settings/branches')}
+                className="text-[10px] font-bold text-[#02C39A] hover:underline cursor-pointer"
+              >
+                Barchasi
+              </button>
+            </div>
+
+            <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-0.5">
+              {branches.map((b) => (
+                <DropdownMenuItem
+                  key={b.id}
+                  onClick={() => handleSelectBranch(b)}
+                  className={`px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-between text-xs transition ${b.id === activeBranch?.id
+                      ? 'bg-[#028090] text-white font-black shadow-2xs'
+                      : 'text-slate-200 hover:bg-[#0D3B46] hover:text-[#02C39A]'
+                    }`}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold bg-black/20 text-slate-200 shrink-0">
+                      {b.code}
+                    </span>
+                    <div className="truncate">
+                      <div className="truncate font-bold">{b.name}</div>
+                      <div className="text-[10px] text-slate-300 font-normal truncate flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5 shrink-0" /> {b.region}
+                      </div>
+                    </div>
+                  </div>
+
+                  {b.id === activeBranch?.id && (
+                    <CheckCircle2 className="w-4 h-4 text-white shrink-0 ml-2" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </div>
+
+            <DropdownMenuSeparator className="bg-[#028090]/30 my-1.5" />
+
+            {/* 3. Bottom Links */}
+            <DropdownMenuItem
+              onClick={() => navigate('/admin/settings/branches')}
+              className="px-2.5 py-1.5 text-xs font-bold text-[#02C39A] hover:bg-[#0D3B46] rounded-lg cursor-pointer flex items-center gap-2"
+            >
+              <Store className="w-3.5 h-3.5" /> Filiallarni boshqarish
             </DropdownMenuItem>
-            <DropdownMenuItem className="focus:bg-[#0D3B46]">Chilonzor filiali</DropdownMenuItem>
-            <DropdownMenuItem className="focus:bg-[#0D3B46]">Ulgurji baza (Qoʻyliq)</DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-[#028090]/30" />
+
             <DropdownMenuItem
               onClick={() => navigate('/admin/settings/company-settings')}
-              className="focus:bg-[#0D3B46]"
+              className="px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-[#0D3B46] hover:text-white rounded-lg cursor-pointer flex items-center gap-2"
             >
-              <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> Korxona sozlamalari
+              <Settings className="w-3.5 h-3.5 text-[#02C39A]" /> Korxona rekvizitlari
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -147,7 +358,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
         <button
           type="button"
           onClick={() => navigate('/admin/guide')}
-          className="w-8 h-8 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 flex items-center justify-center text-white text-xs font-bold transition"
+          className="w-8 h-8 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 flex items-center justify-center text-white text-xs font-bold transition cursor-pointer"
           title="Yordam va qoʻllanma"
         >
           <HelpCircle className="w-4 h-4 text-[#02C39A]" />
@@ -158,7 +369,7 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 p-0.5 rounded-lg hover:ring-2 hover:ring-[#02C39A]/50 transition"
+              className="flex items-center gap-1.5 p-0.5 rounded-lg hover:ring-2 hover:ring-[#02C39A]/50 transition cursor-pointer"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#028090] to-[#02C39A] border border-[#02C39A]/60 flex items-center justify-center text-[#0B2B33] font-black text-xs shadow-xs">
                 S
@@ -170,21 +381,27 @@ export const IboxHeader: React.FC<IboxHeaderProps> = ({ toggleSidebar, isSidebar
             <DropdownMenuLabel className="font-bold text-white">{userName}</DropdownMenuLabel>
             <div className="px-2 py-0.5 text-[11px] text-[#02C39A] font-medium">Boshqaruvchi / Admin</div>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
-            <DropdownMenuItem onClick={() => navigate('/admin/settings/profile')} className="focus:bg-[#0D3B46]">
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/profile')} className="focus:bg-[#0D3B46] cursor-pointer">
               <User className="w-4 h-4 mr-2 text-[#02C39A]" /> Mening profilim
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/admin/settings/company-settings')} className="focus:bg-[#0D3B46]">
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/company-settings')} className="focus:bg-[#0D3B46] cursor-pointer">
               <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> Sozlamalar
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
-            <DropdownMenuItem onClick={handleLogout} className="text-rose-400 font-bold focus:bg-rose-950">
+            <DropdownMenuItem onClick={handleLogout} className="text-rose-400 font-bold focus:bg-rose-950 cursor-pointer">
               <LogOut className="w-4 h-4 mr-2" /> Chiqish
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </header>
   );
 };
 
-export default IboxHeader;
+export default SaparHeader;

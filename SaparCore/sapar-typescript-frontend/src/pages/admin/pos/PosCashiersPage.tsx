@@ -222,13 +222,13 @@ export const PosCashiersPage: React.FC = () => {
             return prev.map((c) =>
               c.cashierName === live.cashierName
                 ? {
-                    ...c,
-                    totalSales: live.totalSales || c.totalSales,
-                    totalChecks: live.totalTransactions || c.totalChecks,
-                    cashAmount: live.cashSales || c.cashAmount,
-                    cardAmount: live.uzcardSales || c.cardAmount,
-                    status: 'OPEN',
-                  }
+                  ...c,
+                  totalSales: live.totalSales || c.totalSales,
+                  totalChecks: live.totalTransactions || c.totalChecks,
+                  cashAmount: live.cashSales || c.cashAmount,
+                  cardAmount: live.uzcardSales || c.cardAmount,
+                  status: 'OPEN',
+                }
                 : c
             );
           }
@@ -258,21 +258,20 @@ export const PosCashiersPage: React.FC = () => {
       prev.map((c) =>
         c.id === selectedShiftForAudit.id
           ? {
-              ...c,
-              status: 'AUDITED',
-              actualCash: countedAuditCash,
-              difference: diff,
-              auditedBy: 'Boshqaruvchi (Menejer)',
-              auditedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            }
+            ...c,
+            status: 'AUDITED',
+            actualCash: countedAuditCash,
+            difference: diff,
+            auditedBy: 'Boshqaruvchi (Menejer)',
+            auditedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          }
           : c
       )
     );
 
     setIsAuditModalOpen(false);
     toast.success(
-      `Smena tekshirildi va ${format(countedAuditCash)} mablagʻ ${
-        inkassatsiyaTarget === 'SAFE' ? 'Bosh Seyfga' : 'Bank hisobiga'
+      `Smena tekshirildi va ${format(countedAuditCash)} mablagʻ ${inkassatsiyaTarget === 'SAFE' ? 'Bosh Seyfga' : 'Bank hisobiga'
       } inkassatsiya qilindi!`
     );
   };
@@ -309,7 +308,7 @@ export const PosCashiersPage: React.FC = () => {
   const activeCount = cashiers.filter((c) => c.status === 'OPEN').length;
   const totalChecks = cashiers.reduce((acc, c) => acc + (c.status === 'OPEN' ? c.totalChecks : 0), 0);
 
-  // Multi-currency cashbox calculations (iBox match)
+  // Multi-currency cashbox calculations (Sapar match)
   const totalCashUzs = registers.reduce((acc, r) => acc + r.balanceUzs, 0);
   const totalCashUsd = registers.reduce((acc, r) => acc + r.balanceUsd, 0);
 
@@ -547,7 +546,7 @@ export const PosCashiersPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: MULTI-CURRENCY CASHBOX BREAKDOWN (Matches iBox "Kassadagi pullar") */}
+      {/* TAB 2: MULTI-CURRENCY CASHBOX BREAKDOWN (Matches Sapar "Kassadagi pullar") */}
       {activeTab === 'cashbox' && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
@@ -555,7 +554,7 @@ export const PosCashiersPage: React.FC = () => {
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Kassadagi Pullar (Multi-valyuta & Toʻlov Kanallari)</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Barcha kassa registrlari, terminallar va seyfdagi qoldiqlar (iBox standarti boʻyicha)
+                  Barcha kassa registrlari, terminallar va seyfdagi qoldiqlar (Sapar standarti boʻyicha)
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -818,22 +817,20 @@ export const PosCashiersPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setInkassatsiyaTarget('SAFE')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-                      inkassatsiyaTarget === 'SAFE'
+                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${inkassatsiyaTarget === 'SAFE'
                         ? 'border-teal-600 bg-teal-50 text-teal-900'
                         : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <Building2 className="w-3.5 h-3.5" /> Bosh Seyf
                   </button>
                   <button
                     type="button"
                     onClick={() => setInkassatsiyaTarget('BANK')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-                      inkassatsiyaTarget === 'BANK'
+                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${inkassatsiyaTarget === 'BANK'
                         ? 'border-teal-600 bg-teal-50 text-teal-900'
                         : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <ArrowRightLeft className="w-3.5 h-3.5" /> Bank Hisobvaragʻi
                   </button>

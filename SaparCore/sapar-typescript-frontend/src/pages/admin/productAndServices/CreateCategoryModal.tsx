@@ -8,6 +8,20 @@ import SubmitButton from "@components/admin/SubmitButton";
 import { toast } from "sonner";
 import DynamicCustomFields from "@components/admin/DynamicCustomFields";
 import ImageCropperUpload from "@components/common/ImageCropperUpload";
+import {
+    Package,
+    ShoppingBag,
+    Wrench,
+    Sparkles,
+    Building2,
+    Layers,
+    Utensils,
+    Zap,
+    Shirt,
+    Coffee,
+    Tag,
+    Palette,
+} from "lucide-react";
 
 interface Props {
     isOpen: boolean;
@@ -22,7 +36,35 @@ interface CategoryFormData {
     status: boolean;
     category_image: File | null;
     categoryImageUrl: string;
+    color: string;
+    icon: string;
+    parentId?: string;
 }
+
+const COLOR_PRESETS = [
+    { name: 'Teal', hex: '#028090', bg: 'bg-[#028090]' },
+    { name: 'Mint', hex: '#02C39A', bg: 'bg-[#02C39A]' },
+    { name: 'Navy', hex: '#0B2B33', bg: 'bg-[#0B2B33]' },
+    { name: 'Amber', hex: '#F59E0B', bg: 'bg-amber-500' },
+    { name: 'Blue', hex: '#3B82F6', bg: 'bg-blue-500' },
+    { name: 'Purple', hex: '#8B5CF6', bg: 'bg-purple-500' },
+    { name: 'Emerald', hex: '#10B981', bg: 'bg-emerald-500' },
+    { name: 'Rose', hex: '#F43F5E', bg: 'bg-rose-500' },
+];
+
+const ICON_PRESETS = [
+    { id: 'package', label: 'Mahsulot', icon: Package },
+    { id: 'bag', label: 'Sumka', icon: ShoppingBag },
+    { id: 'tool', label: 'Asbob', icon: Wrench },
+    { id: 'sparkles', label: 'Maxsus', icon: Sparkles },
+    { id: 'building', label: 'Qurilish', icon: Building2 },
+    { id: 'layers', label: 'Xom-ashyo', icon: Layers },
+    { id: 'food', label: 'Oziq-ovqat', icon: Utensils },
+    { id: 'tech', label: 'Elektr', icon: Zap },
+    { id: 'clothes', label: 'Kiyim', icon: Shirt },
+    { id: 'cafe', label: 'Kafe', icon: Coffee },
+    { id: 'tag', label: 'Aksiya', icon: Tag },
+];
 
 const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
     const setInitialFormData = (): CategoryFormData => ({
@@ -31,7 +73,10 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
         slug: '',
         status: true,
         category_image: null,
-        categoryImageUrl: ''
+        categoryImageUrl: '',
+        color: '#028090',
+        icon: 'package',
+        parentId: '',
     });
     const { token } = useSelector((state: RootState) => state.auth);
     const [formData, setFormData] = useState<CategoryFormData>(setInitialFormData());
@@ -53,7 +98,7 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
         }
     }, [isOpen]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         setFormData(prev => {
@@ -70,7 +115,6 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
         });
     };
 
-
     const handleCroppedCategoryImage = (file: File) => {
         setFormData(prev => ({
             ...prev,
@@ -82,12 +126,12 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
         if (!formData.category_name.trim()) {
-            newErrors.category_name = 'Category name is required.';
-        } else if (formData.category_name.length < 3) {
-            newErrors.category_name = 'Name must be at least 3 characters.';
+            newErrors.category_name = 'Kategoriya nomi kiritilishi shart.';
+        } else if (formData.category_name.length < 2) {
+            newErrors.category_name = 'Nom kamida 2 ta belgidan iborat boʻlishi kerak.';
         }
         if (!formData.slug.trim()) {
-            newErrors.slug = 'Slug is required.';
+            newErrors.slug = 'Slug talab qilinadi.';
         }
         setFormErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -101,6 +145,11 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
         data.append('category_name', formData.category_name);
         data.append('slug', formData.slug);
         data.append('status', String(formData.status || false));
+        data.append('color', formData.color || '#028090');
+        data.append('icon', formData.icon || 'package');
+        if (formData.parentId) {
+            data.append('parentId', formData.parentId);
+        }
 
         if (formData.category_image instanceof File) {
             data.append('category_image', formData.category_image);
@@ -137,42 +186,133 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
             await axios.post(Constants.CREATE_CATEGORY_URL, data, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
             });
-            toast.success('Category created successfully');
+            toast.success('Kategoriya muvaffaqiyatli yaratildi!');
             onSuccess();
         } catch (error: any | AxiosError) {
             setFormErrors(error?.response?.data?.errors || {});
-            toast.error('Something went wrong. Please try again.');
+            toast.error(error?.response?.data?.message || 'Xatolik yuz berdi. Iltimos qaytadan urinib koʻring.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Create Category">
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <Modal isOpen={isOpen} onClose={onClose} title="Yangi Kategoriya Yaratish (iBox / Bukku)">
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
                 {/* Image Upload Section */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700  mb-1">Image</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Rasm / Logo</label>
                     <ImageCropperUpload
                         value={formData.categoryImageUrl || undefined}
                         aspect={1}
-                        label="Upload Image"
+                        label="Kategoriya rasmini yuklash"
                         onCropped={handleCroppedCategoryImage}
                     />
-                    {formErrors.category_image && <p className="text-red-500 text-xs mt-1">{formErrors.category_image}</p>}
+                    {formErrors.category_image && <p className="text-red-500 text-[11px] mt-1">{formErrors.category_image}</p>}
                 </div>
-                {/* Name Input */}
-                <div>
-                    <label htmlFor="category_name" className="block text-sm font-medium text-gray-700  mb-1">Name <span className="text-red-500">*</span></label>
-                    <input id="category_name" name="category_name" type="text" maxLength={100} value={formData.category_name || ""} onChange={handleChange} placeholder="Enter Category Name" className="w-full bg-white  text-gray-950  px-4 py-2 border border-gray-300  rounded-md text-sm focus:ring-purple-600 focus:border-purple-600" />
-                    {formErrors.category_name && <p className="text-red-500 text-xs mt-1">{formErrors.category_name}</p>}
+
+                {/* Name & Slug Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label htmlFor="category_name" className="block text-xs font-bold text-slate-700 mb-1">
+                            Kategoriya Nomi <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="category_name"
+                            name="category_name"
+                            type="text"
+                            maxLength={100}
+                            value={formData.category_name || ""}
+                            onChange={handleChange}
+                            placeholder="Masalan: Qurilish Materiallari"
+                            className="w-full bg-slate-50 text-slate-900 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#028090] focus:outline-none"
+                        />
+                        {formErrors.category_name && <p className="text-red-500 text-[11px] mt-1">{formErrors.category_name}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="slug" className="block text-xs font-bold text-slate-700 mb-1">
+                            Slug (Identifikator) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="slug"
+                            type="text"
+                            name="slug"
+                            maxLength={100}
+                            value={formData.slug || ""}
+                            onChange={handleChange}
+                            placeholder="qurilish-materiallari"
+                            className="w-full bg-slate-50 text-slate-900 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#028090] focus:outline-none"
+                        />
+                        {formErrors.slug && <p className="text-red-500 text-[11px] mt-1">{formErrors.slug}</p>}
+                    </div>
                 </div>
-                {/* Slug Input */}
-                <div>
-                    <label htmlFor="slug" className="block text-sm font-medium text-gray-700  mb-1">Slug <span className="text-red-500">*</span></label>
-                    <input id="slug" type="text" name="slug" maxLength={100} value={formData.slug || ""} onChange={handleChange} placeholder="Enter Category Slug" className="w-full bg-white  text-gray-950  px-4 py-2 border border-gray-300  rounded-md text-sm focus:ring-purple-600 focus:border-purple-600" />
-                    {formErrors.slug && <p className="text-red-500 text-xs mt-1">{formErrors.slug}</p>}
+
+                {/* POS Touch Grid: Color & Icon Picker (iBox Style) */}
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                            <Palette className="w-3.5 h-3.5 text-[#028090]" />
+                            <span>POS Sensorli Plitka Sozlamalari (iBox Standarti)</span>
+                        </span>
+                        <div
+                            className="w-6 h-6 rounded-lg flex items-center justify-center text-white shadow-2xs"
+                            style={{ backgroundColor: formData.color }}
+                        >
+                            {(() => {
+                                const SelectedIcon = ICON_PRESETS.find(i => i.id === formData.icon)?.icon || Package;
+                                return <SelectedIcon className="w-3.5 h-3.5" />;
+                            })()}
+                        </div>
+                    </div>
+
+                    {/* Color palette */}
+                    <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">Plitka Rangi:</label>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {COLOR_PRESETS.map(c => (
+                                <button
+                                    key={c.hex}
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, color: c.hex }))}
+                                    className={`w-6 h-6 rounded-full border-2 transition cursor-pointer ${
+                                        formData.color === c.hex ? 'border-slate-900 scale-110 shadow-xs' : 'border-white'
+                                    }`}
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.name}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Icon selector */}
+                    <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">Piktogramma (Ikonka):</label>
+                        <div className="grid grid-cols-6 gap-1.5">
+                            {ICON_PRESETS.map(item => {
+                                const IconComponent = item.icon;
+                                const isSelected = formData.icon === item.id;
+                                return (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, icon: item.id }))}
+                                        className={`p-1.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition cursor-pointer ${
+                                            isSelected
+                                                ? 'bg-[#028090] text-white border-[#028090] shadow-xs'
+                                                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
+                                        }`}
+                                        title={item.label}
+                                    >
+                                        <IconComponent className="w-4 h-4" />
+                                        <span className="text-[9px] truncate max-w-full">{item.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
+
                 {/* Custom Fields */}
                 <DynamicCustomFields
                     moduleSlug="categories"
@@ -182,8 +322,14 @@ const CreateCategoryModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =>
                 />
 
                 {/* Form Buttons */}
-                <div className="flex justify-end pt-2 space-x-2">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 text-gray-700   cursor-pointer">Cancel</button>
+                <div className="flex justify-end pt-2 space-x-2 border-t border-slate-100">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold hover:bg-slate-50 text-slate-700 cursor-pointer"
+                    >
+                        Bekor Qilish
+                    </button>
                     <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={"create"} />
                 </div>
             </form>

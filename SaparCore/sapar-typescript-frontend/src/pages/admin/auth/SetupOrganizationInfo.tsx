@@ -368,10 +368,8 @@ const SetupOrganizationInfo: React.FC = () => {
                                     onChange={(e) => setFormData((prev) => ({ ...prev, taxRegime: e.target.value }))}
                                     className="mt-1 text-gray-700 p-2 block focus:outline-none focus:ring-1 focus:ring-purple-600 focus:border-purple-600 w-full border border-gray-200 rounded-md"
                                 >
-                                    <option value="NONE">No tax</option>
-                                    <option value="GST_INDIA">India GST</option>
-                                    <option value="VAT_GENERIC">VAT (UK, EU, AU, etc.)</option>
-                                    <option value="US_SALES_TAX">US Sales Tax</option>
+                                    <option value="VAT_GENERIC">QQS (Oʻzbekiston Soliq QQS 12%)</option>
+                                    <option value="NONE">Aylanmadan olinadigan soliq (4%) / Imtiyozli</option>
                                 </select>
                             </div>
 

@@ -69,7 +69,7 @@ lerna-debug.log*
 
 # Screenshots & Audit Dumps (Keep repository clean)
 /*.png
-/ibox_*.png
+/Sapar_*.png
 /sapar_*.png
 /shift_*.png
 /tc_inv_*.png
@@ -83,7 +83,7 @@ lerna-debug.log*
 /module_audit_report.json
 /generateClientPdf.js
 /*.pdf
-/sapar_vs_ibox_complete_comparison.html
+/sapar_vs_Sapar_complete_comparison.html
 /qa-skills/
 
 # Internal Development Plans, Agents & Scripts (Keep Local Only)

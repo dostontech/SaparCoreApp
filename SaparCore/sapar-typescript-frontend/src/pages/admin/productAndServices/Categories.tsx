@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { FC, FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import Constants from "../../../constants/api";
 import axios, { AxiosError } from "axios";
 import Table from "../../../components/admin/Table";
@@ -51,6 +52,7 @@ type FormErrors = {
 };
 
 const CategoryList: FC = () => {
+    const { t } = useTranslation();
     // Hooks and State
     const { token } = useSelector((state: RootState) => state.auth);
     const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
@@ -94,7 +96,7 @@ const CategoryList: FC = () => {
             setPagination(response.data.data.pagination);
         } catch (error) {
             console.error("Error fetching categories:", error);
-            toast.error("Failed to fetch categories.");
+            toast.error(t('categories.fetchError', 'Failed to fetch categories.'));
         } finally {
             setIsLoading(false);
         }
@@ -125,7 +127,7 @@ const CategoryList: FC = () => {
             await axios.put(`${Constants.UPDATE_CATEGORY_URL}/${categoryItem.id}`, updatedCategory, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            toast.success('Status updated successfully');
+            toast.success(t('categories.updatedSuccess', 'Status updated successfully'));
             fetchCategories(search, limit, page); // Refetch current page
         } catch (error) {
             console.error('Failed to update status:', error);
@@ -204,7 +206,7 @@ const CategoryList: FC = () => {
             await axios[method](url, formData, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            toast.success(`Category ${isEditMode ? 'updated' : 'added'} successfully`);
+            toast.success(isEditMode ? t('categories.updatedSuccess', 'Kategoriya muvaffaqiyatli yangilandi') : t('categories.createdSuccess', 'Kategoriya muvaffaqiyatli qoʻshildi'));
             setShowModal(false);
             fetchCategories(search, limit, page); // Refetch current page
         } catch (error) {
@@ -214,7 +216,7 @@ const CategoryList: FC = () => {
                 setFormErrors(data.errors);
             } else {
                 console.error("Error submitting form:", error);
-                toast.error(`Failed to ${isEditMode ? 'update' : 'add'} category.`);
+                toast.error(isEditMode ? 'Failed to update category.' : 'Failed to add category.');
             }
         } finally {
             setIsSubmitting(false);
@@ -241,7 +243,7 @@ const CategoryList: FC = () => {
             await axios.delete(`${Constants.DELETE_CATEGORY_URL}/${itemToDelete.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            toast.success('Category deleted successfully');
+            toast.success(t('categories.deletedSuccess', 'Kategoriya muvaffaqiyatli oʻchirildi'));
             fetchCategories(search, limit, page); // Refetch current page
             setDeleteModalOpen(false);
             setItemToDelete(null);
@@ -257,17 +259,25 @@ const CategoryList: FC = () => {
     const from = (pagination.page - 1) * pagination.limit + 1;
     const to = Math.min(pagination.page * pagination.limit, pagination.total);
 
-    const tableHeader = ["#", "Category Name", "Slug", "Status", "Actions"];
+    const tableHeader = [
+        "#",
+        t('categories.categoryName', 'Kategoriya nomi'),
+        t('categories.slug', 'Slug'),
+        t('categories.status', 'Holati'),
+        t('common.actions', 'Amallar')
+    ];
     const restrictedActions = ['edit', 'delete'];
     const tableActions = [
         {
-            label: 'Edit',
+            label: t('common.edit', 'Tahrirlash'),
+            actionType: 'edit',
             icon: <Edit size={14} />,
             primary: true,
             onClick: (item: Category) => { handleEditClick(item) }
         },
         {
-            label: 'Delete',
+            label: t('common.delete', 'Oʻchirish'),
+            actionType: 'delete',
             icon: <Trash2Icon size={14} />,
             primary: true,
             variant: 'danger' as const,
@@ -275,7 +285,7 @@ const CategoryList: FC = () => {
         }
     ];
     const allowedActions = tableActions.filter((action) => {
-        const actionKey = action.label.toLowerCase() as PermissionAction;
+        const actionKey = ((action as any).actionType || action.label).toLowerCase() as PermissionAction;
 
         if (!restrictedActions.includes(actionKey)) {
             return true;
@@ -288,35 +298,46 @@ const CategoryList: FC = () => {
     }
     return (
         <div className="space-y-4">
-            <PageHeader title="Categories">
+            <PageHeader title={t('categories.title', 'Kategoriyalar')}>
                 {hasPermission(permissions, 'product-services', 'create') &&
                     <Button
                         onClick={openCreateCategory}
                         leftIcon={<CirclePlusIcon size={14} />}
                         className="shadow"
                     >
-                        New Category
+                        {t('categories.newCategory', 'Yangi kategoriya')}
                     </Button>
                 }
             </PageHeader>
 
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-                <input
-                    type="text"
-                    placeholder="Search by category name..."
-                    value={search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600"
-                />
-                <select
-                    value={limit}
-                    onChange={(e) => handlePageLengthChange(Number(e.target.value))}
-                    className="border border-gray-300 px-3 py-2 rounded-md bg-white  text-gray-950  focus:outline-none focus:ring-2 focus:ring-purple-600"
-                >
-                    {[10, 25, 50].map((num) => (
-                        <option className="text-gray-950 " key={num} value={num}>{num} / page</option>
-                    ))}
-                </select>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <input
+                        type="text"
+                        placeholder={t('categories.searchPlaceholder', 'Kategoriya nomi boʻyicha qidirish...')}
+                        value={search}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-64 text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090]"
+                    />
+                    <select
+                        value={limit}
+                        onChange={(e) => handlePageLengthChange(Number(e.target.value))}
+                        className="border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-[#028090]"
+                    >
+                        {[10, 25, 50].map((num) => (
+                            <option className="text-gray-950" key={num} value={num}>{num} / {t('common.page', 'sahifa')}</option>
+                        ))}
+                    </select>
+                </div>
+                {hasPermission(permissions, 'product-services', 'create') && (
+                    <Button
+                        onClick={openCreateCategory}
+                        leftIcon={<CirclePlusIcon size={16} />}
+                        className="bg-[#028090] hover:bg-[#026d7a] text-white shadow"
+                    >
+                        {t('categories.newCategory', 'Yangi kategoriya')}
+                    </Button>
+                )}
             </div>
 
             <Table headers={tableHeader}>
@@ -334,7 +355,7 @@ const CategoryList: FC = () => {
                             categoryItem.slug,
                             <label className="inline-flex items-center cursor-pointer">
                                 <input type="checkbox" className="sr-only peer" checked={categoryItem.status} onChange={() => updateStatus(categoryItem)} />
-                                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-purple-600 rounded-full peer-focus:ring-2 peer-focus:ring-purple-600">
+                                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-[#028090] rounded-full peer-focus:ring-2 peer-focus:ring-[#028090]">
                                     <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${categoryItem.status ? 'translate-x-full' : ''}`}></div>
                                 </div>
                             </label>
@@ -345,13 +366,13 @@ const CategoryList: FC = () => {
 
                 {!isLoading && categories.length === 0 &&
                     <tr>
-                        <td colSpan={tableHeader.length} className="text-center py-4 font-semibold">No brands found.</td>
+                        <td colSpan={tableHeader.length} className="text-center py-4 font-semibold text-gray-500">{t('categories.noCategoriesFound', 'Kategoriyalar topilmadi')}</td>
                     </tr>
                 }
 
                 {isLoading && (
                     <tr key="table-loader">
-                        <td className="text-center py-2 text-gray-950  font-semibold" colSpan={7}>
+                        <td className="text-center py-2 text-gray-950 font-semibold" colSpan={7}>
                             <LoaderSpinner />
                         </td>
                     </tr>
@@ -369,30 +390,29 @@ const CategoryList: FC = () => {
                 paginationShape="rounded"
             />
 
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={isEditMode ? 'Edit Category' : 'Add New Category'}>
-                {/* Form fields are identical to your provided code, just ensure they are within this modal */}
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={isEditMode ? t('categories.editCategory', 'Kategoriyani tahrirlash') : t('categories.addNewCategory', 'Yangi kategoriya qoʻshish')}>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Image Upload Section */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700  mb-1">Image <em className="text-red-500">*</em></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('categories.image', 'Rasm')} <em className="text-red-500">*</em></label>
                         <ImageCropperUpload
                             value={category.categoryImageUrl || undefined}
                             aspect={1}
-                            label="Upload Image"
+                            label={t('categories.uploadImage', 'Rasm yuklash')}
                             onCropped={handleCroppedCategoryImage}
                         />
                         {formErrors.category_image && <p className="text-red-500 text-xs mt-1">{formErrors.category_image}</p>}
                     </div>
                     {/* Name Input */}
                     <div>
-                        <label htmlFor="category_name" className="block text-sm font-medium text-gray-700  mb-1">Name <span className="text-red-500">*</span></label>
-                        <input id="category_name" type="text" value={category.category_name || ""} onChange={(e) => setCategory({ ...category, category_name: e.target.value })} placeholder="Enter Category Name" className="w-full bg-white  text-gray-950  px-4 py-2 border border-gray-300  rounded-md text-sm focus:ring-purple-600 focus:border-purple-600" />
+                        <label htmlFor="category_name" className="block text-sm font-medium text-gray-700 mb-1">{t('categories.categoryName', 'Kategoriya nomi')} <span className="text-red-500">*</span></label>
+                        <input id="category_name" type="text" value={category.category_name || ""} onChange={(e) => setCategory({ ...category, category_name: e.target.value })} placeholder={t('categories.namePlaceholder', 'Kategoriya nomini kiriting')} className="w-full bg-white text-gray-950 px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#028090] focus:border-[#028090]" />
                         {formErrors.category_name && <p className="text-red-500 text-xs mt-1">{formErrors.category_name}</p>}
                     </div>
                     {/* Slug Input */}
                     <div>
-                        <label htmlFor="slug" className="block text-sm font-medium text-gray-700  mb-1">Slug <span className="text-red-500">*</span></label>
-                        <input id="slug" type="text" value={category.slug || ""} onChange={(e) => setCategory({ ...category, slug: e.target.value })} placeholder="Enter Category Slug" className="w-full bg-white  text-gray-950  px-4 py-2 border border-gray-300  rounded-md text-sm focus:ring-purple-600 focus:border-purple-600" />
+                        <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">{t('categories.slug', 'Slug')} <span className="text-red-500">*</span></label>
+                        <input id="slug" type="text" value={category.slug || ""} onChange={(e) => setCategory({ ...category, slug: e.target.value })} placeholder={t('categories.slugPlaceholder', 'Kategoriya slugini kiriting')} className="w-full bg-white text-gray-950 px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#028090] focus:border-[#028090]" />
                         {formErrors.slug && <p className="text-red-500 text-xs mt-1">{formErrors.slug}</p>}
                     </div>
                     <DynamicCustomFields
@@ -403,7 +423,7 @@ const CategoryList: FC = () => {
                     />
                     {/* Form Buttons */}
                     <div className="flex justify-end pt-2 space-x-2">
-                        <Button variant="white" onClick={() => setShowModal(false)}>Cancel</Button>
+                        <Button variant="white" onClick={() => setShowModal(false)}>{t('common.cancel', 'Bekor qilish')}</Button>
                         <SubmitButton isDisabled={isSubmitting} isLoading={isSubmitting} mode={isEditMode ? "edit" : "create"} />
                     </div>
                 </form>
@@ -413,8 +433,8 @@ const CategoryList: FC = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
-                title="Confirm Deletion"
-                message="Are you sure you want to delete this category?"
+                title={t('categories.confirmDeleteTitle', 'Oʻchirishni tasdiqlang')}
+                message={t('categories.confirmDeleteMsg', 'Ushbu kategoriyani oʻchirishga ishonchingiz komilmi?')}
                 isDeleting={isDeleting}
             >
             </DeleteConfirmationModal>

@@ -29,15 +29,15 @@ interface PaginationData {
 
 type RegimeFilter = 'all' | TaxRegime;
 
-const REGIME_OPTIONS: RegimeFilter[] = ['all', 'GST_INDIA', 'VAT_GENERIC', 'US_SALES_TAX', 'NONE'];
+const REGIME_OPTIONS: RegimeFilter[] = ['all', 'VAT_GENERIC', 'NONE'];
 
 const regimeLabel = (r: RegimeFilter): string => {
     switch (r) {
-        case 'all': return 'All';
-        case 'GST_INDIA': return 'GST (India)';
-        case 'VAT_GENERIC': return 'VAT';
-        case 'US_SALES_TAX': return 'US Sales Tax';
-        case 'NONE': return 'None';
+        case 'all': return 'Barcha soliqlar';
+        case 'VAT_GENERIC': return 'QQS (Oʻzbekiston 12%)';
+        case 'GST_INDIA': return 'QQS';
+        case 'US_SALES_TAX': return 'Aylanma soliq';
+        case 'NONE': return 'Soliqsiz (0% / Imtiyozli)';
     }
 };
 

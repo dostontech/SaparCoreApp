@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
 
-export const IboxDashboardPage: React.FC = () => {
+export const SaparDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { format } = useCurrencyFormatter();
 
@@ -319,4 +319,4 @@ export const IboxDashboardPage: React.FC = () => {
   );
 };
 
-export default IboxDashboardPage;
+export default SaparDashboardPage;

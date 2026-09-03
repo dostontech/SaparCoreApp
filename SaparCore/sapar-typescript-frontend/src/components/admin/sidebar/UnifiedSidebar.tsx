@@ -403,16 +403,15 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     const isRouteActive = (to: string, exact?: boolean) => {
         if (exact) return pathname === to;
         if (to === "/admin") return pathname === "/admin" || pathname === "/admin/";
-        return pathname.startsWith(to);
+        return pathname === to || pathname.startsWith(to + "/");
     };
 
     if (!isOpen) return null;
 
     return (
         <aside
-            className={`h-screen flex flex-col bg-[#081F26] border-r border-[#0E353F] transition-all duration-300 ease-in-out select-none shrink-0 z-40 text-slate-200 ${
-                isCollapsed ? "w-[68px]" : "w-[264px]"
-            }`}
+            className={`h-screen flex flex-col bg-[#081F26] border-r border-[#0E353F] transition-all duration-300 ease-in-out select-none shrink-0 z-40 text-slate-200 ${isCollapsed ? "w-[68px]" : "w-[264px]"
+                }`}
         >
             {/* 1. Header: Brand Logo & Collapse Toggle */}
             <div className="h-14 px-3 flex items-center justify-between border-b border-[#0E353F] shrink-0">
@@ -423,7 +422,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                         </div>
                         <div className="flex flex-col truncate">
                             <span className="text-sm font-extrabold tracking-tight text-white flex items-center gap-1">
-                                SAPAR <span className="text-[10px] font-bold text-teal-400">ERP</span>
+                                SAPAR <span className="text-[10px] font-bold text-teal-400">BizOS</span>
                             </span>
                             <span className="text-[10px] text-slate-400 truncate">
                                 Central Asia v2.9
@@ -512,11 +511,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                                         <SimpleTooltip key={fav.to} content={fav.title} side="right">
                                             <Link
                                                 to={fav.to}
-                                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${
-                                                    active
+                                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${active
                                                         ? "bg-teal-500 text-slate-950 font-bold shadow-md shadow-teal-500/20"
                                                         : "text-slate-400 hover:text-white hover:bg-slate-800/80"
-                                                }`}
+                                                    }`}
                                             >
                                                 {fav.icon}
                                             </Link>
@@ -527,11 +525,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                                 return (
                                     <div
                                         key={fav.to}
-                                        className={`group relative flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                                            active
+                                        className={`group relative flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${active
                                                 ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
                                                 : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-                                        }`}
+                                            }`}
                                     >
                                         <Link
                                             to={fav.to}
@@ -563,11 +560,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                         <SimpleTooltip content="Boshqaruv Paneli" side="right">
                             <Link
                                 to="/admin"
-                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${
-                                    isRouteActive("/admin", true)
+                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${isRouteActive("/admin", true)
                                         ? "bg-teal-500 text-slate-950 font-bold shadow-md"
                                         : "text-slate-400 hover:text-white hover:bg-slate-800/80"
-                                }`}
+                                    }`}
                             >
                                 <Home size={18} />
                             </Link>
@@ -575,11 +571,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                     ) : (
                         <Link
                             to="/admin"
-                            className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                                isRouteActive("/admin", true)
+                            className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${isRouteActive("/admin", true)
                                     ? "bg-gradient-to-r from-teal-500 to-teal-600 text-slate-950 shadow-sm"
                                     : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
-                            }`}
+                                }`}
                         >
                             <div className="flex items-center gap-2.5 min-w-0">
                                 <Home size={16} />
@@ -643,11 +638,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                                                         return (
                                                             <div
                                                                 key={sub.to}
-                                                                className={`group relative flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all ${
-                                                                    active
+                                                                className={`group relative flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all ${active
                                                                         ? "bg-teal-500/20 text-teal-200 font-bold border-l-2 border-teal-400"
                                                                         : "text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium"
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <Link
                                                                     to={sub.to}
@@ -658,11 +652,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                                                                 <button
                                                                     type="button"
                                                                     onClick={(e) => togglePin(sub.to, e)}
-                                                                    className={`p-0.5 rounded transition cursor-pointer ${
-                                                                        isPinned
+                                                                    className={`p-0.5 rounded transition cursor-pointer ${isPinned
                                                                             ? "text-amber-400 opacity-100"
                                                                             : "text-slate-600 opacity-0 group-hover:opacity-100 hover:text-amber-400"
-                                                                    }`}
+                                                                        }`}
                                                                     title={isPinned ? "Sevimlilardan chiqarish" : "Sevimlilarga qoʻshish"}
                                                                 >
                                                                     <Star
@@ -699,11 +692,10 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                                         >
                                             <Link
                                                 to={mod.defaultRoute}
-                                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${
-                                                    active
+                                                className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all ${active
                                                         ? "bg-teal-500 text-slate-950 font-bold shadow-md shadow-teal-500/20"
                                                         : "text-slate-400 hover:text-white hover:bg-slate-800/80"
-                                                }`}
+                                                    }`}
                                             >
                                                 {mod.icon}
                                             </Link>
@@ -722,9 +714,8 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                     <DropdownMenuTrigger asChild>
                         <button
                             type="button"
-                            className={`w-full p-2 rounded-xl flex items-center transition cursor-pointer hover:bg-slate-800/80 ${
-                                isCollapsed ? "justify-center" : "justify-between"
-                            }`}
+                            className={`w-full p-2 rounded-xl flex items-center transition cursor-pointer hover:bg-slate-800/80 ${isCollapsed ? "justify-center" : "justify-between"
+                                }`}
                         >
                             <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-600 to-emerald-400 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-xs">

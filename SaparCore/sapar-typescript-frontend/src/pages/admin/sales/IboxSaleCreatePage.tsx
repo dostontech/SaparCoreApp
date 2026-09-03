@@ -27,7 +27,7 @@ interface LineItem {
   total: number;
 }
 
-export const IboxSaleCreatePage: React.FC = () => {
+export const SaparSaleCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const { format } = useCurrencyFormatter();
 
@@ -371,4 +371,4 @@ export const IboxSaleCreatePage: React.FC = () => {
   );
 };
 
-export default IboxSaleCreatePage;
+export default SaparSaleCreatePage;
