@@ -377,15 +377,15 @@ export const SaparHeader: React.FC<SaparHeaderProps> = ({ toggleSidebar, isSideb
               <ChevronDown className="w-3 h-3 text-slate-300 hidden sm:block" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 bg-[#0B2B33] text-slate-100 border-[#028090]/40">
+          <DropdownMenuContent align="end" className="w-52 bg-[#0B2B33] text-white border-[#028090]/40">
             <DropdownMenuLabel className="font-bold text-white">{userName}</DropdownMenuLabel>
             <div className="px-2 py-0.5 text-[11px] text-[#02C39A] font-medium">Boshqaruvchi / Admin</div>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
-            <DropdownMenuItem onClick={() => navigate('/admin/settings/profile')} className="focus:bg-[#0D3B46] cursor-pointer">
-              <User className="w-4 h-4 mr-2 text-[#02C39A]" /> Mening profilim
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/profile')} className="!text-white hover:!text-white focus:!text-white focus:bg-[#0D3B46] cursor-pointer">
+              <User className="w-4 h-4 mr-2 text-[#02C39A]" /> <span className="text-white font-medium">Mening profilim</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/admin/settings/company-settings')} className="focus:bg-[#0D3B46] cursor-pointer">
-              <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> Sozlamalar
+            <DropdownMenuItem onClick={() => navigate('/admin/settings/company-settings')} className="!text-white hover:!text-white focus:!text-white focus:bg-[#0D3B46] cursor-pointer">
+              <Settings className="w-4 h-4 mr-2 text-[#02C39A]" /> <span className="text-white font-medium">Sozlamalar</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[#028090]/30" />
             <DropdownMenuItem onClick={handleLogout} className="text-rose-400 font-bold focus:bg-rose-950 cursor-pointer">
