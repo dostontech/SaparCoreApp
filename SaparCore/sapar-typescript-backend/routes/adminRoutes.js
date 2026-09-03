@@ -129,8 +129,10 @@ const fixedAssetController = require('../controllers/fixedAssetController');
 const documentDefaultsController = require('../controllers/documentDefaultsController');
 const reconciliationController = require('../controllers/reconciliationController');
 const staffActivityController = require('../controllers/staffActivityController');
+const demoSeederController = require('../controllers/demoSeederController');
 
-
+router.post('/demo/seed-data', protect, demoSeederController.seedCurrentUserData);
+router.get('/demo/seed-data', protect, demoSeederController.seedCurrentUserData);
 
 router.get('/', protect, requirePermission('dashboard', 'view'), adminController.dashboard);
 router.get('/countries', protect, requirePermission('finance-settings', 'view'), adminController.getCountries);

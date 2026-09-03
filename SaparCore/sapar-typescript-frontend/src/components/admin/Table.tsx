@@ -25,23 +25,23 @@ const Table = ({ headers, children, fitWidth = false, colWidths }: TableProps) =
   return (
     <div
       className={
-        "w-full rounded-lg border border-gray-100" +
+        "w-full rounded-lg border border-gray-200" +
         (fitWidth ? "" : " overflow-x-auto")
       }
     >
       <table
         className={
-          "w-full bg-white text-sm text-gray-950 border-collapse border border-gray-100" +
-          (fitWidth ? " table-fixed" : " min-w-max")
+          "w-full bg-white text-sm text-gray-950 border-collapse border border-gray-200" +
+          (fitWidth ? " table-fixed" : " min-w-full")
         }
       >
-        <thead className="bg-gray-100 uppercase text-xs font-semibold text-gray-900">
+        <thead className="bg-gray-100 uppercase text-xs font-semibold text-gray-900 border-b border-gray-200">
           <tr>
             {headers.map((header, idx) => (
               <th
                 key={idx}
                 className={
-                  "px-4 py-3 text-left border-b border-gray-100 whitespace-nowrap" +
+                  "px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap" +
                   (colWidths?.[idx] ? ` ${colWidths[idx]}` : "")
                 }
               >

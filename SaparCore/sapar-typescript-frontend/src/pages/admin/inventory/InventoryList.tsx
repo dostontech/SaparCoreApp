@@ -4,7 +4,7 @@ import TableRow from "@components/admin/TableRow";
 import Constants from "@constants/api";
 import type { RootState } from "@store/index";
 import axios from "axios";
-import { CirclePlusIcon, HistoryIcon, MinusCircle, PlusCircleIcon } from "lucide-react";
+import { CirclePlusIcon, HistoryIcon, MinusCircle, PlusCircleIcon, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,6 +12,7 @@ import type { InventoryData } from "@models/inventory";
 import { useCurrencyFormatter } from "@hooks/useCurrencyFormatter";
 import { useCurrencies } from "@hooks/useCurrencies";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import Modal from "@components/admin/Modal";
 import NewInventoryModal from "./NewInventoryModal";
 import PermissionGuard from "@components/admin/PermissionGuard";
@@ -62,6 +63,28 @@ const InventoryList: React.FC = () => {
         `${resolveCurrency(code).symbol}${Number(amount).toLocaleString(locale, { maximumFractionDigits: 2 })}`;
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [isSeeding, setIsSeeding] = useState<boolean>(false);
+
+    const handleSeedDemoData = async () => {
+        try {
+            setIsSeeding(true);
+            toast.loading(t('common.loading', 'Test maʼlumotlari yuklanmoqda...'), { id: 'seed-toast' });
+            const res = await axios.post(`${Constants.API_BASE_URL}/admin/demo/seed-data`, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.data?.success) {
+                toast.success(res.data.message || 'Test maʼlumotlari muvaffaqiyatli yuklandi!', { id: 'seed-toast' });
+                fetchInventories();
+            } else {
+                toast.error(res.data?.message || 'Xatolik yuz berdi', { id: 'seed-toast' });
+            }
+        } catch (err: any) {
+            console.error('Seed error:', err);
+            toast.error(err.response?.data?.message || 'Yuklashda xatolik yuz berdi', { id: 'seed-toast' });
+        } finally {
+            setIsSeeding(false);
+        }
+    };
     const handleSearch = (value: string) => {
         setSearchParams({
             search: value,
@@ -173,14 +196,25 @@ const InventoryList: React.FC = () => {
     return (
         <div className="space-y-4">
             <PageHeader title={t('inventory.title', 'Ombor qoldiqlari')}>
-                {hasPermission(permissions, 'inventory', 'create') && (
+                <div className="flex items-center gap-2">
                     <Button
-                        onClick={handleNewInventoryClick}
-                        leftIcon={<CirclePlusIcon size={14} />}
-                        className="shadow">
-                        {t('inventory.newInventory', 'Yangi qoldiq kiritish')}
+                        onClick={handleSeedDemoData}
+                        disabled={isSeeding}
+                        leftIcon={<Sparkles size={14} className="text-amber-300" />}
+                        className="bg-gradient-to-r from-[#028090] to-[#02C39A] hover:opacity-95 text-white shadow text-xs font-semibold"
+                    >
+                        {isSeeding ? t('common.loading', 'Yuklanmoqda...') : '⚡ Test maʼlumotlarini yuklash'}
                     </Button>
-                )}
+                    {hasPermission(permissions, 'inventory', 'create') && (
+                        <Button
+                            onClick={handleNewInventoryClick}
+                            leftIcon={<CirclePlusIcon size={14} />}
+                            className="shadow"
+                        >
+                            {t('inventory.newInventory', 'Yangi qoldiq kiritish')}
+                        </Button>
+                    )}
+                </div>
             </PageHeader>
 
             {/* Search Input & PageLength */}
@@ -216,7 +250,7 @@ const InventoryList: React.FC = () => {
                     t('inventory.purchasePrice', 'Tannarx (Xarid)'),
                     t('inventory.stockActions', 'Ombor amallari')
                 ]}
-                colWidths={['w-12', 'min-w-[240px]', 'w-36', 'w-36', 'w-36', 'w-36', 'w-[230px]']}
+                colWidths={['w-12', '', 'w-32', 'w-36', 'w-40', 'w-40', 'w-[240px]']}
             >
                 {!isLoading && inventories && inventories.map((inventory, index) => (
                     <TableRow
@@ -270,8 +304,28 @@ const InventoryList: React.FC = () => {
                 {
                     !isLoading && inventories.length === 0 && (
                         <tr key="no-quotations">
-                            <td className="text-center py-6 text-gray-500 font-medium" colSpan={10}>
-                                {t('inventory.noItemsFound', 'Omborda tovarlar topilmadi')}
+                            <td className="text-center py-10 text-gray-500 font-medium" colSpan={7}>
+                                <div className="flex flex-col items-center justify-center gap-2.5 max-w-md mx-auto">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#F0FBF8] border border-[#02C39A]/40 flex items-center justify-center text-[#028090]">
+                                        <Sparkles size={22} className="text-[#028090]" />
+                                    </div>
+                                    <p className="text-base font-bold text-gray-900">
+                                        {t('inventory.noItemsFound', 'Omborda tovarlar topilmadi')}
+                                    </p>
+                                    <p className="text-xs text-gray-500 leading-relaxed text-center">
+                                        Ombor hisobini toʻliq koʻrish uchun tayyor Oʻzbekiston biznes test maʼlumotlarini yuklashingiz mumkin.
+                                    </p>
+                                    <div className="flex items-center gap-2.5 mt-2">
+                                        <Button
+                                            onClick={handleSeedDemoData}
+                                            disabled={isSeeding}
+                                            leftIcon={<Sparkles size={14} className="text-amber-300" />}
+                                            className="bg-gradient-to-r from-[#028090] to-[#02C39A] hover:opacity-95 text-white shadow text-xs font-semibold"
+                                        >
+                                            {isSeeding ? t('common.loading', 'Yuklanmoqda...') : '⚡ Test maʼlumotlarini yuklash (Rizobay Stroy)'}
+                                        </Button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     )

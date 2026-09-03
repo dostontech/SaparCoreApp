@@ -5,7 +5,7 @@ import Constants from "@constants/api";
 import axios from "axios";
 import Table from "@components/admin/Table";
 import PaginationWrapper from "@components/admin/PaginationWrapper";
-import { CirclePlusIcon, Edit, Trash2Icon, Printer } from "lucide-react";
+import { CirclePlusIcon, Edit, Trash2Icon, Printer, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import BarcodeLabelPrintModal from "@components/admin/products/BarcodeLabelPrintModal";
 import { useSelector } from "react-redux";
@@ -224,6 +224,28 @@ const ProductList: FC = () => {
         }
     };
 
+    const [isSeeding, setIsSeeding] = useState(false);
+    const handleSeedDemoData = async () => {
+        try {
+            setIsSeeding(true);
+            toast.loading(t('common.loading', 'Test maʼlumotlari yuklanmoqda...'), { id: 'seed-toast' });
+            const res = await axios.post(`${Constants.API_BASE_URL}/admin/demo/seed-data`, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.data?.success) {
+                toast.success(res.data.message || 'Test maʼlumotlari muvaffaqiyatli yuklandi!', { id: 'seed-toast' });
+                fetchProducts(search, limit, page);
+            } else {
+                toast.error(res.data?.message || 'Xatolik yuz berdi', { id: 'seed-toast' });
+            }
+        } catch (err: any) {
+            console.error('Seed error:', err);
+            toast.error(err.response?.data?.message || 'Yuklashda xatolik yuz berdi', { id: 'seed-toast' });
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
     // Calculate display range for pagination text
     const from = (pagination.page - 1) * pagination.limit + 1;
     const to = Math.min(pagination.page * pagination.limit, pagination.total);
@@ -231,6 +253,14 @@ const ProductList: FC = () => {
     return (
         <div className="space-y-4">
             <PageHeader title={t('products.title', 'Mahsulotlar va Xizmatlar')}>
+                <Button
+                    onClick={handleSeedDemoData}
+                    disabled={isSeeding}
+                    leftIcon={<Sparkles size={14} className="text-amber-300" />}
+                    className="bg-gradient-to-r from-[#028090] to-[#02C39A] hover:opacity-95 text-white shadow text-xs font-semibold"
+                >
+                    {isSeeding ? t('common.loading', 'Yuklanmoqda...') : '⚡ Test maʼlumotlarini yuklash'}
+                </Button>
                 {hasPermission(permissions, 'product-services', 'view') &&
                     <ExportButton
                         url={Constants.EXPORT_PRODUCTS_URL}
