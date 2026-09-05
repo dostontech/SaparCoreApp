@@ -23,6 +23,7 @@ const BASE_URL = rawBase;
 const API_BASE_URL = BASE_URL ? `${BASE_URL}/api` : "/api";
 const Constants = {
   API_BASE_URL,
+  API_URL: API_BASE_URL,
   BASE_URL,
   LOGIN_URL: `${API_BASE_URL}/auth/login`,
   REGISTER_URL: `${API_BASE_URL}/auth/register`,

@@ -92,7 +92,7 @@ const AdminLogin: React.FC = () => {
 
     if (slug && slug !== "app" && slug !== "www" && slug !== "api") {
       axios
-        .get(`${Constants.API_URL}/public/tenant/resolve?slug=${slug}`)
+        .get(`${Constants.API_BASE_URL}/public/tenant/resolve?slug=${slug}`)
         .then((res) => {
           if (res.data?.success && res.data?.data) {
             setTenantWorkspace(res.data.data);
@@ -235,21 +235,36 @@ const AdminLogin: React.FC = () => {
   // 3. Phone + Password or Email + Password Login
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phoneMethod === "EMAIL") {
-      const resultAction = await dispatch(loginUser({ email, password }));
-      if (loginUser.fulfilled.match(resultAction)) {
-        const { token, user: loggedInUser } = resultAction.payload;
-        completeLogin(token, loggedInUser);
+    const slowServerTimer = setTimeout(() => {
+      toast.info("⏳ Server uygʻonmoqda, iltimos biroz kuting...", { duration: 5000, id: "server-wakeup" });
+    }, 2500);
+
+    try {
+      if (phoneMethod === "EMAIL") {
+        const resultAction = await dispatch(loginUser({ email, password }));
+        clearTimeout(slowServerTimer);
+        toast.dismiss("server-wakeup");
+        if (loginUser.fulfilled.match(resultAction)) {
+          const { token, user: loggedInUser } = resultAction.payload;
+          completeLogin(token, loggedInUser);
+        } else {
+          const msg = (resultAction.payload as string) || "Email yoki parol notoʻgʻri.";
+          toast.error(msg);
+        }
       } else {
-        toast.error("Email yoki parol notoʻgʻri.");
+        try {
+          const resp = await axios.post(Constants.AUTH_PHONE_LOGIN_URL, { phone, password });
+          clearTimeout(slowServerTimer);
+          toast.dismiss("server-wakeup");
+          completeLogin(resp.data.token, resp.data.user);
+        } catch (err: any) {
+          clearTimeout(slowServerTimer);
+          toast.dismiss("server-wakeup");
+          toast.error(err.response?.data?.message || "Telefon raqami yoki parol notoʻgʻri.");
+        }
       }
-    } else {
-      try {
-        const resp = await axios.post(Constants.AUTH_PHONE_LOGIN_URL, { phone, password });
-        completeLogin(resp.data.token, resp.data.user);
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || "Telefon raqami yoki parol notoʻgʻri.");
-      }
+    } finally {
+      clearTimeout(slowServerTimer);
     }
   };
 

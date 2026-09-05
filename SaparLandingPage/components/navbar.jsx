@@ -38,13 +38,13 @@ export default function Navbar() {
 
                 <div className="hidden md:flex items-center gap-3">
                     <a
-                        href={process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/login` : 'http://localhost:8080/login'}
+                        href={process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/login` : 'https://app.sapar.uz/login'}
                         className='px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#028090] transition'
                     >
                         Kirish
                     </a>
                     <a
-                        href={process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/register` : 'http://localhost:8080/register'}
+                        href={process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/register` : 'https://app.sapar.uz/register'}
                         className='inline-flex items-center gap-2 rounded-xl bg-[#028090] px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-[#0B2B33] shadow-md shadow-[#028090]/20'
                     >
                         <span>Bepul boshlash</span>
