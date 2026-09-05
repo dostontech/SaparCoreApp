@@ -19,4 +19,8 @@ router.post('/payme/webhook', uzbekPaymentGatewaysController.handlePaymeWebhook)
 router.post('/click/prepare', uzbekPaymentGatewaysController.handleClickPrepare);
 router.post('/click/complete', uzbekPaymentGatewaysController.handleClickComplete);
 
+// 🇺🇿 UzQR National Unified QR Webhook endpoint (Central Bank / EOPC / Acquiring Bank)
+router.post('/uzqr/webhook', uzbekPaymentGatewaysController.handleUzQrWebhook);
+router.post('/uzqr', uzbekPaymentGatewaysController.handleUzQrWebhook);
+
 module.exports = router;

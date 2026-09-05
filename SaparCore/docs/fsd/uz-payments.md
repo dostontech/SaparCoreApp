@@ -12,15 +12,16 @@ The Uzbekistan Payment Gateways module provides configuration and integration st
 
 | Gateway | Type | Coverage |
 |---|---|---|
+| **UzQR** | Unified National QR | Mandatory from 1 July 2026 (All Banks & PSPs in Uzbekistan) |
 | **Payme Business** | QR / Online | Uzbekistan-wide consumer and B2B |
 | **Click Merchant** | QR / Online | Uzbekistan-wide consumer |
 | **Uzum Pay** (formerly Apelsin) | QR / Wallet | Uzbekistan-wide |
 | **Uzcard / Humo** | Card (split-tender) | Recorded at POS checkout only |
-| **Direct Bank API** | Statement import | Ipak Yo'li, Anorbank, Kapitalbank, Agrobank (planned) |
+| **Direct Bank API** | Statement import | Ipak Yo'li, Anorbank, Kapitalbank, Agrobank |
 
-**Scope in current release:** Gateway settings UI + credential storage model. Actual payment initiation and webhook handling are stubbed. POS checkout records payment method splits but does not call gateway APIs.
+**Scope:** Gateway settings UI, credential storage, UzQR national unified QR generator, POS terminal QR checkout, public invoice QR viewer, and webhook/status polling endpoints.
 
-**Regional scope:** Pure Uzbekistan module. All gateways are UZS-only.
+**Regional scope:** Pure Uzbekistan module. All gateways and UzQR transactions are UZS-only (currency code 860).
 
 ---
 

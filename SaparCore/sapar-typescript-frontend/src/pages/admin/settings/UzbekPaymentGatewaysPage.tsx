@@ -7,6 +7,9 @@ import {
   Upload,
   Landmark,
   Building2,
+  QrCode,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, FormField } from '@components/ui';
@@ -20,6 +23,14 @@ export const UzbekPaymentGatewaysPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'gateways' | 'bank_import'>('gateways');
   const [saving, setSaving] = useState(false);
+
+  // UzQR Settings (Mandatory from 1 July 2026 across Uzbekistan)
+  const [uzqrEnabled, setUzqrEnabled] = useState(true);
+  const [uzqrMerchantId, setUzqrMerchantId] = useState('UZQR-MERCHANT-7788');
+  const [uzqrTerminalId, setUzqrTerminalId] = useState('TERM-001');
+  const [uzqrBankName, setUzqrBankName] = useState('Ipak Yoʻli Bank');
+  const [uzqrSecret, setUzqrSecret] = useState('uzqr_secret_998');
+  const [uzqrStaticPayload, setUzqrStaticPayload] = useState('uzqr://pay?m=UZQR-MERCHANT-7788&t=TERM-001&b=ipak_yoli');
 
   // Gateway Settings
   const [paymeEnabled, setPaymeEnabled] = useState(true);
@@ -50,6 +61,14 @@ export const UzbekPaymentGatewaysPage: React.FC = () => {
       });
       if (res.data?.data) {
         const d = res.data.data;
+        if (d.uzqr) {
+          setUzqrEnabled(d.uzqr.enabled);
+          if (d.uzqr.merchantId) setUzqrMerchantId(d.uzqr.merchantId);
+          if (d.uzqr.terminalId) setUzqrTerminalId(d.uzqr.terminalId);
+          if (d.uzqr.bankName) setUzqrBankName(d.uzqr.bankName);
+          if (d.uzqr.secretKey) setUzqrSecret(d.uzqr.secretKey);
+          if (d.uzqr.staticQrPayload) setUzqrStaticPayload(d.uzqr.staticQrPayload);
+        }
         if (d.payme) {
           setPaymeEnabled(d.payme.enabled);
           setPaymeMerchantId(d.payme.merchantId);
@@ -73,6 +92,15 @@ export const UzbekPaymentGatewaysPage: React.FC = () => {
     try {
       setSaving(true);
       const payload = {
+        uzqr: {
+          enabled: uzqrEnabled,
+          merchantId: uzqrMerchantId,
+          terminalId: uzqrTerminalId,
+          bankName: uzqrBankName,
+          secretKey: uzqrSecret,
+          staticQrPayload: uzqrStaticPayload,
+          testMode: false,
+        },
         payme: { enabled: paymeEnabled, merchantId: paymeMerchantId, secretKey: paymeSecret, testMode: false },
         click: { enabled: clickEnabled, serviceId: clickServiceId, merchantId: clickMerchantId, secretKey: clickSecret, testMode: false },
         uzum: { enabled: uzumEnabled, merchantId: uzumMerchantId, terminalId: 'TERM-01', testMode: false },
@@ -149,8 +177,8 @@ export const UzbekPaymentGatewaysPage: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <CreditCard className="w-4 h-4" />
-          Payme, Click & Uzum Pay
+          <QrCode className="w-4 h-4" />
+          UzQR, Payme, Click & Uzum Pay
         </button>
         <button
           type="button"
@@ -168,6 +196,109 @@ export const UzbekPaymentGatewaysPage: React.FC = () => {
 
       {activeTab === 'gateways' && (
         <div className="space-y-6">
+          {/* UzQR July 2026 Legal Compliance Banner */}
+          <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+            uzqrEnabled && uzqrMerchantId
+              ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950 shadow-xs'
+              : 'bg-amber-50/90 border-amber-200 text-amber-950 shadow-xs'
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm ${
+                uzqrEnabled && uzqrMerchantId ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'
+              }`}>
+                <QrCode className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 font-bold text-sm">
+                  <span>Oʻzbekiston Yagona QR (UzQR) Muvofiqligi</span>
+                  <span className={`text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full font-black ${
+                    uzqrEnabled && uzqrMerchantId
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {uzqrEnabled && uzqrMerchantId ? '✓ Faol & 1-Iyul 2026 Talabiga Mos' : '⚠ Sozlanmagan (Qonuniy Majburiyat)'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1 max-w-3xl">
+                  Oʻzbekiston Respublikasi qonunchiligiga binoan, <strong>2026-yil 1-iyuldan</strong> boshlab chakana savdo va xizmat koʻrsatish korxonalarida yagona <strong>UzQR</strong> toʻlov kodini taklif qilish majburiydir. Bu har qanday bank ilovasi (Ipak Yoʻli, Anorbank, TBC, Kapitalbank, Payme, Click) orqali toʻlash imkonini beradi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* UzQR Card */}
+          <div className="bg-white rounded-3xl p-6 border border-teal-200/90 shadow-sm space-y-4 ring-1 ring-teal-500/10">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-teal-600 text-white font-black flex items-center justify-center text-sm shadow-sm">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-base text-slate-900">UzQR (Yagona QR-kod)</h3>
+                    <span className="text-[10px] bg-teal-50 text-teal-700 font-bold px-2 py-0.5 rounded-md border border-teal-200">
+                      Davlat Standarti
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Mijoz har qanday bank ilovasi bilan skanerlab toʻlashi mumkin boʻlgan yagona milliy QR kodi
+                  </p>
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={uzqrEnabled}
+                  onChange={(e) => setUzqrEnabled(e.target.checked)}
+                  className="w-4 h-4 text-teal-600 rounded border-slate-300"
+                />
+                Faollashtirilgan
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Xizmat Koʻrsatuvchi Bank (Acquiring Bank) *</label>
+                <select
+                  value={uzqrBankName}
+                  onChange={(e) => setUzqrBankName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="Ipak Yoʻli Bank">Ipak Yoʻli Bank</option>
+                  <option value="Kapitalbank">Kapitalbank</option>
+                  <option value="Anorbank">Anorbank</option>
+                  <option value="Agrobank">Agrobank</option>
+                  <option value="Hamkorbank">Hamkorbank</option>
+                  <option value="Milliy Toʻlov Shlyuzi (HUMO / Uzcard)">Milliy Toʻlov Shlyuzi (HUMO / Uzcard)</option>
+                </select>
+              </div>
+              <FormField
+                label="UzQR Merchant ID *"
+                value={uzqrMerchantId}
+                onChange={(e) => setUzqrMerchantId(e.target.value)}
+              />
+              <FormField
+                label="UzQR Terminal ID *"
+                value={uzqrTerminalId}
+                onChange={(e) => setUzqrTerminalId(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <FormField
+                label="UzQR Secret / API Kalit *"
+                type="password"
+                value={uzqrSecret}
+                onChange={(e) => setUzqrSecret(e.target.value)}
+              />
+              <FormField
+                label="Statik Storefront UzQR (ixtiyoriy vitrina kodi)"
+                value={uzqrStaticPayload}
+                onChange={(e) => setUzqrStaticPayload(e.target.value)}
+              />
+            </div>
+          </div>
+
           {/* Payme Business Card */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">

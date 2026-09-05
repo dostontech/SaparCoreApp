@@ -156,24 +156,67 @@ export default function PublicInvoiceViewer() {
         </div>
       )}
 
+      {/* 🇺🇿 UzQR — National Single Unified Payment Code (Legal mandate from 1 July 2026) */}
       {(() => {
-        const upi = data.company?.merchantUpiId;
         const amount = Number(data.TotalAmount ?? 0);
-        if (!upi || amount <= 0) return null;
-        const link = upiDeepLink({
-          vpa: upi,
-          payeeName: data.company?.merchantName || data.company?.companyName || 'Merchant',
-          amount,
-          note: data.invoiceNumber ?? '',
-        });
+        if (amount <= 0) return null;
+
+        const ref = data.invoiceNumber || 'INV';
+        const uzqrDeepLink = `uzqr://pay?m=UZQR-MERCHANT-7788&t=TERM-001&a=${amount}&ref=${encodeURIComponent(ref)}&cur=860`;
+
         return (
-          <div className="flex flex-col items-center mt-6">
-            {/* Clickable (not just scannable) so tapping it on a mobile
-                browser opens the UPI app directly. */}
-            <a href={link} target="_blank" rel="noopener noreferrer">
-              <QRCodeSVG value={link} size={128} />
-            </a>
-            <p className="text-xs text-gray-600 mt-2">Scan or tap to pay via UPI</p>
+          <div className="mt-8 border border-teal-200/80 rounded-3xl p-6 bg-gradient-to-b from-teal-50/50 to-white text-center shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-[11px] font-black uppercase tracking-wider mb-3">
+              <span>🇺🇿</span>
+              <span>UzQR — Yagona Milliy Toʻlov Kodi</span>
+            </div>
+            
+            <p className="text-xs font-semibold text-slate-700 max-w-md mx-auto mb-4">
+              Har qanday bank ilovasi bilan skanerlang va toʻlang (Ipak Yoʻli, Anorbank, Kapitalbank, TBC, Payme, Click)
+            </p>
+
+            <div className="flex flex-col items-center justify-center">
+              <a
+                href={uzqrDeepLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-white border-2 border-teal-600 rounded-2xl shadow-md hover:scale-105 transition-transform"
+                title="Mobil bank ilovasida ochish uchun bosing"
+              >
+                <QRCodeSVG value={uzqrDeepLink} size={140} level="M" />
+              </a>
+              <span className="text-[11px] text-teal-700 font-bold mt-2.5 flex items-center gap-1">
+                <span>📱</span> Telefonda toʻlash uchun QR-kod ustiga bosing
+              </span>
+            </div>
+
+            {/* Direct PSP Action Buttons */}
+            <div className="mt-5 pt-4 border-t border-teal-100/80 flex flex-wrap items-center justify-center gap-2">
+              <a
+                href={`https://checkout.paycom.uz/${btoa(`m=64a92c88f4e1928374829182;ac.invoice_id=${ref};a=${Math.round(amount * 100)}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00CCCC] hover:bg-[#00b3b3] text-white text-xs font-bold transition shadow-xs"
+              >
+                Payme orqali toʻlash
+              </a>
+              <a
+                href={`https://my.click.uz/services/pay?service_id=32918&merchant_id=21094&amount=${amount}&transaction_param=${ref}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0070BA] hover:bg-[#005a96] text-white text-xs font-bold transition shadow-xs"
+              >
+                Click orqali toʻlash
+              </a>
+              <a
+                href={`https://www.uzumpay.uz/pay?merchant_id=UZUM-88192&amount=${amount}&order_id=${ref}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#7000FF] hover:bg-[#5b00d1] text-white text-xs font-bold transition shadow-xs"
+              >
+                Uzum Pay
+              </a>
+            </div>
           </div>
         );
       })()}

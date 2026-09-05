@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   CreditCard,
   Banknote,
@@ -6,6 +7,8 @@ import {
   Calendar,
   CheckCircle2,
   Coins,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@components/ui';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
@@ -86,7 +89,7 @@ export const PosPaymentModal: React.FC<Props> = ({
       });
     } else if (activeTab === 'qr') {
       onCompletePayment({
-        paymentMethod: 'Payme / Click QR',
+        paymentMethod: 'UzQR (Yagona QR-kod)',
         cashAmount: 0,
         uzcardAmount: 0,
         humoAmount: 0,
@@ -116,22 +119,29 @@ export const PosPaymentModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-white">Toʻlovni Qabul Qilish</h2>
-            <p className="text-xs text-slate-300">Toʻlov usulini tanlang va tasdiqlang</p>
+            <span className="text-xs text-teal-400 font-bold uppercase tracking-wider block">
+              Toʻlovni Yakunlash
+            </span>
+            <h2 className="text-2xl font-black font-mono mt-0.5">
+              {format(totalAmount)}
+            </h2>
           </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-400 block">Jami Toʻlov:</span>
-            <span className="text-xl font-black font-mono text-teal-400">{format(totalAmount)}</span>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Payment Method Tabs */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-700">
+        {/* Payment Methods Nav */}
+        <div className="grid grid-cols-6 border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-600">
           <button
             type="button"
             onClick={() => setActiveTab('cash')}
@@ -142,7 +152,7 @@ export const PosPaymentModal: React.FC<Props> = ({
             }`}
           >
             <Banknote className="w-4 h-4 text-emerald-600" />
-            Naqd Pul
+            Naqd
           </button>
           <button
             type="button"
@@ -178,7 +188,7 @@ export const PosPaymentModal: React.FC<Props> = ({
             }`}
           >
             <QrCode className="w-4 h-4 text-teal-600" />
-            Payme/Click
+            UzQR / QR
           </button>
           <button
             type="button"
@@ -286,17 +296,33 @@ export const PosPaymentModal: React.FC<Props> = ({
           )}
 
           {activeTab === 'qr' && (
-            <div className="p-6 rounded-2xl bg-teal-50/60 border border-teal-200 text-center space-y-3">
-              <QrCode className="w-12 h-12 text-teal-700 mx-auto" />
+            <div className="p-6 rounded-3xl bg-gradient-to-b from-teal-50/70 to-white border border-teal-200 text-center space-y-4 shadow-xs">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-[11px] font-black uppercase tracking-wider">
+                <span>🇺🇿</span>
+                <span>UzQR — Yagona Milliy Toʻlov Kodi</span>
+              </div>
               <h3 className="text-base font-bold text-slate-900">
-                Payme / Click / Uzum Dinamik QR Kod
+                Mijoz Ilovasi Bilan Skanerlang
               </h3>
-              <p className="text-xs text-slate-600">
-                Mijoz oʻzining Payme, Click yoki Uzum Pay ilovasi orqali QR kodni skaner qiladi.
+              <p className="text-xs text-slate-600 max-w-sm mx-auto">
+                Mijoz oʻzining xohlagan bank ilovasi (Ipak Yoʻli, Anorbank, Kapitalbank, TBC, Payme, Click, Uzum) orqali toʻlaydi.
               </p>
-              <div className="inline-block p-3 bg-white rounded-2xl border border-slate-300 shadow-xs">
-                <div className="w-32 h-32 bg-slate-900 rounded-xl flex items-center justify-center text-white text-xs font-mono font-bold">
-                  [ QR KOD ]
+
+              <div className="inline-block p-4 bg-white rounded-3xl border-2 border-teal-600 shadow-md">
+                <QRCodeSVG
+                  value={`uzqr://pay?m=UZQR-MERCHANT-7788&t=TERM-001&a=${totalAmount}&ref=POS-${Date.now()}&cur=860`}
+                  size={144}
+                  level="M"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-lg font-black font-mono text-teal-700">
+                  {format(totalAmount)}
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs text-teal-800 font-semibold bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                  Mijoz toʻlashi kutilmoqda (Avtomatik tasdiqlash)...
                 </div>
               </div>
             </div>
@@ -347,7 +373,7 @@ export const PosPaymentModal: React.FC<Props> = ({
                 />
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="font-semibold text-slate-700">Payme / Click:</span>
+                <span className="font-semibold text-slate-700">UzQR / QR:</span>
                 <input
                   type="number"
                   value={splitQr}

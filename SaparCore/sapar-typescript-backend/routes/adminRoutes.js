@@ -1023,6 +1023,7 @@ router.get('/payments/uz-gateways/settings', protect, requirePermission('finance
 router.post('/payments/uz-gateways/settings', protect, requirePermission('finance-settings', 'edit'), uzbekPaymentGatewaysController.saveGatewaySettings);
 router.get('/payments/uz-gateways/invoice-links/:invoiceId', protect, requirePermission('invoices', 'view'), uzbekPaymentGatewaysController.generateInvoicePaymentLinks);
 router.post('/payments/uz-gateways/import-statement', protect, requirePermission('banking', 'create'), uzbekPaymentGatewaysController.importBankStatement);
+router.get('/payments/uzqr/status/:referenceId', protect, uzbekPaymentGatewaysController.checkUzQrPaymentStatus);
 
 // 🎧 Customer Support & Helpdesk Ticketing routes
 const helpdeskController = require('../controllers/helpdeskController');
