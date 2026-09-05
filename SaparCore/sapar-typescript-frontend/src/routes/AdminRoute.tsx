@@ -221,6 +221,15 @@ const AdminRoute = () => {
                 <Route path="/manufacturing/bom" element={<><Seo title="Texnologik Xaritalar (BOM)" /><ManufacturingBomPage /></>} />
 
                 {/* Compatibility Aliases for Header & Sidebar Links */}
+                <Route path="/deals" element={<Navigate to="/admin/crm/pipeline" replace />} />
+                <Route path="/crm" element={<Navigate to="/admin/crm/pipeline" replace />} />
+                <Route path="/projects" element={<Navigate to="/admin/accounting/projects/workspace" replace />} />
+                <Route path="/bank-accounts" element={<Navigate to="/admin/settings/bank-accounts" replace />} />
+                <Route path="/reports/soliq" element={<Navigate to="/admin/accounting/reports/soliq-qqs" replace />} />
+                <Route path="/helpdesk" element={<Navigate to="/admin/helpdesk/tickets" replace />} />
+                <Route path="/company-details" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                <Route path="/company-settings" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                <Route path="/settings/company-details" element={<Navigate to="/admin/settings/company-settings" replace />} />
                 <Route path="/settings/company" element={<Navigate to="/admin/settings/company-settings" replace />} />
                 <Route path="/settings/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
                 <Route path="/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
