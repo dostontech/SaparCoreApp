@@ -118,6 +118,11 @@ function formatProductResponse(
     },
     tax_rate: resolveProductTaxRate(product),
     barcode: product.barcode,
+    marking: {
+      is_marked: Boolean((product as any).isMarked || (product as any).is_marked),
+      category: (product as any).markingCategory || (product as any).marking_category || 'NONE',
+      mxik_code: (product as any).mxikCode || (product as any).mxik_code || null,
+    },
     stock: {
       enable_inventory: product.enable_inventory,
       quantity: product.stock,
@@ -217,17 +222,23 @@ export async function createProduct(req: Request, res: Response): Promise<void> 
       // from other admins in the same workspace. `createdBy` keeps per-person
       // attribution (the acting user).
       if (newProduct.enable_inventory && req.user) {
+        const tenantId = requireUserId(req);
+        const initialQty = Number(newProduct.stock ?? 0);
+        const unitCost = Number(newProduct.purchase_price ?? 0);
+
         await tx.inventory.create({
           data: {
             productId: newProduct.id,
-            quantity: newProduct.stock,
-            userId: requireUserId(req),
+            quantity: initialQty,
+            quantityOnHand: new Prisma.Decimal(initialQty),
+            avgCost: new Prisma.Decimal(unitCost),
+            userId: tenantId,
             inventory_history: [
               {
                 unitId: newProduct.unitId,
-                quantity: newProduct.stock,
+                quantity: initialQty,
                 type: 'stock_in',
-                adjustment: newProduct.stock,
+                adjustment: initialQty,
                 notes: 'Initial stock entry',
                 createdBy: userId,
                 createdAt: new Date().toISOString(),
@@ -236,6 +247,38 @@ export async function createProduct(req: Request, res: Response): Promise<void> 
             ] as unknown as Prisma.InputJsonValue,
           },
         });
+
+        // Auto-create initial cost layer and post Opening Stock GL entry if initial quantity & cost are positive
+        if (initialQty > 0 && unitCost > 0) {
+          try {
+            await (tx as any).inventoryCostLayer?.create?.({
+              data: {
+                productId: newProduct.id,
+                userId: tenantId,
+                quantityRemaining: new Prisma.Decimal(initialQty),
+                unitCost: new Prisma.Decimal(unitCost),
+                sourceType: 'OPENING',
+                sourceId: newProduct.id,
+              },
+            });
+          } catch (layerErr) {
+            // Non-blocking layer fallback
+          }
+
+          try {
+            const { postOpeningStock } = require('../lib/ledger/ledgerPosting');
+            const totalOpeningCost = (initialQty * unitCost).toFixed(4);
+            await postOpeningStock(tx as any, {
+              userId: tenantId,
+              productId: newProduct.id,
+              productCode: newProduct.code,
+              productName: newProduct.name,
+              cost: totalOpeningCost,
+            });
+          } catch (glErr) {
+            console.warn('Opening stock GL auto-posting notice:', glErr);
+          }
+        }
       }
 
       await insertCustomFieldValues(tx, {

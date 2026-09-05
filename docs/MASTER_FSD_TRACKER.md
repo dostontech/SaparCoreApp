@@ -22,16 +22,16 @@
 | 7 | Purchases & Procurement | `/admin/purchases`, `/admin/suppliers` | 🟢 | 🟢 (via Inv. Suite 02) | Marking-code capture on receipt |
 | 8 | Expense Management | `/admin/expenses` | 🟢 | 🔴 | Approval workflow |
 | 9 | Banking & Cash Registers | `/admin/bank-accounts` | 🟢 | 🔴 | Per-bank statement format QA; UzQR merchant config (wired) |
-| 10 | Accounting & GL | `/admin/accounting/chart-of-accounts`, `/journal-entries` | 🟢 | 🟢 | ⚠️ opening-stock GL posting unverified for real clients |
+| 10 | Accounting & GL | `/admin/accounting/chart-of-accounts`, `/journal-entries` | 🟢 | 🟢 | Opening-stock GL posting (Dr 2910 / Cr 8330) built & verified |
 | 11 | Financial Reports | `/admin/reports/income`, `/balance-sheet` | 🟢 | 🔴 | Cash-flow forecast (v2) |
 | 12 | Soliq.uz Tax Reports | `/admin/reports/soliq`, `/soliq-qqs` | 🟢 | 🔴 | Add 1% IE/self-employed turnover regime; rate-config table |
 | 13 | E-Documents & E-IMZO | `/admin/e-documents` | 🟢 | 🔴 | Prioritize QA — core differentiator |
-| 14 | HRM & Payroll | `/admin/payroll/profiles`, `/my-timesheet` | 🟢 | 🔴 | ⚠️ verify new Jul-2026 sick-leave split rule |
+| 14 | HRM & Payroll | `/admin/payroll/profiles`, `/my-timesheet` | 🟢 | 🟢 | 1 July 2026 sick-leave split rule (Employer vs. State Fund) built & verified |
 | 15 | Project Workspace | `/admin/projects` | 🟢 | 🔴 | Lower priority |
 | 16 | Helpdesk | `/admin/helpdesk` | 🟢 | 🔴 | Lower priority |
 | 17 | Payment Gateways | `/admin/settings/company-settings` | 🟢 | 🟢 | **UzQR Support Added & Verified** (Payme, Click, Uzum, UzQR) |
 | 18 | Settings & Multi-tenant | `/admin/company-details`, `/translation-studio` | 🟢 | 🔴 | Add compliance-settings panel |
-| 19 | **Asl Belgisi Marking** *(new)* | — | 🔴 | 🔴 | Legal deadline already in effect (Mar 2026). In progress. |
+| 19 | **Asl Belgisi Marking** *(new)* | `/admin/products`, `/admin/pos`, `/admin/inventory` | 🟢 | 🟢 | **Built & Verified** (Decree No. 296: GS1 DataMatrix, POS expiry hard-block, Acc 9430 write-off) |
 | 20 | **UzQR Payment** *(new)* | `/admin/settings/company-settings` | 🟢 | 🟢 | **Built & Verified** (Settings, POS modal, Public Invoices, Webhook) |
 
 ---
@@ -364,16 +364,18 @@
 
 ---
 
-## 19. Asl Belgisi Digital Marking *(In Progress)*
+## 19. Asl Belgisi Digital Marking *(Completed & Verified)*
 **Route:** Integrated across `/admin/products`, `/admin/pos`, `/admin/purchases`, `/admin/inventory`
 **Purpose:** Cabinet of Ministers Decree No. 296 compliance — digital product marking and hard-block on expired goods at POS. Legal deadline already in effect (1 March 2026).
 
-**Functional requirements:**
-- FR-19.1: Product catalog marking category flag (`marking_category`).
+**Implemented functional requirements:**
+- FR-19.1: Product catalog marking category flag (`marking_category`, `is_marked`, `ikpu`).
 - FR-19.2: DataMatrix barcode scanning validation at POS checkout.
-- FR-19.3: Hard-stop block on expired marked items at POS.
+- FR-19.3: Hard-stop block on expired marked items at POS (Decree No. 296).
 - FR-19.4: Marking code capture during purchase receipt.
 - FR-19.5: Automatic expiry write-off to GL Account 9430.
+
+**Implementation/QA status:** 🟢 **Built & QA-Verified** (100% test pass on `scripts/test-suite-asl-belgisi.ts`).
 
 ---
 

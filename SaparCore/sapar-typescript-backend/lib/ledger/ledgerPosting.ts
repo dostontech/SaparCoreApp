@@ -451,3 +451,40 @@ export async function voidDocument(
     data: { isDeleted: true, event: `${p.event}.voided.${existing.id}` },
   });
 }
+
+/**
+ * Auto-posts balanced Opening Stock journal entry for onboarding or product creation with initial inventory.
+ * Debit: INVENTORY (2910)
+ * Credit: OPENING_BALANCE_EQUITY (8330)
+ */
+export async function postOpeningStock(
+  tx: PostingTx,
+  p: {
+    userId: string;
+    productId: string;
+    productCode: string;
+    productName: string;
+    cost: string;
+    date?: Date;
+  },
+): Promise<{ id: string } | null> {
+  if (!isPos(p.cost)) return null;
+  const date = p.date ?? new Date();
+  const settings = await tx.companySettings.findFirst({ where: { userId: p.userId } });
+  if (!shouldPost(settings, date)) return null;
+
+  return post(tx, {
+    userId: p.userId,
+    sourceType: 'OPENING_STOCK',
+    sourceId: p.productId,
+    event: 'INITIAL_BALANCE',
+    date,
+    description: `Boshlang'ich tovar qoldig'i: ${p.productName} (${p.productCode})`,
+    instructions: [
+      { roleKey: 'INVENTORY', side: 'debit', amount: p.cost },
+      { roleKey: 'OPENING_BALANCE_EQUITY', side: 'credit', amount: p.cost },
+    ],
+  });
+}
+
+

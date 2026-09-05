@@ -21,6 +21,7 @@ import { applyStockAdjustment } from '../lib/inventory/stockAdjust';
 import { postInvoiceIssued, postInvoicePayment, postSaleCogs } from '../lib/ledger/ledgerPosting';
 import { applyWacIssue, applyFifoIssue } from '../lib/ledger/inventoryValuation';
 import { TelegramNotificationService } from '../services/telegramNotificationService';
+import { validateMarkingCodeForPos, recordMarkingCodeSold } from '../lib/marking/aslBelgisiService';
 
 function handleUnauthorized(res: Response, err: unknown): boolean {
   if (err instanceof UnauthorizedError) {
@@ -117,6 +118,8 @@ export async function getPosProducts(req: Request, res: Response): Promise<void>
             category: p.category?.category_name || 'Umumiy',
             unit: p.unit?.short_name || (p as any).unit || 'dona',
             taxPercent: 12,
+            isMarked: Boolean((p as any).isMarked),
+            markingCategory: (p as any).markingCategory || 'NONE',
           };
         }),
         categories: categories.map((c) => ({
@@ -373,6 +376,29 @@ export async function posCheckout(req: Request, res: Response): Promise<void> {
     if (!items || !Array.isArray(items) || items.length === 0) {
       res.status(400).json({ success: false, message: 'Savatda mahsulotlar mavjud emas' });
       return;
+    }
+
+    // 0. Asl Belgisi & Decree No. 296 Digital Marking Hard-Block Check
+    for (const item of items) {
+      const anyItem = item as any;
+      const markingCodesToCheck: string[] = [];
+      if (anyItem.markingCode) markingCodesToCheck.push(anyItem.markingCode);
+      if (Array.isArray(anyItem.markingCodes)) markingCodesToCheck.push(...anyItem.markingCodes);
+
+      for (const code of markingCodesToCheck) {
+        const val = validateMarkingCodeForPos(userId, code, { id: item.id, name: item.name });
+        if (val.blocked) {
+          res.status(422).json({
+            success: false,
+            blocked: true,
+            reason: val.reason,
+            message: val.message,
+            item: item.name,
+            code,
+          });
+          return;
+        }
+      }
     }
 
     // 1. Idempotency Check: if this idempotency key was already committed for this tenant, return it safely.
@@ -688,6 +714,17 @@ export async function posCheckout(req: Request, res: Response): Promise<void> {
       return formatReceiptResponse(createdReceipt, company);
 
     });
+
+    // Record used marking codes as SOLD
+    for (const item of items) {
+      const anyItem = item as any;
+      const markingCodesToCheck: string[] = [];
+      if (anyItem.markingCode) markingCodesToCheck.push(anyItem.markingCode);
+      if (Array.isArray(anyItem.markingCodes)) markingCodesToCheck.push(...anyItem.markingCodes);
+      for (const code of markingCodesToCheck) {
+        recordMarkingCodeSold(userId, code, (result as any)?.receiptId, item.id);
+      }
+    }
 
     res.status(200).json({
       success: true,

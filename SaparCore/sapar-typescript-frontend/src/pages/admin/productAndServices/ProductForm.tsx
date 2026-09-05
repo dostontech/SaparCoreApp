@@ -84,6 +84,8 @@ interface IFormData {
     valuationMethod: 'WAC' | 'FIFO';
     currencyCode: string;
     ikpu?: string;
+    is_marked?: boolean;
+    marking_category?: string;
 }
 
 // For form validation errors
@@ -121,6 +123,8 @@ export default function ProductForm({ productData }: ProductFormProps) {
         valuationMethod: 'WAC',
         currencyCode: defaultCurrencyCode,
         ikpu: '01111001001000000',
+        is_marked: false,
+        marking_category: 'NONE',
     });
 
     const [productImage, setProductImage] = useState<File | null>(null);
@@ -268,6 +272,9 @@ export default function ProductForm({ productData }: ProductFormProps) {
                 images_to_remove: [],
                 valuationMethod: productData.valuationMethod || 'WAC',
                 currencyCode: productData.currencyCode || defaultCurrencyCode,
+                ikpu: (productData as any).ikpu || (productData as any).marking?.mxik_code || '01111001001000000',
+                is_marked: Boolean((productData as any).marking?.is_marked || (productData as any).is_marked),
+                marking_category: (productData as any).marking?.category || (productData as any).marking_category || 'NONE',
             });
             if (productData.product_image) {
                 let _baseUrl = Constants.BASE_URL;
@@ -665,6 +672,75 @@ export default function ProductForm({ productData }: ProductFormProps) {
                                 </button>
                             </div>
                             {formErrors.barcode && <p className="text-red-500 text-xs mt-1">{formErrors.barcode}</p>}
+                        </div>
+
+                        {/* 🏷️ Asl Belgisi Digital Marking (Decree No. 296) */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-md p-3 col-span-1 md:col-span-3 mt-2">
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        name="is_marked"
+                                        checked={Boolean(formData.is_marked)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                is_marked: checked,
+                                                marking_category: checked && prev.marking_category === 'NONE' ? 'WATER_BEVERAGES' : prev.marking_category,
+                                            }));
+                                        }}
+                                        className="h-4 w-4 text-[#028090] border-gray-300 rounded focus:ring-[#028090]"
+                                    />
+                                    <span className="ml-2 text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                                        <span>🏷️ Asl Belgisi Raqamli Markirovka</span>
+                                        <span className="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded-full">
+                                            VM 296-son qarori
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Tamaki, alkogol, dori-darmon, maishiy texnika va suv/ichimliklar uchun majburiy GS1 DataMatrix markirovkasi. POS kassada muddati oʻtgan tovarlar sotuvi avtomatik bloklanadi.
+                            </p>
+
+                            {formData.is_marked && (
+                                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label htmlFor="marking_category" className="block text-xs font-semibold text-gray-700">
+                                            Markirovka guruhi / Toifasi
+                                        </label>
+                                        <select
+                                            name="marking_category"
+                                            id="marking_category"
+                                            value={formData.marking_category || 'WATER_BEVERAGES'}
+                                            onChange={handleInputChange}
+                                            className="mt-1 text-xs text-gray-700 p-2 block w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-[#028090] bg-white font-medium"
+                                        >
+                                            <option value="WATER_BEVERAGES">💧 Suv va salqin ichimliklar (Majburiy)</option>
+                                            <option value="PHARMACEUTICALS">💊 Dori vositalari va tibbiy buyumlar (Majburiy)</option>
+                                            <option value="TOBACCO">🚬 Tamaki mahsulotlari (Majburiy)</option>
+                                            <option value="ALCOHOL">🍾 Alkogolli ichimliklar va pivo (Majburiy)</option>
+                                            <option value="APPLIANCES">⚡ Maishiy texnika (Majburiy)</option>
+                                            <option value="OTHER">📦 Boshqa markirovkalanadigan tovarlar</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="ikpu" className="block text-xs font-semibold text-gray-700">
+                                            MXIK / IKPU Kodi (17 ta raqam)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="ikpu"
+                                            id="ikpu"
+                                            value={formData.ikpu || ''}
+                                            onChange={handleInputChange}
+                                            placeholder="01111001001000000"
+                                            className="mt-1 text-xs font-mono font-bold text-gray-700 p-2 block w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-[#028090] bg-white"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Track Inventory */}

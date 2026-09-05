@@ -1025,6 +1025,13 @@ router.get('/payments/uz-gateways/invoice-links/:invoiceId', protect, requirePer
 router.post('/payments/uz-gateways/import-statement', protect, requirePermission('banking', 'create'), uzbekPaymentGatewaysController.importBankStatement);
 router.get('/payments/uzqr/status/:referenceId', protect, uzbekPaymentGatewaysController.checkUzQrPaymentStatus);
 
+// 🏷️ Asl Belgisi Digital Marking & Decree No. 296 Compliance
+const markingController = require('../controllers/markingController');
+router.get('/marking/categories', protect, markingController.getMarkingCategories);
+router.post('/marking/verify', protect, markingController.verifyMarkingCode);
+router.post('/marking/register', protect, markingController.registerMarkingCodes);
+router.post('/marking/write-off', protect, markingController.writeOffMarkingCode);
+
 // 🎧 Customer Support & Helpdesk Ticketing routes
 const helpdeskController = require('../controllers/helpdeskController');
 router.get('/helpdesk/tickets', protect, requirePermission('helpdesk', 'view'), helpdeskController.listTickets);

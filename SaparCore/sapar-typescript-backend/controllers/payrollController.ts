@@ -613,7 +613,8 @@ export async function calculateVacationAndSick(req: Request, res: Response): Pro
       const dailyEarnings = Number(req.query.dailyEarnings || 0);
       const days = Number(req.query.days || 1);
       const seniority = Number(req.query.seniority || 3);
-      const result = calculateSickLeavePay(dailyEarnings, days, seniority);
+      const date = (req.query.date as string) || undefined;
+      const result = calculateSickLeavePay(dailyEarnings, days, seniority, date);
       res.json({ success: true, data: result });
     } else {
       const total12Month = Number(req.query.total12MonthEarnings || 0);

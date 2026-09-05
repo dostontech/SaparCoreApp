@@ -149,21 +149,38 @@ export function calculateVacationPay(total12MonthEarnings: number, vacationDays:
   };
 }
 
+export interface SickLeaveCalculationResult {
+  coveragePercentage: number;
+  seniorityYears: number;
+  sickLeaveDays: number;
+  isJuly2026RuleApplied: boolean;
+  employerDays: number;
+  stateFundDays: number;
+  employerPaidAmount: number;
+  stateFundPaidAmount: number;
+  totalSickPay: number;
+  jshodsTotal: number;
+  inpsDeduction: number;
+  netSickPay: number;
+}
+
 /**
- * Calculates sick leave compensation (Kasallik varaqasi) based on work seniority:
+ * Calculates sick leave compensation (Kasallik varaqasi) per Uzbekistan Labor Code & July 2026 reforms:
  * - Seniority < 5 years: 60% of average earnings
  * - Seniority 5 - 8 years: 80%
  * - Seniority > 8 years / Occupational: 100%
+ *
+ * 🇺🇿 1 July 2026 Regulatory Split Rule:
+ * - First 5 calendar days: funded by employer.
+ * - Days beyond 5 (or co-financed remainder): funded by State Social Insurance Fund (Ijtimoiy sugʻurta jamgʻarmasi).
+ * - Company GL (Dr 9420 / Cr 6710) expenses only employerPaidAmount.
  */
 export function calculateSickLeavePay(
   averageDailyEarnings: number,
   sickLeaveDays: number,
-  seniorityYears: number
-): {
-  coveragePercentage: number;
-  totalSickPay: number;
-  netSickPay: number;
-} {
+  seniorityYears: number,
+  effectiveDate?: Date | string
+): SickLeaveCalculationResult {
   let coveragePercentage = 60;
   if (seniorityYears >= 8) {
     coveragePercentage = 100;
@@ -171,14 +188,45 @@ export function calculateSickLeavePay(
     coveragePercentage = 80;
   }
 
-  const baseSickPay = averageDailyEarnings * sickLeaveDays;
-  const totalSickPay = Math.round(baseSickPay * (coveragePercentage / 100));
-  const jshods = Math.round(totalSickPay * 0.12);
-  const netSickPay = totalSickPay - jshods;
+  const days = Math.max(1, Number(sickLeaveDays || 1));
+  const daily = Math.max(0, Number(averageDailyEarnings || 0));
+
+  // Determine if July 2026 rule applies
+  const evalDate = effectiveDate ? new Date(effectiveDate) : new Date();
+  const july2026Threshold = new Date('2026-07-01T00:00:00.000Z');
+  const isJuly2026RuleApplied = evalDate >= july2026Threshold;
+
+  let employerDays = days;
+  let stateFundDays = 0;
+
+  if (isJuly2026RuleApplied) {
+    // Under 1 July 2026 rule, employer covers first 5 days, State Fund covers remaining
+    employerDays = Math.min(days, 5);
+    stateFundDays = Math.max(0, days - 5);
+  }
+
+  const dayRate = daily * (coveragePercentage / 100);
+  const employerPaidAmount = Math.round(dayRate * employerDays);
+  const stateFundPaidAmount = Math.round(dayRate * stateFundDays);
+  const totalSickPay = employerPaidAmount + stateFundPaidAmount;
+
+  const jshodsTotal = Math.round(totalSickPay * 0.12);
+  const inpsDeduction = Math.round(totalSickPay * 0.001);
+  const netSickPay = totalSickPay - jshodsTotal;
 
   return {
     coveragePercentage,
+    seniorityYears,
+    sickLeaveDays: days,
+    isJuly2026RuleApplied,
+    employerDays,
+    stateFundDays,
+    employerPaidAmount,
+    stateFundPaidAmount,
     totalSickPay,
+    jshodsTotal,
+    inpsDeduction,
     netSickPay,
   };
 }
+
