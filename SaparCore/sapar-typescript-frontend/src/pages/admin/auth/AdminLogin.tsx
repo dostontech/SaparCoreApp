@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -17,6 +18,8 @@ import {
   CheckCircle2,
   ArrowRight,
   Usb,
+  Sparkles,
+  Globe,
 } from "lucide-react";
 
 import { loginUser, setAuthSuccess } from "../../../store/auth/authSlice";
@@ -29,8 +32,32 @@ import { resolveLandingPath } from "@utils/roleLanding";
 type AuthTab = "PHONE" | "EIMZO" | "QR";
 type PhoneMethod = "SMS_OTP" | "PASSWORD" | "EMAIL";
 
-const DEMO_EMAIL = "buxgalter@sapar.uz";
-const DEMO_PASSWORD = "password123";
+const DEMO_PRESETS = [
+  {
+    label: "Bosh Buxgalter",
+    role: "Buxgalteriya & Hisobotlar",
+    email: "buxgalter@sapar.uz",
+    pass: "password123",
+    icon: "👩‍💼",
+  },
+  {
+    label: "Rizobay Stroy",
+    role: "Boshqaruv & Omborxona",
+    email: "stroy@sapar.uz",
+    pass: "Demo123$",
+    icon: "🏗️",
+  },
+  {
+    label: "Demo Admin",
+    role: "Barcha Huquqlar",
+    email: "admin@demo.sapar.local",
+    pass: "Demo123$",
+    icon: "🏢",
+  },
+];
+
+const DEMO_EMAIL = DEMO_PRESETS[0].email;
+const DEMO_PASSWORD = DEMO_PRESETS[0].pass;
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -77,6 +104,23 @@ const AdminLogin: React.FC = () => {
     siteLogo?: string | null;
     phone?: string;
   } | null>(null);
+
+  // Localization
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || localStorage.getItem("sapar_lang") || "uz";
+
+  const handleLangChange = (code: string) => {
+    i18n.changeLanguage(code);
+    localStorage.setItem("sapar_lang", code);
+  };
+
+  const handleSelectPreset = (preset: (typeof DEMO_PRESETS)[0]) => {
+    setActiveTab("PHONE");
+    setPhoneMethod("EMAIL");
+    setEmail(preset.email);
+    setPassword(preset.pass);
+    toast.success(`${preset.label} hisobi tanlandi (${preset.email})`);
+  };
 
   useEffect(() => {
     let slug = tenantSlug?.toLowerCase().trim();
@@ -395,7 +439,30 @@ const AdminLogin: React.FC = () => {
 
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header Branding */}
-        <div className="p-6 sm:p-8 bg-gradient-to-b from-teal-50/70 to-white border-b border-gray-100 text-center space-y-2">
+        <div className="p-6 sm:p-8 bg-gradient-to-b from-teal-50/70 to-white border-b border-gray-100 text-center space-y-2 relative">
+          {/* Quick Language Switcher */}
+          <div className="sm:absolute top-4 right-4 flex items-center justify-center gap-1 bg-white/90 p-1 rounded-full border border-slate-200/90 shadow-xs mb-2 sm:mb-0">
+            <Globe size={13} className="text-slate-400 ml-1.5 mr-0.5" />
+            {[
+              { code: "uz", label: "UZ" },
+              { code: "ru", label: "RU" },
+              { code: "en", label: "EN" },
+            ].map((lng) => (
+              <button
+                key={lng.code}
+                type="button"
+                onClick={() => handleLangChange(lng.code)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider transition-all cursor-pointer ${
+                  currentLang.toLowerCase().startsWith(lng.code)
+                    ? "bg-teal-600 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                {lng.label}
+              </button>
+            ))}
+          </div>
+
           {tenantWorkspace?.siteLogo ? (
             <div className="flex items-center justify-center gap-2 mb-2">
               <img
@@ -425,11 +492,11 @@ const AdminLogin: React.FC = () => {
         </div>
 
         {/* Auth Method Navigation Tabs */}
-        <div className="grid grid-cols-3 bg-slate-100/80 p-1.5 m-6 mb-4 rounded-2xl border border-slate-200/80 text-xs font-bold">
+        <div className="grid grid-cols-3 bg-slate-100/80 p-1.5 m-6 mb-3 rounded-2xl border border-slate-200/80 text-xs font-bold">
           <button
             type="button"
             onClick={() => setActiveTab("PHONE")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
               activeTab === "PHONE"
                 ? "bg-white text-teal-800 shadow-sm font-black"
                 : "text-slate-600 hover:text-slate-900"
@@ -441,7 +508,7 @@ const AdminLogin: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab("EIMZO")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
               activeTab === "EIMZO"
                 ? "bg-white text-teal-800 shadow-sm font-black"
                 : "text-slate-600 hover:text-slate-900"
@@ -453,7 +520,7 @@ const AdminLogin: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab("QR")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
               activeTab === "QR"
                 ? "bg-white text-teal-800 shadow-sm font-black"
                 : "text-slate-600 hover:text-slate-900"
@@ -462,6 +529,39 @@ const AdminLogin: React.FC = () => {
             <QrCode size={15} className={activeTab === "QR" ? "text-teal-600" : ""} />
             Mobil QR
           </button>
+        </div>
+
+        {/* Quick 1-Click Demo Profiles */}
+        <div className="mx-6 mb-3 p-3 bg-slate-50/90 border border-slate-200/80 rounded-2xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-amber-500" />
+              Tezkor Demo Kirish (1 bosishda):
+            </span>
+            <span className="text-[10px] text-teal-700 font-semibold bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+              Tayyor hisoblar
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+            {DEMO_PRESETS.map((preset) => (
+              <button
+                key={preset.email}
+                type="button"
+                onClick={() => handleSelectPreset(preset)}
+                className={`px-2.5 py-2 rounded-xl text-left border transition-all cursor-pointer ${
+                  email === preset.email
+                    ? "bg-teal-50 border-teal-500 text-teal-900 shadow-xs ring-1 ring-teal-500/20"
+                    : "bg-white border-slate-200 hover:border-teal-300 text-slate-700"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-xs">
+                  <span>{preset.icon}</span>
+                  <span className="truncate">{preset.label}</span>
+                </div>
+                <div className="text-[10px] text-slate-400 truncate mt-0.5">{preset.role}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="p-6 pt-2 space-y-5">

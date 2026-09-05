@@ -114,6 +114,137 @@ try {
     }
     console.log(`[seedDefaults] ✅ Payment modes seeded`);
 
+    // ── 5. Default Roles ──────────────────────────────────────────────────────
+    let buxgalterRole = null;
+    let adminRole = null;
+    try {
+      buxgalterRole = await prisma.role.findFirst({
+        where: { roleName: 'Bosh Buxgalter' },
+      });
+      if (!buxgalterRole) {
+        buxgalterRole = await prisma.role.create({
+          data: { roleName: 'Bosh Buxgalter', status: true },
+        });
+      }
+
+      adminRole = await prisma.role.findFirst({
+        where: { roleName: 'Admin' },
+      });
+      if (!adminRole) {
+        adminRole = await prisma.role.create({
+          data: { roleName: 'Admin', status: true },
+        });
+      }
+      console.log(`[seedDefaults] ✅ Default roles (Admin, Bosh Buxgalter) verified`);
+    } catch (roleErr) {
+      console.warn('[seedDefaults] Role seed skipped:', roleErr.message);
+    }
+
+    // ── 6. Uzbekistan Demo Accounts ──────────────────────────────────────────
+    try {
+      const bcrypt = require('bcryptjs');
+      const defaultPassHash = await bcrypt.hash('Demo123$', 10);
+      const buxgalterPassHash = await bcrypt.hash('password123', 10);
+
+      const demoUsers = [
+        {
+          email: 'buxgalter@sapar.uz',
+          firstName: 'Aziza',
+          lastName: 'Rahimova (Bosh Buxgalter)',
+          password: buxgalterPassHash,
+          phone: '+998 (90) 123-45-67',
+          roleId: buxgalterRole ? buxgalterRole.id : undefined,
+          user_type: 1,
+        },
+        {
+          email: 'stroy@sapar.uz',
+          firstName: 'Rizobay',
+          lastName: 'Stroy Admin',
+          password: defaultPassHash,
+          phone: '+998 (91) 234-56-78',
+          roleId: adminRole ? adminRole.id : undefined,
+          user_type: 1,
+        },
+        {
+          email: 'admin@demo.sapar.local',
+          firstName: 'Sapar',
+          lastName: 'Demo Admin',
+          password: defaultPassHash,
+          phone: '+998 (93) 345-67-89',
+          roleId: adminRole ? adminRole.id : undefined,
+          user_type: 1,
+        },
+      ];
+
+      for (const u of demoUsers) {
+        try {
+          await prisma.user.upsert({
+            where: { email: u.email },
+            update: {
+              firstName: u.firstName,
+              lastName: u.lastName,
+              password: u.password,
+              roleId: u.roleId,
+            },
+            create: {
+              email: u.email,
+              firstName: u.firstName,
+              lastName: u.lastName,
+              password: u.password,
+              phone: u.phone,
+              roleId: u.roleId,
+              user_type: u.user_type,
+              balance: 0,
+              isDeleted: false,
+            },
+          });
+        } catch (uErr) {
+          console.warn(`[seedDefaults] User ${u.email} seed skipped:`, uErr.message);
+        }
+      }
+      console.log(`[seedDefaults] ✅ Uzbekistan demo accounts verified`);
+    } catch (demoErr) {
+      console.warn('[seedDefaults] Demo accounts seed skipped:', demoErr.message);
+    }
+
+    // ── 7. Uzbekistan Standard Tax Rates ─────────────────────────────────────
+    try {
+      const allOwners = await prisma.user.findMany({
+        where: { isDeleted: false },
+        select: { id: true, email: true },
+      });
+
+      const uzTaxRates = [
+        { name: 'QQS 12% (Standart stavka)', rate: 12.0, regime: 'NONE' },
+        { name: 'QQS 0% (Eksport va imtiyozli)', rate: 0.0, regime: 'NONE' },
+        { name: 'JShODS 12% (Daromad soligʻi)', rate: 12.0, regime: 'NONE' },
+        { name: 'Ijtimoiy soliq 12%', rate: 12.0, regime: 'NONE' },
+        { name: 'Aylanmadan olinadigan soliq 4%', rate: 4.0, regime: 'NONE' },
+        { name: 'INPS 0.1% (Pensiya jamgʻarmasi)', rate: 0.1, regime: 'NONE' },
+      ];
+
+      for (const owner of allOwners) {
+        for (const tax of uzTaxRates) {
+          const taxId = `tax-${tax.name.slice(0, 4).toLowerCase().replace(/[^a-z0-9]/g, '')}-${owner.id.slice(0, 8)}`;
+          await prisma.taxRate.upsert({
+            where: { id: taxId },
+            update: { name: tax.name, rate: tax.rate, isActive: true },
+            create: {
+              id: taxId,
+              userId: owner.id,
+              name: tax.name,
+              rate: tax.rate,
+              regime: tax.regime,
+              isActive: true,
+            },
+          }).catch(() => {});
+        }
+      }
+      console.log(`[seedDefaults] ✅ Uzbekistan standard tax rates initialized`);
+    } catch (taxErr) {
+      console.warn('[seedDefaults] Tax rates seed skipped:', taxErr.message);
+    }
+
     console.log('[seedDefaults] ✅ All Uzbekistan defaults seeded successfully!');
     await prisma.$disconnect();
   }
