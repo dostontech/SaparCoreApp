@@ -1,0 +1,162 @@
+# ==========================================
+# SAPAR ERP — Root Git Ignore Configuration
+# Security & Secret Sanitization
+# ==========================================
+
+# Environment & Secrets (STRICT - NEVER COMMIT)
+.env
+.env.*
+!.env.example
+docker/.env
+docker/.env.*
+!docker/.env.example
+*.local
+*.secret
+*.secrets
+credentials.json
+service-account*.json
+
+# Certificates, Digital Signatures & Private Keys
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+*.pkcs8
+*.jks
+id_rsa*
+id_ed25519*
+token.json
+session.json
+
+# Dependencies & Package Caches
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Build Outputs & Bundles
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# Database dumps, storage & backups
+*.sql
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+backups/
+storage/uploads/
+uploads/
+dumps/
+
+# Logs & Debug Data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Screenshots & Audit Dumps (Keep repository clean)
+/*.png
+/Sapar_*.png
+/sapar_*.png
+/shift_*.png
+/tc_inv_*.png
+/test_*.png
+/sale_*.png
+/module_screenshots/
+/module_screenshots_uz/
+/module_audit_screenshots/
+/final-changes-screenshots/
+/final chnages update/
+/implementation_plan*
+/walkthrough.md
+/module_audit_report.json
+/generateClientPdf.js
+/*.pdf
+/sapar_vs_Sapar_complete_comparison.html
+/qa-skills/
+
+# Internal Development Plans, Agents & Scripts (Keep Local Only)
+/MASTER_FEATURE_WALKTHROUGH.md
+/MODULE_AUDIT_REPORT.md
+/PITCH_DECK_VS_1C_DIDOX_DOCCO.md
+/TODO_ROADMAP.md
+/SAPAR_API_REFERENCE.md
+/AGENTS.md
+/skills-lock.json
+/.agents/
+/scripts/
+/SAPAR_ERP_Postman_Collection.json
+/SAPAR_ERP_Postman_Environment.json
+/sapar_api_documentation.html
+
+# Exclude non-app files (Docs, Docker, Landing Page, Comparisons, Guides, Presentations)
+/docs/
+/SaparCore/docs/
+/SaparCore/docker/
+/SaparCore/scripts/
+/SaparCore/documentation/
+/SaparCore/CHANGELOG.md
+/SaparCore/DEPLOYMENT.md
+/SaparCore/Makefile
+/SaparCore/sapar-erp-ui.html
+/SaparCore/AGENTS.md
+/SaparLandingPage/
+/guides/
+/resources/screenshots/
+/*.html
+/BUKKU_MY_DETAILED_FEATURE_SPECIFICATION.md
+/RENDER_DEPLOYMENT_GUIDE.md
+/SAPAR_ERP_Enterprise_Presentation_2026.pptx
+/SAPAR_MODULES_DOCUMENTATION.md
+/crm_kanban.webp
+/crm_kanban.png
+/dashboard_ui.png
+/pos_terminal.png
+/sapar-logo-512.png
+/generate_pptx.py
+/presentation.md
+/render.yaml
+/sapar_vs_ibox_complete_comparison.html
+
+
+# Testing & Subagent Artifacts
+.playwright-mcp/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+.nyc_output/
+.system_generated/
+
+# OS and IDE Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

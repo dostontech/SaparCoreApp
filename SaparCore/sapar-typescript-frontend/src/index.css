@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+@theme {
+  /* Default sans -> Instrument Sans (headings + body) */
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+
+  /* Brand SAPAR Teal / Mint ramp.
+     The existing purple-* usages now render the official Sapar teal brand color. */
+  --color-purple-50: #F0FBF8;
+  --color-purple-100: #E0F7F4;
+  --color-purple-200: #B2ECE3;
+  --color-purple-300: #74DECE;
+  --color-purple-400: #2ECEB4;
+  --color-purple-500: #02C39A;
+  --color-purple-600: #028090;
+  --color-purple-700: #0B2B33;
+  --color-purple-800: #082229;
+  --color-purple-900: #05161A;
+  --color-purple-950: #020B0D;
+
+  /* Semantic brand tokens -> bg-primary / text-primary etc. */
+  --color-primary: #028090;
+  --color-primary-hover: #0B2B33;
+  --color-primary-soft: #F0FBF8;
+  --color-secondary: #0B2B33;
+
+  /* Status colors + soft surfaces */
+  --color-success: #27AE60;
+  --color-success-soft: #F4FBF7;
+  --color-danger: #EF1E1E;
+  --color-danger-soft: #FEF4F4;
+  --color-warning: #E2B93B;
+  --color-warning-soft: #FEFBF5;
+  --color-info: #06AED4;
+  --color-info-soft: #F4F9FE;
+
+  /* Richer accents for colorful cards/badges/charts */
+  --color-indigo: #3538CD;
+  --color-orange: #E04F16;
+  --color-orange-soft: #FDF6F3;
+  --color-pink: #DD2590;
+  --color-pink-soft: #FDF4F9;
+  --color-teal: #0E9384;
+  --color-teal-soft: #E9F5F4;
+
+  /* Text + surface */
+  --color-heading: #0F172A;
+  --color-body: #475569;
+  --color-border: #E2E8F0;
+  --color-surface: #FFFFFF;
+
+  /* Crisp slate gray ramp */
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+
+  --color-indigo-600: #4F46E5;
+
+  /* Shadows + radii -> ultra-clean modern subtle elevation */
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --radius-control: 8px;
+  --radius-card: 16px;
+
+  --text-sm: 0.875rem;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.2s ease-out;
+}
+
+/* Radix UI Primitives Animations */
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayHide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes contentHide {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+@keyframes slideDownAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRightAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideLeftAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-overlay-show {
+  animation: overlayShow 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-content-show {
+  animation: contentShow 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-down-fade {
+  animation: slideDownAndFade 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-up-fade {
+  animation: slideUpAndFade 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+main {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .editor-container {
+    border-radius: theme('borderRadius.md');
+    border-width: 1px;
+    border-color: theme('colors.gray.300');
+  }
+
+  .editor-container {
+    border-radius: theme('borderRadius.md');
+    border-width: 1px;
+    border-color: theme('colors.gray.300');
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: theme('spacing.2');
+    border-top-left-radius: theme('borderRadius.md');
+    border-top-right-radius: theme('borderRadius.md');
+    border-bottom-width: 1px;
+    border-color: theme('colors.gray.300');
+    background-color: theme('colors.gray.50');
+    padding: theme('spacing.2');
+  }
+
+  .toolbar button {
+    border-radius: theme('borderRadius.md');
+    padding: theme('spacing.2');
+    color: theme('colors.gray.700');
+  }
+
+  .toolbar button:hover {
+    background-color: theme('colors.gray.200');
+  }
+
+  .toolbar button.is-active {
+    background-color: theme('colors.gray.300');
+    color: theme('colors.gray.900');
+  }
+
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .editor-container {
+      border-color: theme('colors.gray.700');
+    }
+
+    .toolbar {
+      border-color: theme('colors.gray.700');
+      background-color: theme('colors.gray.900');
+    }
+
+    .toolbar button {
+      color: theme('colors.gray.300');
+    }
+
+    .toolbar button:hover {
+      background-color: theme('colors.gray.800');
+    }
+
+    .toolbar button.is-active {
+      background-color: theme('colors.gray.700');
+      color: theme('colors.gray.50');
+    }
+  }
+
+  .ProseMirror {
+    min-height: 250px;
+  }
+}
+
+/* Global Slim Scrollbar Start */
+
+/* For Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  /* track background */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d2d2d2;
+  /* gray thumb */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #4b5563;
+  /* darker on hover */
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e4e0ec transparent;
+  /* thumb + track */
+}
+
+/* Global Slim Scrollbar End */
+button {
+  cursor: pointer;
+}
+
+/* ApexCharts Toolbar Menu Styling  */
+.apexcharts-menu {
+  background-color: #ffffff !important;
+  border: 1px solid #e8e7e7 !important;
+  border-radius: 0.5rem !important;
+  padding: 0 !important;
+}
+
+.apexcharts-menu-item {
+  color: #638192 !important;
+  font-size: 14px !important;
+  font-weight: 500;
+  padding: 6px 12px !important;
+}
+
+.apexcharts-theme-light .apexcharts-menu-item:hover {
+  background-color: #f5f4f4 !important;
+}
+
+/* === Tooltip Styling === */
+.apexcharts-tooltip {
+  background: #fff !important;
+  /* gray-800 */
+  border: 1px solid #d8d7d7 !important;
+  /* gray-600 */
+  border-radius: 0.5rem !important;
+  color: #000 !important;
+  /* gray-50 */
+  font-size: 13px !important;
+}
+
+.apexcharts-tooltip-title {
+  background: #f2f1f1 !important;
+  color: #000;
+  /* gray-900 */
+  border-bottom: 1px solid #e4e4e4 !important;
+}

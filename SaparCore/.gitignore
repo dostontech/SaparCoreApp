@@ -1,0 +1,41 @@
+# ==========================================
+# SAPAR Core — Git Ignore Configuration
+# ==========================================
+
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+docker/.env
+docker/.env.*
+!.docker/.env.example
+*.local
+
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+out/
+
+# Database dumps
+*.sql
+*.sql.gz
+*.dump
+backups/
+
+# Logs
+logs/
+*.log
+
+# Local Only (Hidden from remote repository for security & privacy)
+docker/
+docs/
+documentation/
+scripts/
+AGENTS.md
+CHANGELOG.md
+DEPLOYMENT.md
+Makefile
+sapar-erp-ui.html

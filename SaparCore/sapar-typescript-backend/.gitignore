@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Optional npm cache
+.npm/
+
+# Yarn
+.yarn/cache/
+.pnp.*
+uploads/
+
+# TypeScript incremental build cache (slice 0.1a)
+*.tsbuildinfo
+
+# Developer Scratch & Local Seed Scripts (Excluded for security & cleanliness)
+check_db.js
+seed_*.js
+seedClientDemoData.js
+seedDefaults.js
+seedModules.js
+seedNotification.js
+seedRizobayStroy*.js
+seedTeamRolesAndStaff.js
+set_demo_passwords.js
