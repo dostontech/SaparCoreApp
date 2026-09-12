@@ -15,9 +15,13 @@ import {
   HardHat,
   ShoppingBag,
   SlidersHorizontal,
+  Trash2,
+  Globe,
+  ExternalLink,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@components/ui';
-
+import Constants from '@constants/api';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
 import { Link } from 'react-router-dom';
 
@@ -33,6 +37,8 @@ interface SaasClient {
   country: string;
   plan: string;
   status: 'ACTIVE' | 'TRIAL' | 'SUSPENDED';
+  subdomain?: string | null;
+  publicBaseUrl?: string | null;
   staffCount: number;
   productsCount: number;
   invoicesCount: number;
@@ -66,7 +72,6 @@ const ALL_MODULES = [
   { key: 'settings', nameUz: 'Tizim Sozlamalari', descUz: 'E-IMZO, rekvizitlar va toʻlov tizimlari' },
 ];
 
-
 const SECTOR_DEFAULTS: Record<string, Record<string, boolean>> = {
   construction: { pos: true, sales: true, purchases: true, inventory: true, banking: true, accounting: true, reports: true, crm: true, projects: false, payroll: false, helpdesk: false, settings: true },
   restaurant: { pos: true, sales: false, purchases: true, inventory: true, banking: true, accounting: true, reports: true, crm: false, projects: false, payroll: true, helpdesk: false, settings: true },
@@ -88,6 +93,11 @@ export const SaasClientsPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Delete modal state
+  const [clientToDelete, setClientToDelete] = useState<SaasClient | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   // Module assignment modal state
   const [selectedClientForModules, setSelectedClientForModules] = useState<SaasClient | null>(null);
   const [clientModules, setClientModules] = useState<Record<string, boolean>>(SECTOR_DEFAULTS.all);
@@ -106,13 +116,41 @@ export const SaasClientsPage: React.FC = () => {
     sector: 'retail',
     stir: '',
     plan: 'Korporativ Enterprise',
+    subdomain: '',
   });
+  const [isSubdomainManual, setIsSubdomainManual] = useState(false);
 
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[\s_]+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 32);
+
+  const handleCompanyNameChange = (val: string) => {
+    setNewTenant((prev) => ({
+      ...prev,
+      companyName: val,
+      subdomain: isSubdomainManual ? prev.subdomain : slugify(val),
+    }));
+  };
+
+  const handleSubdomainChange = (val: string) => {
+    setIsSubdomainManual(true);
+    setNewTenant((prev) => ({
+      ...prev,
+      subdomain: slugify(val),
+    }));
+  };
 
   const fetchClients = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/admin/saas/clients');
+      const res = await axios.get(`${Constants.API_BASE_URL}/admin/saas/clients`);
       if (res.data?.success) {
         setClients(res.data.data.clients || []);
         setKpi(res.data.data.kpi || null);
@@ -131,7 +169,7 @@ export const SaasClientsPage: React.FC = () => {
   const handleImpersonate = async (clientId: string) => {
     setImpersonatingId(clientId);
     try {
-      const res = await axios.post(`/api/admin/saas/clients/${clientId}/impersonate`);
+      const res = await axios.post(`${Constants.API_BASE_URL}/admin/saas/clients/${clientId}/impersonate`);
       if (res.data?.success && res.data?.data?.token) {
         // Save new auth token & user info
         localStorage.setItem('sapar_token', res.data.data.token);
@@ -145,6 +183,26 @@ export const SaasClientsPage: React.FC = () => {
       alert('Mijoz hisobiga ulanishda xatolik yuz berdi.');
     } finally {
       setImpersonatingId(null);
+    }
+  };
+
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await axios.delete(`${Constants.API_BASE_URL}/admin/saas/clients/${clientToDelete.id}`);
+      if (res.data?.success) {
+        setClientToDelete(null);
+        await fetchClients();
+      } else {
+        setDeleteError(res.data?.message || 'Xatolik yuz berdi');
+      }
+    } catch (err: any) {
+      console.error('Delete client error:', err);
+      setDeleteError(err.response?.data?.message || 'Kompaniyani oʻchirishda xatolik yuz berdi');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -177,7 +235,7 @@ export const SaasClientsPage: React.FC = () => {
     if (!selectedClientForModules) return;
     setIsSavingModules(true);
     try {
-      await axios.put(`/api/admin/saas/clients/${selectedClientForModules.id}/modules`, {
+      await axios.put(`${Constants.API_BASE_URL}/admin/saas/clients/${selectedClientForModules.id}/modules`, {
         modules: clientModules,
       });
       setModuleSaveSuccess(true);
@@ -197,7 +255,7 @@ export const SaasClientsPage: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await axios.post('/api/admin/saas/clients', newTenant);
+      const res = await axios.post(`${Constants.API_BASE_URL}/admin/saas/clients`, newTenant);
       if (res.data?.success) {
         setShowAddModal(false);
         setNewTenant({
@@ -211,7 +269,9 @@ export const SaasClientsPage: React.FC = () => {
           sector: 'retail',
           stir: '',
           plan: 'Korporativ Enterprise',
+          subdomain: '',
         });
+        setIsSubdomainManual(false);
         fetchClients();
       }
     } catch (err: any) {
@@ -403,13 +463,28 @@ export const SaasClientsPage: React.FC = () => {
                       <h3 className="font-extrabold text-slate-900 text-base leading-snug">
                         {client.companyName}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-0.5">
                         <span className="font-medium">{client.city}, {client.country}</span>
                         <span>•</span>
                         <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">
                           STIR: {client.stir}
                         </span>
                       </div>
+                      {client.subdomain && (
+                        <div className="mt-1.5">
+                          <a
+                            href={client.publicBaseUrl || `https://${client.subdomain}.sapar.uz`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-teal-50 text-teal-700 border border-teal-200/80 hover:bg-teal-100 hover:text-teal-900 transition-colors"
+                            title="Ish maydonini ochish"
+                          >
+                            <Globe size={11} className="text-teal-600" />
+                            <span>{client.subdomain}.sapar.uz</span>
+                            <ExternalLink size={10} className="text-teal-500 opacity-70" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -458,24 +533,36 @@ export const SaasClientsPage: React.FC = () => {
                   <span className="font-bold text-slate-700">{client.plan}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Button
                     size="sm"
                     variant="white"
                     onClick={() => openModuleModal(client)}
-                    className="border-slate-200 text-slate-700 font-bold hover:bg-slate-50 text-xs py-1.5"
+                    className="border-slate-200 text-slate-700 font-bold hover:bg-slate-50 text-xs py-1.5 px-2.5"
                     leftIcon={<SlidersHorizontal size={13} />}
                   >
-                    Modullarni Sozlash
+                    Modullar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="white"
+                    onClick={() => {
+                      setDeleteError(null);
+                      setClientToDelete(client);
+                    }}
+                    className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 font-bold text-xs py-1.5 px-2.5"
+                    leftIcon={<Trash2 size={13} />}
+                  >
+                    Oʻchirish
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => handleImpersonate(client.id)}
                     disabled={impersonatingId === client.id}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm py-1.5"
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm py-1.5 px-3"
                     leftIcon={impersonatingId === client.id ? <RefreshCw size={13} className="animate-spin" /> : <LogIn size={13} />}
                   >
-                    {impersonatingId === client.id ? 'Ulanilmoqda…' : 'Mijoz Tizimiga Kirish'}
+                    {impersonatingId === client.id ? 'Ulanilmoqda…' : 'Kirish'}
                   </Button>
                 </div>
               </div>
@@ -513,10 +600,36 @@ export const SaasClientsPage: React.FC = () => {
                   type="text"
                   required
                   value={newTenant.companyName}
-                  onChange={(e) => setNewTenant({ ...newTenant, companyName: e.target.value })}
+                  onChange={(e) => handleCompanyNameChange(e.target.value)}
                   placeholder="Masalan: MEGA STROY INVEST MCHJ"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-slate-700">Ish maydoni subdomeni (Subdomain) *</label>
+                  <span className="text-[11px] text-teal-600 font-mono font-semibold">*.sapar.uz</span>
+                </div>
+                <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-teal-500 bg-white">
+                  <span className="px-3 text-slate-400 bg-slate-50 border-r border-slate-200 py-2 font-mono text-xs select-none">
+                    https://
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={newTenant.subdomain}
+                    onChange={(e) => handleSubdomainChange(e.target.value)}
+                    placeholder="masalan: megastroy"
+                    className="w-full px-3 py-2 text-sm focus:outline-none font-mono text-slate-900"
+                  />
+                  <span className="px-3 text-teal-700 bg-teal-50/60 border-l border-slate-200 py-2 font-mono text-xs font-bold select-none">
+                    .sapar.uz
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Tizim havolasi: <span className="font-mono text-slate-600 font-bold">{newTenant.subdomain ? `https://${newTenant.subdomain}.sapar.uz` : 'https://[subdomen].sapar.uz'}</span>
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -760,6 +873,64 @@ export const SaasClientsPage: React.FC = () => {
                   {isSavingModules ? 'Saqlanmoqda…' : 'Modullarni Saqlash'}
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {clientToDelete && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl border border-rose-100 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">Kompaniyani oʻchirish</h3>
+                <p className="text-xs text-slate-500">Ushbu amalni ortga qaytarib boʻlmaydi</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-rose-50/50 rounded-2xl border border-rose-100 text-xs text-slate-700 space-y-2 mb-4">
+              <p>
+                Siz haqiqatdan ham <strong className="text-rose-700 font-extrabold">{clientToDelete.companyName}</strong> kompaniyasini va unga tegishli barcha maʼlumotlarni (tovarlar, fakturalar, xodimlar) oʻchirmoqchimisiz?
+              </p>
+              {clientToDelete.subdomain && (
+                <p className="font-mono text-[11px] text-rose-800 bg-white/80 p-2 rounded-lg border border-rose-200">
+                  Subdomen: <strong>{clientToDelete.subdomain}.sapar.uz</strong> boʻshatiladi.
+                </p>
+              )}
+            </div>
+
+            {deleteError && (
+              <div className="p-3 mb-4 rounded-xl bg-rose-100/70 border border-rose-200 text-rose-800 text-xs font-semibold">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <Button
+                type="button"
+                variant="white"
+                onClick={() => {
+                  setClientToDelete(null);
+                  setDeleteError(null);
+                }}
+                disabled={isDeleting}
+                className="text-xs"
+              >
+                Bekor qilish
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDeleteClient}
+                disabled={isDeleting}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs"
+                leftIcon={isDeleting ? <RefreshCw size={13} className="animate-spin" /> : <Trash2 size={13} />}
+              >
+                {isDeleting ? 'Oʻchirilmoqda…' : 'Ha, butunlay oʻchirilsin'}
+              </Button>
             </div>
           </div>
         </div>

@@ -24,6 +24,7 @@
     "prisma:seed:notifications": "ts-node prisma/seedNotifications.ts",
     "prisma:seed:demo": "ts-node prisma/seed-demo.ts",
     "prisma:seed:demo:full": "ts-node prisma/seed-demo-full.ts",
+    "prisma:seed:rizaboy": "ts-node prisma/seed-rizaboy.ts",
     "prisma:import:geo": "ts-node prisma/importGeoDataset.ts",
     "prisma:migrate:contacts": "ts-node prisma/migrateContacts.ts",
     "prisma:migrate:taxes": "ts-node prisma/migrateTaxesToRates.ts",

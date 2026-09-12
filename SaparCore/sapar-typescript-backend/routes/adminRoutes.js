@@ -1078,6 +1078,8 @@ router.use(taxReturnRoutes);
 const saasClientController = require('../controllers/saasClientController');
 router.get('/saas/clients', protect, requirePermission('users', 'view'), saasClientController.getSaasClients);
 router.post('/saas/clients', protect, requirePermission('users', 'create'), saasClientController.createSaasClient);
+router.delete('/saas/clients/:id', protect, requirePermission('users', 'delete'), saasClientController.deleteSaasClient);
+router.post('/saas/clients/:id/impersonate', protect, requirePermission('users', 'edit'), saasClientController.impersonateSaasClient);
 router.put('/saas/clients/:id/modules', protect, requirePermission('users', 'edit'), saasClientController.updateSaasClientModules);
 router.get('/saas/my-modules', protect, /* self */ saasClientController.getMyModules);
 

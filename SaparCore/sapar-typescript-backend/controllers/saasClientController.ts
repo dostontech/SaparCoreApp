@@ -4,6 +4,7 @@ import { hashPassword } from '../utils/password';
 import { generateToken } from '../utils/generateToken';
 import { ensureRole, OWNER_ROLE_NAME } from '../lib/defaultRoles';
 import { seedDefaultChart } from '../lib/defaultChartOfAccounts';
+import { registerRenderCustomDomain, deleteRenderCustomDomain } from '../lib/renderDomainManager';
 
 /**
  * Super-Admin / SaaS Platform Owner Controller
@@ -59,6 +60,21 @@ export async function getSaasClients(req: Request, res: Response): Promise<void>
 
         const comp = owner.companySettings;
 
+        // Resolve clean subdomain for tenant workspace
+        let subdomain: string | null = null;
+        if (comp?.publicBaseUrl) {
+          try {
+            const url = new URL(comp.publicBaseUrl.startsWith('http') ? comp.publicBaseUrl : `https://${comp.publicBaseUrl}`);
+            const parts = url.hostname.split('.');
+            if (parts.length >= 3 && parts[parts.length - 2] === 'sapar' && parts[parts.length - 1] === 'uz') {
+              subdomain = parts[0];
+            }
+          } catch {
+            const m = comp.publicBaseUrl.match(/https?:\/\/([^.]+)\.sapar\.uz/i);
+            if (m) subdomain = m[1];
+          }
+        }
+
         return {
           id: owner.id,
           companyName: comp?.companyName || `${owner.firstName} ${owner.lastName || ''}`.trim(),
@@ -71,6 +87,8 @@ export async function getSaasClients(req: Request, res: Response): Promise<void>
           country: comp?.country || 'Uzbekistan',
           plan: 'Korporativ Enterprise',
           status: 'ACTIVE',
+          subdomain,
+          publicBaseUrl: comp?.publicBaseUrl || (subdomain ? `https://${subdomain}.sapar.uz` : null),
           staffCount: owner.staff.length + 1,
           productsCount,
           invoicesCount,
@@ -124,6 +142,7 @@ export async function createSaasClient(req: Request, res: Response): Promise<voi
       sector,
       stir,
       plan,
+      subdomain,
     } = req.body;
 
     if (!email || !companyName) {
@@ -152,6 +171,15 @@ export async function createSaasClient(req: Request, res: Response): Promise<voi
       },
     });
 
+    // Handle dedicated subdomain
+    const rawSubdomain = (subdomain || companyName)
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '')
+      .slice(0, 32);
+    const cleanSubdomain = rawSubdomain || null;
+    const tenantUrl = cleanSubdomain ? `https://${cleanSubdomain}.sapar.uz` : null;
+
     await prisma.companySettings.create({
       data: {
         userId: user.id,
@@ -164,8 +192,16 @@ export async function createSaasClient(req: Request, res: Response): Promise<voi
         country: 'Uzbekistan',
         pincode: '100000',
         taxRegime: 'VAT_GENERIC',
+        publicBaseUrl: tenantUrl,
       },
     });
+
+    // Automatically provision custom subdomain on Render
+    if (cleanSubdomain) {
+      registerRenderCustomDomain(cleanSubdomain).catch((err) => {
+        console.warn('createSaasClient: Render custom domain provisioning notice', err);
+      });
+    }
 
     // Seed default chart of accounts for the new tenant
     await seedDefaultChart(prisma, user.id);
@@ -425,6 +461,124 @@ export async function completeOnboarding(req: Request, res: Response): Promise<v
   } catch (err: any) {
     console.error('completeOnboarding error:', err);
     res.status(500).json({ success: false, message: 'Onboarding xatoligi', error: err.message });
+  }
+}
+
+// DELETE /api/admin/saas/clients/:id
+export async function deleteSaasClient(req: Request, res: Response): Promise<void> {
+  try {
+    const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const clientId = rawId as string;
+    const currentUserId = (req as any).user;
+
+    // Safety guard: cannot delete yourself
+    if (clientId === currentUserId) {
+      res.status(400).json({ success: false, message: 'Oʻz hisobingizni oʻchira olmaysiz.' });
+      return;
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: clientId },
+      include: { companySettings: true, staff: true },
+    });
+
+    if (!targetUser) {
+      res.status(404).json({ success: false, message: 'Kompaniya topilmadi.' });
+      return;
+    }
+
+    const comp = targetUser.companySettings;
+    const companyName = comp?.companyName || `${targetUser.firstName} ${targetUser.lastName || ''}`.trim();
+
+    // Extract subdomain if configured
+    let subdomain: string | null = null;
+    if (comp?.publicBaseUrl) {
+      try {
+        const url = new URL(comp.publicBaseUrl.startsWith('http') ? comp.publicBaseUrl : `https://${comp.publicBaseUrl}`);
+        const parts = url.hostname.split('.');
+        if (parts.length >= 3 && parts[parts.length - 2] === 'sapar' && parts[parts.length - 1] === 'uz') {
+          subdomain = parts[0];
+        }
+      } catch {
+        const m = comp.publicBaseUrl.match(/https?:\/\/([^.]+)\.sapar\.uz/i);
+        if (m) subdomain = m[1];
+      }
+    }
+
+    // Try to remove custom domain on Render
+    if (subdomain) {
+      deleteRenderCustomDomain(subdomain).catch((err) => {
+        console.warn('deleteSaasClient: Render custom domain removal notice', err);
+      });
+    }
+
+    // Purge tenant data
+    try {
+      await prisma.$transaction(async (tx) => {
+        const staffIds = targetUser.staff.map((s) => s.id);
+        const allUserIds = [clientId, ...staffIds];
+
+        // Best effort cascading deletion of tenant child records
+        await tx.loginActivity.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.signature.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.bankTransaction.deleteMany({ where: { bankAccount: { userId: { in: allUserIds } } } }).catch(() => {});
+        await tx.bankDetail.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.pettyCash.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.expenseChangeLog.deleteMany({ where: { expense: { userId: { in: allUserIds } } } }).catch(() => {});
+        await tx.expense.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.purchaseOrder.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.purchase.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.invoice.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.inventory.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.customer.deleteMany({ where: { userId: { in: allUserIds } } }).catch(() => {});
+        await tx.supplier.deleteMany({ where: { user_id: { in: allUserIds } } }).catch(() => {});
+        await tx.supplierPayment.deleteMany({ where: { createdBy: { in: allUserIds } } }).catch(() => {});
+        await tx.companySettings.deleteMany({ where: { userId: clientId } }).catch(() => {});
+
+        if (staffIds.length > 0) {
+          await tx.user.deleteMany({ where: { id: { in: staffIds } } }).catch(() => {});
+        }
+
+        await tx.user.delete({ where: { id: clientId } });
+      });
+    } catch (dbErr: any) {
+      console.warn('Hard delete failed due to constraints, applying clean soft-delete:', dbErr.message);
+      const delTimestamp = Date.now();
+      await prisma.user.update({
+        where: { id: clientId },
+        data: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          email: `${targetUser.email}__deleted_${delTimestamp}`,
+        },
+      });
+
+      if (comp) {
+        await prisma.companySettings.update({
+          where: { id: comp.id },
+          data: {
+            publicBaseUrl: null,
+            companyName: `${comp.companyName} (Oʻchirilgan)`,
+          },
+        });
+      }
+
+      await prisma.user.updateMany({
+        where: { ownerId: clientId },
+        data: {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `"${companyName}" kompaniyasi va unga tegishli barcha maʼlumotlar muvaffaqiyatli oʻchirildi.`,
+    });
+  } catch (err: any) {
+    console.error('deleteSaasClient error:', err);
+    res.status(500).json({ success: false, message: 'Kompaniyani oʻchirishda xatolik', error: err.message });
   }
 }
 

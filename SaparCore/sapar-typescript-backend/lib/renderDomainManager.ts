@@ -38,3 +38,36 @@ export async function registerRenderCustomDomain(subdomain: string): Promise<boo
     return false;
   }
 }
+
+export async function deleteRenderCustomDomain(subdomain: string): Promise<boolean> {
+  const apiKey = process.env.RENDER_API_KEY;
+  const serviceId = process.env.RENDER_FRONTEND_SERVICE_ID || 'srv-da9tftm7bikc73esh020';
+
+  if (!apiKey || !subdomain) {
+    return false;
+  }
+
+  const domainName = `${subdomain.toLowerCase().trim()}.sapar.uz`;
+
+  try {
+    const response = await axios.delete(
+      `https://api.render.com/v1/services/${serviceId}/custom-domains/${domainName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    console.log(`[RenderDomainManager] Successfully deleted custom domain ${domainName} from Render:`, response.status);
+    return true;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      console.log(`[RenderDomainManager] Domain ${domainName} not found on Render (already deleted).`);
+      return true;
+    }
+    console.warn(`[RenderDomainManager] Failed to delete domain ${domainName} on Render:`, error.response?.data || error.message);
+    return false;
+  }
+}
