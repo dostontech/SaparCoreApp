@@ -123,20 +123,23 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const isSuperAdmin = user?.user_type === 1 || user?.email?.toLowerCase().includes("admin");
+
     const primaryModules: PrimaryModuleItem[] = [
-        {
-            key: "dashboard",
-            title: t("nav.dashboard", "Boshqaruv Paneli"),
+        ...(isSuperAdmin ? [{
+            key: "dashboard" as PrimaryModuleKey,
+            title: t("nav.saasClients", "👑 SaaS Mijozlar"),
+            badge: "SaaS",
             icon: <Home size={19} />,
             defaultRoute: "/admin",
             slug: "dashboard",
-        },
+        }] : []),
         {
             key: "pos",
             title: t("nav.pos", "POS Kassa Terminali"),
             badge: "⚡",
             icon: <ShoppingCart size={19} />,
-            defaultRoute: "/admin/pos",
+            defaultRoute: "/pos",
             slug: "pos",
         },
         {
@@ -144,7 +147,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.sales", "Savdo & Fakturalar"),
             badge: "TTN",
             icon: <Receipt size={19} />,
-            defaultRoute: "/admin/invoices",
+            defaultRoute: "/sales",
             slug: "invoices",
         },
         {
@@ -152,7 +155,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.purchases", "Xaridlar & Taʼminot"),
             badge: "PO",
             icon: <ShoppingBag size={19} />,
-            defaultRoute: "/admin/purchases",
+            defaultRoute: "/purchases",
             slug: "purchases",
         },
         {
@@ -160,7 +163,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.inventory", "Ombor va Tovarlar"),
             badge: "FIFO",
             icon: <Package size={19} />,
-            defaultRoute: "/admin/inventory",
+            defaultRoute: "/inventory",
             slug: "inventory",
         },
         {
@@ -168,7 +171,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.bankingGroup", "Bank & Kassa"),
             badge: "🏦",
             icon: <LandmarkIcon size={19} />,
-            defaultRoute: "/admin/banking",
+            defaultRoute: "/banking",
             slug: "banking",
         },
         {
@@ -176,7 +179,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.accounting", "Buxgalteriya (BHMS 21)"),
             badge: "21",
             icon: <BookOpen size={19} />,
-            defaultRoute: "/admin/accounting/chart-of-accounts",
+            defaultRoute: "/accounting/bhms-chart-of-accounts",
             slug: "accounting",
         },
         {
@@ -184,7 +187,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.financialReports", "Moliyaviy Hisobotlar"),
             badge: "1/2",
             icon: <BarChart2 size={19} />,
-            defaultRoute: "/admin/accounting/reports",
+            defaultRoute: "/accounting/reports",
             slug: "accounting_reports",
         },
         {
@@ -192,7 +195,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("workspace.crm", "CRM & Bitimlar"),
             badge: "CRM",
             icon: <Target size={19} />,
-            defaultRoute: "/admin/crm/deals",
+            defaultRoute: "/crm/pipeline",
             slug: "crm",
         },
         {
@@ -200,21 +203,21 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("workspace.hrm", "HRM & Xodimlar"),
             badge: "12%",
             icon: <Users size={19} />,
-            defaultRoute: "/admin/payroll/tabel",
+            defaultRoute: "/payroll/tabel",
             slug: "payroll",
         },
         {
             key: "projects",
             title: t("workspace.projects", "Loyihalar & Vazifalar"),
             icon: <Briefcase size={19} />,
-            defaultRoute: "/admin/projects",
+            defaultRoute: "/accounting/projects/workspace",
             slug: "projects",
         },
         {
             key: "support",
             title: t("workspace.support", "Mijozlar Yordami"),
             icon: <Headphones size={19} />,
-            defaultRoute: "/admin/helpdesk",
+            defaultRoute: "/helpdesk/tickets",
             slug: "helpdesk",
         },
         {
@@ -222,7 +225,7 @@ export const PrimaryRail: React.FC<PrimaryRailProps> = ({
             title: t("nav.settings", "Tizim Sozlamalari"),
             badge: "⚙️",
             icon: <Settings size={19} />,
-            defaultRoute: "/admin/settings/company-settings",
+            defaultRoute: "/settings/company-settings",
             slug: "settings",
         },
     ];

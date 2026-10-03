@@ -32,14 +32,15 @@ export const SaparSaleCreatePage: React.FC = () => {
   const { format } = useCurrencyFormatter();
 
   // Header State
-  const [customer, setCustomer] = useState('OOO "RIZOBAY STROY"');
-  const [saleDate, setSaleDate] = useState('2026-09-03 10:00');
-  const [saleNumber, setSaleNumber] = useState('SO-00482');
-  const [salesChannel, setSalesChannel] = useState('Bosh doʻkon (Chakana / Ulgurji)');
-  const [responsiblePerson, setResponsiblePerson] = useState('Shokirjon Turgʻunboyev');
+  const [customer, setCustomer] = useState('');
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 16).replace('T', ' '));
+  const [saleNumber, setSaleNumber] = useState('');
+  const [salesChannel, setSalesChannel] = useState('');
+  const [responsiblePerson, setResponsiblePerson] = useState('');
   const [currency, setCurrency] = useState('UZS');
-  const [warehouse, setWarehouse] = useState('Boshqarma');
+  const [warehouse, setWarehouse] = useState('');
   const [priceList, setPriceList] = useState('Standart narx');
+
 
   // Bottom State
   const [notes, setNotes] = useState('');
@@ -123,11 +124,10 @@ export const SaparSaleCreatePage: React.FC = () => {
               onChange={(e) => setCustomer(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#028090]/20 focus:border-[#028090]"
             >
-              <option value='OOO "RIZOBAY STROY"'>OOO "RIZOBAY STROY"</option>
-              <option value="Akbarjon Usta">Akbarjon Usta (Quruvchi)</option>
-              <option value="Sherdor Qurilish MCHJ">Sherdor Qurilish MCHJ</option>
+              <option value="">-- Mijozni tanlang --</option>
               <option value="Chakana Xaridor">Chakana Xaridor</option>
             </select>
+
           </div>
 
           <div>

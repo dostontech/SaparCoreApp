@@ -2,6 +2,15 @@ import { buildStandardPack } from './buildStandardPack';
 import type { CountryPack } from './types';
 
 export const COUNTRY_PACKS: Record<string, CountryPack> = {
+  UZ: buildStandardPack({
+    countryCode: 'UZ',
+    name: 'Oʻzbekiston (Uzbekistan 21-BHMS)',
+    defaultFunctionalCurrency: 'UZS',
+    fiscalYearStartMonth: 1,
+    taxRegime: 'VAT_GENERIC',
+    outputTaxName: 'QQS majburiyati (Output VAT 12%)',
+    inputTaxName: 'QQS hisobga olish (Input VAT)',
+  }),
   IN: buildStandardPack({
     countryCode: 'IN', name: 'India', defaultFunctionalCurrency: 'INR', fiscalYearStartMonth: 4,
     taxRegime: 'GST_INDIA', outputTaxName: 'GST Payable (Output)', inputTaxName: 'GST Receivable (Input)',

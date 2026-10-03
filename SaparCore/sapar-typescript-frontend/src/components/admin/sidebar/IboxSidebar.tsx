@@ -16,11 +16,13 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Star,
   Search,
   X,
   FileCheck,
   UserCheck,
+  ShieldCheck,
   PanelLeftClose,
   PanelLeftOpen,
   TrendingUp,
@@ -30,6 +32,7 @@ import {
   GripVertical,
   RotateCcw,
 } from 'lucide-react';
+import axios from 'axios';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { toast } from 'sonner';
 import { SimpleTooltip } from '@components/ui/Tooltip';
@@ -81,10 +84,52 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
 
   const userRole = useMemo(() => {
     const email = (user?.email || localStorage.getItem('userEmail') || '').toLowerCase();
-    if (email.includes('buxgalter')) return 'BUXGALTER';
-    if (email.includes('stroy')) return 'OMBOR_STROY';
+    if (email === 'buxgalter@sapar.uz' || email === 'accounting@sapar.uz' || email.includes('buxgalter') || email.includes('accounting')) return 'BUXGALTER';
+    if (email === 'stroy@sapar.uz') return 'OMBOR_STROY';
     return 'ADMIN';
   }, [user]);
+
+  // Business Modules selection state (from onboarding / settings / database)
+  const [businessModules, setBusinessModules] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('sapar_sidebar_modules');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('sapar_sidebar_modules');
+        if (saved) {
+          setBusinessModules(JSON.parse(saved));
+        }
+      } catch {}
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('sapar_modules_updated', handleSync);
+
+    const isImpersonating = Boolean(localStorage.getItem('sapar_impersonating'));
+    if (!isImpersonating) {
+      axios.get('/api/admin/saas/my-modules')
+        .then((res) => {
+          if (res.data?.success && res.data.data?.modules) {
+            const serverMods = res.data.data.modules;
+            setBusinessModules(serverMods);
+            localStorage.setItem('sapar_sidebar_modules', JSON.stringify(serverMods));
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('sapar_modules_updated', handleSync);
+    };
+  }, []);
 
   // Search filter query
   const [searchQuery, setSearchQuery] = useState('');
@@ -353,23 +398,32 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
       },
       {
         id: 'fabrika',
-        title: 'Fabrika',
+        title: 'Fabrika & Loyihalar',
         icon: <Factory className="w-4 h-4 shrink-0 text-cyan-300" />,
         children: [
           { id: 'mfg-orders', title: 'Ishlab chiqarish buyurtmalari', to: '/admin/manufacturing/orders' },
           { id: 'mfg-bom', title: 'Texnologik xaritalar (BOM)', to: '/admin/manufacturing/bom' },
+          { id: 'mfg-projects', title: 'Loyihalar doskasi', to: '/admin/projects' },
         ],
       },
       {
         id: 'hrm',
-        title: 'HRM & Xodimlar',
+        title: 'HRM, Tabel & Oylik Maosh',
         icon: <UserCheck className="w-4 h-4 shrink-0 text-emerald-400" />,
         children: [
-          { id: 'hrm-users', title: 'Xodimlar roʻyxati', to: '/admin/users' },
-          { id: 'hrm-roles', title: 'Rollar va huquqlar', to: '/admin/roles' },
           { id: 'hrm-runs', title: 'Oylik hisoblash (Payroll)', to: '/admin/payroll/runs' },
           { id: 'hrm-tabel', title: 'Ish vaqti hisobi (Tabel)', to: '/admin/payroll/tabel' },
           { id: 'hrm-profiles', title: 'Xodim profillari', to: '/admin/payroll/profiles' },
+        ],
+      },
+      {
+        id: 'xodimlar',
+        title: 'Xodimlar & Huquqlar',
+        icon: <ShieldCheck className="w-4 h-4 shrink-0 text-teal-400" />,
+        badge: 'Rollar',
+        children: [
+          { id: 'users-list', title: 'Xodimlar (Foydalanuvchilar)', to: '/admin/users' },
+          { id: 'users-roles', title: 'Rollar va Huquqlar', to: '/admin/roles' },
         ],
       },
       {
@@ -378,7 +432,9 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
         icon: <FileSpreadsheet className="w-4 h-4 shrink-0 text-[#02C39A]" />,
         children: [
           { id: 'rep-hub', title: 'Hisobotlar markazi', to: '/admin/accounting/reports' },
-          { id: 'rep-sales', title: 'Sotuvlar hisoboti', to: '/admin/reports/sales' },
+          { id: 'rep-1c-migration', title: '1C Migratsiya markazi', to: '/admin/accounting/1c-migration', badge: '1C' },
+          { id: 'rep-month-close', title: 'Oyni yopish ustasi', to: '/admin/accounting/month-closing' },
+          { id: 'rep-account-card', title: '1C Hisob kartochkasi', to: '/admin/accounting/reports/account-card' },
           { id: 'rep-uz-gov', title: '1/2-Shakl Davlat hisobotlari', to: '/admin/accounting/reports/uz-financial-statements' },
           { id: 'rep-pnl', title: 'Foyda va zararlar (P&L)', to: '/admin/accounting/reports/profit-loss' },
           { id: 'rep-balance', title: 'Buxgalteriya balansi', to: '/admin/accounting/reports/balance-sheet' },
@@ -387,6 +443,7 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
           { id: 'rep-qqs', title: 'Soliq QQS 12%', to: '/admin/accounting/reports/soliq-qqs' },
           { id: 'rep-bhms', title: '21-son BHMS hisoblar rejasi', to: '/admin/accounting/bhms-chart-of-accounts' },
           { id: 'rep-journal', title: 'Bosh jurnal provodkalari', to: '/admin/accounting/journal-entries' },
+          { id: 'rep-sales', title: 'Sotuvlar hisoboti', to: '/admin/reports/sales' },
         ],
       },
       {
@@ -395,6 +452,8 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
         icon: <Settings className="w-4 h-4 shrink-0 text-slate-300" />,
         children: [
           { id: 'set-company', title: 'Korxona rekvizitlari', to: '/admin/settings/company-settings' },
+          { id: 'set-modules', title: 'Faol modullarni sozlash', to: '/admin/settings/subscription-plans' },
+          { id: 'set-users', title: 'Xodimlar va Huquqlar', to: '/admin/users' },
           { id: 'set-branches', title: 'Filiallar (Savdo nuqtalari)', to: '/admin/settings/branches', badge: 'Sapar' },
           { id: 'set-currencies', title: 'Valyutalar & Kurslar', to: '/admin/settings/currencies' },
           { id: 'set-translations', title: 'Tarjimalar studiyasi', to: '/admin/settings/translations' },
@@ -405,36 +464,74 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
     []
   );
 
-  // Filter menu items strictly according to user role
+  // Check if a module is active for this tenant
+  const isModuleActive = (itemId: string): boolean => {
+    // If master view mode is explicitly requested by superadmin toggle, allow bypass:
+    const superAdminViewAll = localStorage.getItem('sapar_superadmin_view_all') === 'true';
+    if (superAdminViewAll) {
+      return true;
+    }
+
+    // If no module filter has been set yet, show all
+    const hasConfig = businessModules && Object.keys(businessModules).length > 0;
+    if (!hasConfig) return true;
+
+    // Core administration pages
+    if (itemId === 'dashboard') {
+      return true;
+    }
+    if (itemId === 'sozlamalar') {
+      return Boolean(businessModules.settings !== false);
+    }
+    if (itemId === 'xodimlar') {
+      return Boolean(businessModules.users || businessModules.hrm || businessModules.payroll);
+    }
+
+    switch (itemId) {
+      case 'pos':
+        return Boolean(businessModules.pos);
+      case 'sotuvlar':
+        return Boolean(businessModules.sales || businessModules.pos);
+      case 'mahsulotlar':
+        return Boolean(businessModules.inventory || businessModules.sales || businessModules.purchases);
+      case 'ombor':
+        return Boolean(businessModules.inventory);
+      case 'xaridlar':
+      case 'taminotchilar':
+        return Boolean(businessModules.purchases);
+      case 'pullar':
+        return Boolean(businessModules.banking || businessModules.accounting);
+      case 'ehujjatlar':
+        return Boolean(businessModules.accounting || businessModules.eDocuments);
+      case 'business-loans-scoring':
+        return Boolean(businessModules.loans);
+      case 'mijozlar':
+        return Boolean(businessModules.crm || businessModules.helpdesk);
+      case 'fabrika':
+        return Boolean(businessModules.projects || businessModules.manufacturing);
+      case 'hrm':
+        return Boolean(businessModules.payroll || businessModules.hrm);
+      case 'hisobotlar':
+        return Boolean(businessModules.accounting || businessModules.reports);
+      default:
+        return true;
+    }
+  };
+
+  // Filter menu items strictly according to user role and tenant active modules
   const menuItems: MenuItem[] = useMemo(() => {
+    let items = allMenuItems;
+
     if (userRole === 'BUXGALTER') {
       const allowedIds = [
         'dashboard',
-        'business-loans-scoring',
-        'hisobotlar',
         'pullar',
-        'sotuvlar',
-        'xaridlar',
-        'taminotchilar',
-        'mijozlar',
         'ehujjatlar',
+        'hisobotlar',
+        'sozlamalar',
       ];
-      return allMenuItems
-        .filter((item) => allowedIds.includes(item.id))
-        .map((item) => {
-          if (item.id === 'sotuvlar') {
-            return {
-              ...item,
-              children: item.children?.filter(
-                (c) => c.id !== 'sale-pos' && c.id !== 'sale-shifts'
-              ),
-            };
-          }
-          return item;
-        });
-    }
-
-    if (userRole === 'OMBOR_STROY') {
+      items = allMenuItems.filter((item) => allowedIds.includes(item.id));
+    } else if (userRole === 'OMBOR_STROY') {
       const allowedIds = [
         'dashboard',
         'mahsulotlar',
@@ -445,12 +542,71 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
         'mijozlar',
         'fabrika',
       ];
-      return allMenuItems.filter((item) => allowedIds.includes(item.id));
+      items = allMenuItems.filter((item) => allowedIds.includes(item.id));
     }
 
-    // Demo Admin / Full Administrator
-    return allMenuItems;
-  }, [allMenuItems, userRole]);
+    // Apply tenant active modules filter!
+    return items
+      .filter((item) => isModuleActive(item.id))
+      .map((item) => {
+        if (item.id === 'sotuvlar' && businessModules && Object.keys(businessModules).length > 0) {
+          const hasPos = Boolean(businessModules.pos);
+          const hasSales = Boolean(businessModules.sales);
+          if (hasPos && !hasSales) {
+            return {
+              ...item,
+              title: 'POS Kassa Terminali',
+              children: item.children?.filter((c) => c.id === 'sale-pos' || c.id === 'sale-shifts'),
+            };
+          }
+          if (hasSales && !hasPos) {
+            return {
+              ...item,
+              title: 'Savdo & Fakturalar',
+              children: item.children?.filter((c) => c.id !== 'sale-pos' && c.id !== 'sale-shifts'),
+            };
+          }
+        }
+        if (item.id === 'mijozlar' && businessModules && Object.keys(businessModules).length > 0) {
+          const hasCrm = Boolean(businessModules.crm);
+          const hasHelpdesk = Boolean(businessModules.helpdesk);
+          if (hasHelpdesk && !hasCrm) {
+            return {
+              ...item,
+              title: 'Mijozlar Yordami',
+              children: item.children?.filter((c) => c.id === 'crm-helpdesk'),
+            };
+          }
+          if (hasCrm && !hasHelpdesk) {
+            return {
+              ...item,
+              children: item.children?.filter((c) => c.id !== 'crm-helpdesk'),
+            };
+          }
+        }
+        if (item.id === 'hisobotlar' && businessModules && Object.keys(businessModules).length > 0) {
+          const hasAccounting = Boolean(businessModules.accounting);
+          const hasReports = Boolean(businessModules.reports);
+          const hasSales = Boolean(businessModules.sales);
+          let filteredChildren = item.children || [];
+          if (!hasSales) {
+            filteredChildren = filteredChildren.filter((c) => c.id !== 'rep-sales');
+          }
+          if (hasReports && !hasAccounting) {
+            return {
+              ...item,
+              title: 'Tahliliy Hisobotlar',
+              children: filteredChildren.filter((c) => c.id === 'rep-hub' || c.id === 'rep-sales'),
+            };
+          }
+          return {
+            ...item,
+            children: filteredChildren,
+          };
+        }
+        return item;
+      });
+  }, [allMenuItems, userRole, businessModules]);
 
   // Reorder menu items according to user custom drag-and-drop order
   const orderedMenuItems: MenuItem[] = useMemo(() => {
@@ -635,6 +791,23 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
   // Render COMPACT RAIL when isOpen is false on desktop
   const renderCompactRail = () => (
     <aside className="w-16 bg-[#082026] text-slate-100 h-full flex flex-col select-none border-r border-[#13444D] shrink-0 font-sans transition-all duration-300 z-30">
+      {/* 0. Top Mini Brand Logo (56px / h-14) — Aligns with SaparHeader */}
+      <div className="h-14 border-b border-[#13444D] flex items-center justify-center bg-[#06181D] shrink-0">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#028090] to-[#02C39A] p-0.5 shadow-sm flex items-center justify-center cursor-pointer hover:scale-105 transition"
+          title="Menyuni ochish"
+        >
+          <svg className="w-5 h-5 text-white" viewBox="0 0 41 45" fill="none">
+            <path d="M0.571411 14.4812V25.6239L7.62723 21.7237V14.8521L18.3063 8.90914L11.4419 4.82776L3.89365 8.95446C1.84171 10.0763 0.571411 12.1895 0.571411 14.4812Z" fill="#FFFFFF" />
+            <path d="M41 30.0855V18.9429L33.9442 22.843V29.7146L23.2651 35.6576L30.1295 39.739L37.6778 35.6123C39.7298 34.4904 41 32.3772 41 30.0855Z" fill="#0B2B33" />
+            <path d="M40.6892 14.0206L40.8093 15.6004L33.7535 19.3148V14.8575L13.7302 4.08136L20.5946 0L37.3268 8.93073C39.2607 9.96294 40.5263 11.8787 40.6892 14.0206Z" fill="#02C39A" />
+            <path d="M0.12016 30.925L0 29.3451L7.05584 25.6307V30.088L27.0791 40.8642L20.2147 44.9456L3.48254 36.0148C1.54864 34.9826 0.283068 33.0668 0.12016 30.925Z" fill="#028090" />
+          </svg>
+        </button>
+      </div>
+
       {/* Top: Quick Favorites Icon */}
       <div className="p-3 border-b border-[#13444D] flex justify-center bg-[#06181D]">
         <SimpleTooltip
@@ -765,6 +938,51 @@ export const SaparSidebar: React.FC<SaparSidebarProps> = ({ isOpen, onClose, onT
   // Full Expanded Sidebar Content
   const sidebarContent = (
     <aside className="w-64 bg-[#082026] text-slate-100 h-full flex flex-col select-none border-r border-[#13444D] transition-all duration-200 shrink-0 overflow-hidden font-sans shadow-lg">
+      {/* 0. Brand Header (56px / h-14) — Aligns with SaparHeader */}
+      <div className="h-14 px-3.5 border-b border-[#13444D] bg-[#06181D] flex items-center justify-between shrink-0">
+        <div
+          onClick={() => navigate('/sales')}
+          className="flex items-center gap-2.5 cursor-pointer group"
+        >
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#028090] to-[#02C39A] p-0.5 shadow-sm flex items-center justify-center">
+            <svg
+              className="w-5 h-5 text-white"
+              viewBox="0 0 41 45"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.571411 14.4812V25.6239L7.62723 21.7237V14.8521L18.3063 8.90914L11.4419 4.82776L3.89365 8.95446C1.84171 10.0763 0.571411 12.1895 0.571411 14.4812Z"
+                fill="#FFFFFF"
+              />
+              <path
+                d="M41 30.0855V18.9429L33.9442 22.843V29.7146L23.2651 35.6576L30.1295 39.739L37.6778 35.6123C39.7298 34.4904 41 32.3772 41 30.0855Z"
+                fill="#0B2B33"
+              />
+              <path
+                d="M40.6892 14.0206L40.8093 15.6004L33.7535 19.3148V14.8575L13.7302 4.08136L20.5946 0L37.3268 8.93073C39.2607 9.96294 40.5263 11.8787 40.6892 14.0206Z"
+                fill="#02C39A"
+              />
+              <path
+                d="M0.12016 30.925L0 29.3451L7.05584 25.6307V30.088L27.0791 40.8642L20.2147 44.9456L3.48254 36.0148C1.54864 34.9826 0.283068 33.0668 0.12016 30.925Z"
+                fill="#028090"
+              />
+            </svg>
+          </div>
+          <span className="font-black text-xl tracking-tight text-white font-sans">SAPAR</span>
+        </div>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="w-7 h-7 rounded-lg bg-[#0D3B46] hover:bg-[#028090] border border-[#028090]/30 flex items-center justify-center text-white transition text-xs shadow-xs cursor-pointer"
+            title="Menyuni yigʻish"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {/* 1. Quick Search Filter Bar */}
       <div className="p-2.5 border-b border-[#13444D] bg-[#06181D]/80">
         <div className="relative flex items-center">

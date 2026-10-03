@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
   FileSpreadsheet,
@@ -131,14 +132,38 @@ export const UzbekistanFinancialReportsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/admin/accounting/1c-migration"
+            className="text-xs font-bold bg-[#F0FBF8] text-[#028090] border border-[#02C39A]/30 hover:bg-[#028090] hover:text-white px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            🚚 1C dan Koʻchirish
+          </Link>
+          <Link
+            to="/admin/accounting/account-card"
+            className="text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            📖 Schyot Kartochkasi
+          </Link>
+          <Link
+            to="/admin/accounting/month-closing"
+            className="text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            🔒 Oyni Yopish
+          </Link>
+          <Link
+            to="/admin/accounting/bhms-chart-of-accounts"
+            className="text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            📋 Hisoblar Rejasi
+          </Link>
           <Button
             variant="outline"
             onClick={() => window.print()}
             className="text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
           >
             <Printer className="w-3.5 h-3.5" />
-            Chop etish (Print)
+            Chop etish
           </Button>
         </div>
       </div>

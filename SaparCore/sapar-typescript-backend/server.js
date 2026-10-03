@@ -104,7 +104,7 @@ app.use('/uploads', express.static('uploads'));
 
 const { checkMailHealth } = require('./utils/mailer');
 
-app.get('/api/healthz', async (req, res) => {
+app.get(['/api/healthz', '/health', '/api/health', '/healthz'], async (req, res) => {
   const isDetailed = req.query.detailed === 'true';
   const mailHealth = isDetailed ? await checkMailHealth() : undefined;
 
@@ -169,23 +169,23 @@ app.use(prismaErrorHandler);
 
 const PORT = process.env.PORT || 3001;
 
+// Start listening immediately so the server binds its port and healthchecks pass without waiting on background DB migrations
+if (process.env.ENABLE_HTTPS === 'true') {
+  const options = {
+    key: fs.readFileSync(__dirname + '/ssl.key'),
+    cert: fs.readFileSync(__dirname + '/ssl.crt'),
+  };
+  https.createServer(options, app).listen(PORT, () => {
+    logger.info({ port: PORT, protocol: 'https' }, `SAPAR API listening on port ${PORT} (HTTPS)`);
+  });
+} else {
+  app.listen(PORT, '0.0.0.0', () => {
+    logger.info({ port: PORT, protocol: 'http' }, `SAPAR API listening on port ${PORT}`);
+  });
+}
+
 // ---------------------------------------------------------------------------
-// Boot bootstrap — migrate + seed before accepting traffic.
-//
-// Runs regardless of deployment method (Docker, PM2, bare node server.js).
-// Both steps are idempotent and non-fatal: a failure logs a warning but
-// never prevents the server from starting.
-//
-// Disable individual steps via environment variables:
-//   MIGRATE_ON_BOOT=false    — skip `prisma migrate deploy` (e.g. in CI where
-//                              migrations are applied externally)
-//   SEED_ON_BOOT=false       — skip baseline seed (e.g. when using the Docker
-//                              entrypoint to control sequencing manually)
-//   BACKFILL_ON_BOOT=false   — skip the legacy Customer/Supplier -> Contact
-//                              data migration (e.g. if you run it manually)
-//   GEO_ON_BOOT=false        — skip the Country/State geo dataset import
-//                              (e.g. if you run `npm run prisma:import:geo`
-//                              manually, or manage that data yourself)
+// Boot bootstrap — migrate + seed in background.
 // ---------------------------------------------------------------------------
 (async function bootstrap() {
   // Idempotent auto-migration patch: ensure newly added columns exist in Postgres
@@ -220,9 +220,10 @@ const PORT = process.env.PORT || 3001;
     logger.warn({ err: schemaErr }, '[boot] Schema sync fallback error (non-fatal)');
   }
 
-  // Idempotent demo users & roles bootstrap: ensures the 3 demo role accounts
-  // (Demo Admin, Bosh Buxgalter, Rizobay Stroy) exist and can log in with password123
-  try {
+  // Idempotent demo users & roles bootstrap: only runs when DEMO_ACCOUNTS_ON_BOOT=true.
+  // In production keep this false (default). Set to true only for demo/staging environments.
+  if (process.env.DEMO_ACCOUNTS_ON_BOOT === 'true') {
+    try {
     const { prisma } = require('./lib/prisma');
     const bcrypt = require('bcryptjs');
     const defaultHashedPassword = await bcrypt.hash('password123', 10);
@@ -270,7 +271,7 @@ const PORT = process.env.PORT || 3001;
     }
 
     // 3. Ensure Admin account
-    const adminUser = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: 'admin@sapar.uz' },
       update: {
         firstName: 'Dostonbek',
@@ -290,28 +291,7 @@ const PORT = process.env.PORT || 3001;
       },
     });
 
-    // Also alias admin@demo.sapar.local to admin user
-    await prisma.user.upsert({
-      where: { email: 'admin@demo.sapar.local' },
-      update: {
-        firstName: 'Demo',
-        lastName: 'Admin',
-        roleId: ownerRole.id,
-        user_type: 1,
-        password: defaultHashedPassword,
-      },
-      create: {
-        id: 'user-demo-admin-local',
-        email: 'admin@demo.sapar.local',
-        firstName: 'Demo',
-        lastName: 'Admin',
-        roleId: ownerRole.id,
-        user_type: 1,
-        password: defaultHashedPassword,
-      },
-    });
-
-    // 4. Ensure Bosh Buxgalter account (user_type: 1 ensures full UI access without 401)
+    // 4. Ensure Bosh Buxgalter account
     await prisma.user.upsert({
       where: { email: 'buxgalter@sapar.uz' },
       update: {
@@ -332,7 +312,7 @@ const PORT = process.env.PORT || 3001;
       },
     });
 
-    // 5. Ensure Rizobay Stroy account (user_type: 1 ensures full UI access without 401)
+    // 5. Ensure Rizobay Stroy account
     await prisma.user.upsert({
       where: { email: 'stroy@sapar.uz' },
       update: {
@@ -357,6 +337,7 @@ const PORT = process.env.PORT || 3001;
   } catch (demoErr) {
     logger.warn({ err: demoErr }, '[boot] Demo accounts bootstrap warning (non-fatal)');
   }
+  } // end DEMO_ACCOUNTS_ON_BOOT
 
   if (process.env.MIGRATE_ON_BOOT !== 'false') {
     try {
@@ -377,13 +358,17 @@ const PORT = process.env.PORT || 3001;
   }
 
   // Idempotent synchronization of 31 Uzbekistan B2B products & warehouse inventory stock
-  try {
-    logger.info('[boot] synchronizing rich Uzbekistan B2B products and warehouse inventory...');
-    await require('./prisma/seedRichProductsAndInventory').seedRichProductsAndInventory();
-    logger.info('[boot] rich products and inventory synchronized.');
-  } catch (err) {
-    logger.warn({ err }, '[boot] rich products and inventory seed failed (non-fatal)');
+  // Only runs when SEED_ON_BOOT=true (disabled by default in production)
+  if (process.env.SEED_ON_BOOT === 'true') {
+    try {
+      logger.info('[boot] synchronizing rich Uzbekistan B2B products and warehouse inventory...');
+      await require('./prisma/seedRichProductsAndInventory').seedRichProductsAndInventory();
+      logger.info('[boot] rich products and inventory synchronized.');
+    } catch (err) {
+      logger.warn({ err }, '[boot] rich products and inventory seed failed (non-fatal)');
+    }
   }
+
 
   // Idempotent data migration: on self-hosted upgrades from the legacy
   // Customer/Supplier model, this populates the unified Contact table and
@@ -428,21 +413,5 @@ const PORT = process.env.PORT || 3001;
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Start listening — runs after migrate + seed + contact backfill + geo
-  // import complete (or are skipped).
-  // -------------------------------------------------------------------------
-  if (process.env.ENABLE_HTTPS === 'true') {
-    const options = {
-      key: fs.readFileSync(__dirname + '/ssl.key'),
-      cert: fs.readFileSync(__dirname + '/ssl.crt'),
-    };
-    https.createServer(options, app).listen(PORT, () => {
-      logger.info({ port: PORT, protocol: 'https' }, `SAPAR API listening on port ${PORT} (HTTPS)`);
-    });
-  } else {
-    app.listen(PORT, () => {
-      logger.info({ port: PORT, protocol: 'http' }, `SAPAR API listening on port ${PORT}`);
-    });
-  }
+    logger.info('[boot] bootstrap finished.');
 })();

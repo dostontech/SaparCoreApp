@@ -52,45 +52,11 @@ export class EimzoService {
           return response.data.certificates.map((c: Record<string, string | undefined>) => this.parseCertificate(c));
         }
       } catch (err) {
-        console.warn('[E-IMZO] Failed to parse local certificates, using installed store:', err);
+        console.warn('[E-IMZO] Failed to parse local certificates:', err);
       }
     }
 
-    // High-fidelity fallback / Sandbox Certificate for instant demo & development:
-    return [
-      {
-        id: 'pfx-demo-01',
-        disk: 'DSK',
-        path: 'C:/e-imzo/keys/DS302918273.pfx',
-        name: 'DS302918273.pfx (Asosiy raqamli imzo)',
-        alias: '302918273_sapar_erp',
-        serialNumber: '5C4A9E2180B72D',
-        validFrom: '01.01.2025',
-        validTo: '01.01.2027',
-        CN: 'KARIMOV NODIRBEK ALISHEROVICH',
-        TIN: '302918273',
-        PINFL: '31508920190034',
-        O: 'SAPAR SOFTWARE SYSTEMS MCHJ',
-        T: 'Bosh direktor (CEO)',
-        isExpired: false,
-      },
-      {
-        id: 'pfx-demo-02',
-        disk: 'USB',
-        path: 'E:/e-imzo/buxgalter_imzo.pfx',
-        name: 'buxgalter_imzo.pfx (Bosh buxgalter)',
-        alias: '302918273_accountant',
-        serialNumber: '7B98F3410C3A12',
-        validFrom: '15.03.2024',
-        validTo: '15.03.2026',
-        CN: 'AZIMOVA DILNOZA RASHIDOVNA',
-        TIN: '302918273',
-        PINFL: '42205940120019',
-        O: 'SAPAR SOFTWARE SYSTEMS MCHJ',
-        T: 'Bosh buxgalter (Chief Accountant)',
-        isExpired: false,
-      },
-    ];
+    return [];
   }
 
   private parseCertificate(raw: Record<string, string | undefined>): EimzoCertificate {

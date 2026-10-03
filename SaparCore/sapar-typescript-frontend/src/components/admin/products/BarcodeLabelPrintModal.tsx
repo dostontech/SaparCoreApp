@@ -23,7 +23,7 @@ export const BarcodeLabelPrintModal: React.FC<BarcodeLabelPrintModalProps> = ({
   isOpen,
   onClose,
   products,
-  companyName = 'OOO "RIZOBAY STROY"',
+  companyName = '',
 }) => {
   const [selectedSize, setSelectedSize] = useState<LabelSize>('40x25');
   const [copies, setCopies] = useState<number>(1);

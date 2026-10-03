@@ -15,6 +15,8 @@ import {
     Briefcase,
     Headphones,
     Settings,
+    ShieldCheck,
+    SlidersHorizontal,
     Search,
     Star,
     Sparkles,
@@ -27,6 +29,7 @@ import {
     Building,
     ChevronRight,
 } from "lucide-react";
+import axios from "axios";
 import type { RootState, AppDispatch } from "@store/index";
 import { logout } from "@store/auth/authSlice";
 import {
@@ -298,15 +301,26 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                         ],
                     },
                     {
+                        id: "users",
+                        title: "Xodimlar & Huquqlar",
+                        icon: <ShieldCheck size={16} className="text-teal-400" />,
+                        defaultRoute: "/admin/users",
+                        badge: "Rollar",
+                        items: [
+                            { title: "Xodimlar (Foydalanuvchilar)", to: "/admin/users" },
+                            { title: "Rollar va Huquqlar", to: "/admin/roles" },
+                        ],
+                    },
+                    {
                         id: "settings",
                         title: t("nav.settings", "Tizim Sozlamalari"),
                         icon: <Settings size={16} />,
                         defaultRoute: "/admin/settings/company-settings",
                         items: [
                             { title: "Korxona rekvizitlari", to: "/admin/settings/company-settings" },
+                            { title: "Faol modullarni sozlash", to: "/admin/settings/subscription-plans" },
                             { title: "E-IMZO raqamli kalit", to: "/admin/settings/e-imzo" },
                             { title: "Integratsiyalar & API", to: "/admin/settings/integrations" },
-                            { title: "Foydalanuvchilar va rollar", to: "/admin/settings/users" },
                         ],
                     },
                 ],
@@ -314,6 +328,74 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
         ],
         [t]
     );
+
+    // Dynamic Business Modules State based on Onboarding selection & Tenant Subscription
+    const [businessModules, setBusinessModules] = useState<Record<string, boolean>>(() => {
+        try {
+            const saved = localStorage.getItem("sapar_sidebar_modules");
+            return saved ? JSON.parse(saved) : {};
+        } catch {
+            return {};
+        }
+    });
+
+    useEffect(() => {
+        const syncModules = () => {
+            try {
+                const saved = localStorage.getItem("sapar_sidebar_modules");
+                if (saved) {
+                    setBusinessModules(JSON.parse(saved));
+                }
+            } catch {}
+        };
+
+        window.addEventListener("storage", syncModules);
+
+        axios.get("/api/admin/saas/my-modules")
+            .then((res) => {
+                if (res.data?.success && res.data.data?.modules) {
+                    const serverMods = res.data.data.modules;
+                    setBusinessModules(serverMods);
+                    localStorage.setItem("sapar_sidebar_modules", JSON.stringify(serverMods));
+                }
+            })
+            .catch(() => {});
+
+        return () => window.removeEventListener("storage", syncModules);
+    }, []);
+
+    // Check if a module is active for this tenant
+    const isModuleActive = (modId: string): boolean => {
+        // Administration, Settings, Users, and Dashboard are always accessible
+        if (modId === "settings" || modId === "users" || modId === "dashboard") return true;
+
+        if (!businessModules || Object.keys(businessModules).length === 0) return true;
+
+        if (modId === "pos") return Boolean(businessModules.pos);
+        if (modId === "sales") return Boolean(businessModules.sales);
+        if (modId === "purchases") return Boolean(businessModules.purchases);
+        if (modId === "inventory") return Boolean(businessModules.inventory);
+        if (modId === "banking") return Boolean(businessModules.banking);
+        if (modId === "accounting") return Boolean(businessModules.accounting);
+        if (modId === "reports") return Boolean(businessModules.reports || businessModules.accounting);
+        if (modId === "crm") return Boolean(businessModules.crm);
+        if (modId === "hrm") return Boolean(businessModules.payroll || businessModules.hrm);
+        if (modId === "projects") return Boolean(businessModules.projects);
+        if (modId === "support") return Boolean(businessModules.helpdesk || businessModules.support);
+
+        return true;
+    };
+
+    // Filter domain groups: only show modules selected by the business
+    const visibleDomainGroups = useMemo(() => {
+        return domainGroups
+            .map((group) => {
+                const activeModules = group.modules.filter((m) => isModuleActive(m.id));
+                if (activeModules.length === 0) return null;
+                return { ...group, modules: activeModules };
+            })
+            .filter((g): g is NavDomainGroup => Boolean(g));
+    }, [domainGroups, businessModules]);
 
     // Flatten all items for quick lookup and favorites
     const allItems = useMemo(() => {
@@ -325,7 +407,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                 domainTitle: "Asosiy",
             },
         ];
-        domainGroups.forEach((d) => {
+        visibleDomainGroups.forEach((d) => {
             d.modules.forEach((m) => {
                 m.items.forEach((item) => {
                     list.push({
@@ -338,7 +420,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
             });
         });
         return list;
-    }, [domainGroups]);
+    }, [visibleDomainGroups]);
 
     // Pinned favorites objects
     const favoriteItems = useMemo(() => {
@@ -349,7 +431,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
 
     // Active domain detection to expand default accordion
     const activeDomainId = useMemo(() => {
-        for (const group of domainGroups) {
+        for (const group of visibleDomainGroups) {
             for (const mod of group.modules) {
                 for (const item of mod.items) {
                     if (item.exact ? pathname === item.to : pathname.startsWith(item.to)) {
@@ -358,14 +440,14 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                 }
             }
         }
-        return "operations";
-    }, [pathname, domainGroups]);
+        return visibleDomainGroups[0]?.id || "operations";
+    }, [pathname, visibleDomainGroups]);
 
     // Filtered domains when search query is typed
     const filteredDomains = useMemo(() => {
-        if (!searchQuery.trim()) return domainGroups;
+        if (!searchQuery.trim()) return visibleDomainGroups;
         const q = searchQuery.toLowerCase();
-        return domainGroups
+        return visibleDomainGroups
             .map((group) => {
                 const matchedModules = group.modules
                     .map((mod) => {
@@ -388,7 +470,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                 return null;
             })
             .filter((g): g is NavDomainGroup => Boolean(g));
-    }, [domainGroups, searchQuery]);
+    }, [visibleDomainGroups, searchQuery]);
 
     const isRouteActive = (to: string, exact?: boolean) => {
         if (exact) return pathname === to;
@@ -742,6 +824,24 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
                             >
                                 <UserCircle2 size={15} className="text-slate-400" />
                                 <span>Profil sozlamalari</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                to="/admin/users"
+                                className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:text-slate-900"
+                            >
+                                <ShieldCheck size={15} className="text-teal-600" />
+                                <span>Xodimlar & Huquqlar</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link
+                                to="/admin/settings/subscription-plans"
+                                className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:text-slate-900"
+                            >
+                                <SlidersHorizontal size={15} className="text-teal-600" />
+                                <span>Faol modullarni sozlash</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>

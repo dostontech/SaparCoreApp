@@ -60,6 +60,8 @@ export function packRegimeToPrisma(regime: PackTaxRegime): PrismaTaxRegime {
       return 'GST_NZ';
     case 'SALES_TAX_US':
       return 'US_SALES_TAX';
+    case 'VAT_GENERIC':
+      return 'VAT_GENERIC';
     default:
       return 'NONE';
   }
@@ -81,6 +83,12 @@ function ratesForPack(countryCode: string, prismaRegime: PrismaTaxRegime): RateS
   const noTax: RateSpec = { name: NO_TAX_RATE_NAME, rate: '0', regime: 'NONE' };
 
   switch (prismaRegime) {
+    case 'VAT_GENERIC':
+      return [
+        { name: 'QQS 12%', rate: '12', regime: 'VAT_GENERIC', taxKind: 'VAT' },
+        { name: 'QQS 0% (Imtiyozli)', rate: '0', regime: 'VAT_GENERIC', taxKind: 'VAT' },
+        noTax,
+      ];
     case 'VAT_UK':
       return [
         { name: 'VAT Standard 20%', rate: '20', regime: 'VAT_UK', taxKind: 'VAT' },

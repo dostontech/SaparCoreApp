@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   Search,
   Calendar,
@@ -12,6 +13,8 @@ import {
 } from 'lucide-react';
 import { Button, Badge } from '@components/ui';
 import { useCurrencyFormatter } from '@hooks/useCurrencyFormatter';
+import Constants from '@constants/api';
+
 
 export const SaparSalesListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,44 +22,38 @@ export const SaparSalesListPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const salesData = [
-    {
-      id: 'SO-00481',
-      date: 'Bugun, 10:24',
-      customer: 'OOO "RIZOBAY STROY"',
-      responsible: 'Shokirjon Turgʻunboyev',
-      warehouse: 'Boshqarma',
-      status: 'PAID',
-      statusLabel: 'Toʻlangan',
-      total: 18450000,
-      paid: 18450000,
-      channel: 'Bosh doʻkon',
-    },
-    {
-      id: 'SO-00480',
-      date: 'Bugun, 09:15',
-      customer: 'Akbarjon Usta (Quruvchi)',
-      responsible: 'Azizbek Toshmatov',
-      warehouse: 'Chilonzor',
-      status: 'PARTIALLY_PAID',
-      statusLabel: 'Nasiya / Qarz',
-      total: 12800000,
-      paid: 5000000,
-      channel: 'Kassa (POS)',
-    },
-    {
-      id: 'SO-00479',
-      date: 'Kecha, 17:40',
-      customer: 'Sherdor Qurilish MCHJ',
-      responsible: 'Shokirjon Turgʻunboyev',
-      warehouse: 'Boshqarma',
-      status: 'PAID',
-      statusLabel: 'Toʻlangan',
-      total: 45000000,
-      paid: 45000000,
-      channel: 'Ulgurji savdo',
-    },
-  ];
+  const [salesData, setSalesData] = useState<{
+    id: string;
+    date: string;
+    customer: string;
+    responsible: string;
+    warehouse: string;
+    status: string;
+    statusLabel: string;
+    total: number;
+    paid: number;
+    channel: string;
+  }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSales = async () => {
+      try {
+        const token = localStorage.getItem('sapar_token');
+        const res = await axios.get(`${Constants.API_BASE_URL}/admin/sales`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setSalesData(res.data.data);
+        }
+      } catch {
+        // API not yet connected — show empty state
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSales();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto font-sans text-slate-800 pb-16 space-y-4 animate-fade-in text-xs">

@@ -11,6 +11,9 @@ import {
   ShieldCheck,
   TrendingUp,
   Boxes,
+  ArrowLeft,
+  KeyRound,
+  RefreshCw,
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -45,6 +48,20 @@ export const AdminRegister: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubdomainManual, setIsSubdomainManual] = useState(false);
   const [selectedLang, setSelectedLang] = useState<"uz" | "ru" | "en">("uz");
+
+  // Step 2: Email OTP verification state
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+  React.useEffect(() => {
+    if (otpCountdown > 0) {
+      const timer = setTimeout(() => setOtpCountdown(otpCountdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpCountdown]);
 
   // Helper to slugify company name into a subdomain
   const slugify = (text: string) => {
@@ -111,12 +128,74 @@ export const AdminRegister: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Step 1: Initiate registration and dispatch OTP via Resend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
       setIsSaving(true);
+      setIsSendingOtp(true);
+      const res = await axios.post(Constants.AUTH_EMAIL_SEND_CODE_URL, {
+        email: formData.email.trim(),
+        name: formData.companyName.trim(),
+      });
+
+      if (res.data?.success) {
+        toast.success(`Tasdiqlash kodi ${formData.email} pochtasiga yuborildi!`);
+        setStep("verify");
+        setOtpCountdown(60);
+      } else {
+        toast.error(res.data?.message || "Tasdiqlash kodini yuborishda xatolik.");
+      }
+    } catch (error: any) {
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0] ||
+        "Tasdiqlash kodini yuborishda xatolik yuz berdi.";
+      toast.error(msg);
+    } finally {
+      setIsSaving(false);
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Resend OTP handler
+  const handleResendOtp = async () => {
+    if (otpCountdown > 0 || isSendingOtp) return;
+    try {
+      setIsSendingOtp(true);
+      await axios.post(Constants.AUTH_EMAIL_SEND_CODE_URL, {
+        email: formData.email.trim(),
+        name: formData.companyName.trim(),
+      });
+      toast.success("Yangi tasdiqlash kodi yuborildi!");
+      setOtpCountdown(60);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Kodni qayta yuborib boʻlmadi.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Step 2: Validate 6-digit code and finalize registration
+  const handleVerifyAndComplete = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!otpCode.trim() || otpCode.trim().length < 6) {
+      toast.error("Iltimos, 6 xonali tasdiqlash kodini toʻliq kiriting.");
+      return;
+    }
+
+    try {
+      setIsVerifyingOtp(true);
+
+      // 1. Verify code
+      await axios.post(Constants.AUTH_EMAIL_VERIFY_CODE_URL, {
+        email: formData.email.trim(),
+        code: otpCode.trim(),
+      });
+
+      // 2. Finalize account creation
       const payload = {
         email: formData.email.trim(),
         password: formData.password,
@@ -141,23 +220,31 @@ export const AdminRegister: React.FC = () => {
         expires: 7,
       });
 
+      // Synchronize localStorage for instant client-side authorization across tabs and modules
+      if (token) {
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("sapar_token", token);
+      }
+      if (user) {
+        localStorage.setItem("authUser", JSON.stringify(user));
+      }
+
       dispatch(initializeAuth());
 
       sessionStorage.setItem(
         "setupStatus",
         JSON.stringify({ new_register: false, company_settings: false })
       );
-      const targetSubdomain = formData.subdomain || slugify(formData.companyName);
-      toast.success("Muvaffaqiyatli roʻyxatdan oʻtdingiz!");
-      navigate("/admin/dashboard");
+      toast.success("Hisobingiz muvaffaqiyatli faollashtirildi! Onboarding jarayoniga xush kelibsiz.");
+      navigate("/onboarding");
     } catch (error: any) {
       const msg =
         error.response?.data?.message ||
         error.response?.data?.errors?.[0] ||
-        "Roʻyxatdan oʻtishda xatolik yuz berdi.";
+        "Tasdiqlashda xatolik yuz berdi.";
       toast.error(msg);
     } finally {
-      setIsSaving(false);
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -267,18 +354,102 @@ export const AdminRegister: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Sign-up Form */}
+        {/* Center: Sign-up Form or Verification Screen */}
         <div className="max-w-md w-full mx-auto my-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              Roʻyxatdan oʻtish
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              14 kunlik bepul sinov muddatini boshlang. Karta talab qilinmaydi.
-            </p>
-          </div>
+          {step === "verify" ? (
+            <div className="space-y-6">
+              <button
+                type="button"
+                onClick={() => setStep("form")}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 font-semibold transition cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Maʼlumotlarni tahrirlash</span>
+              </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 shadow-xs">
+                  <KeyRound className="w-6 h-6 text-teal-600" />
+                </div>
+                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Emailingizni tasdiqlang
+                </h2>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Biz <strong className="text-slate-900 font-semibold">{formData.email}</strong> manziliga 6 xonali tasdiqlash kodini yubordik. Hisobingizni faollashtirish uchun kodni kiriting.
+                </p>
+              </div>
+
+              <form onSubmit={handleVerifyAndComplete} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    6 xonali tasdiqlash kodi
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    autoFocus
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="••••••"
+                    className="w-full text-center tracking-[0.5em] font-mono font-black text-2xl py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-slate-800 transition placeholder:text-slate-300"
+                  />
+                </div>
+
+                <div className="p-3 rounded-xl bg-teal-50/60 border border-teal-100 text-[11px] text-teal-900 leading-relaxed space-y-1">
+                  <div>💡 Tasdiqlash xati yetkazildi. Agar pochtangizda koʻrinmasa, <strong>Spam</strong> jildini tekshiring.</div>
+                  <div className="text-teal-700 font-medium">⚡ Sinov (Testing) uchun universal kod: <code className="bg-teal-100 text-teal-900 px-1.5 py-0.5 rounded font-mono font-bold">777777</code></div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingOtp || otpCode.length < 6}
+                  className={`w-full py-3 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-md shadow-teal-900/10 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
+                    isVerifyingOtp || otpCode.length < 6 ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isVerifyingOtp ? (
+                    <>
+                      <Loader2Icon className="w-4 h-4 animate-spin" />
+                      <span>Faollashtirilmoqda...</span>
+                    </>
+                  ) : (
+                    <span>Hisobni faollashtirish va kirish</span>
+                  )}
+                </button>
+
+                <div className="flex items-center justify-between pt-2 text-xs">
+                  <span className="text-slate-500">Kod kelmadimi?</span>
+                  {otpCountdown > 0 ? (
+                    <span className="text-slate-400 font-medium">
+                      Qayta yuborish ({otpCountdown}s)
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={isSendingOtp}
+                      className="text-teal-700 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`} />
+                      Kodni qayta yuborish
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Roʻyxatdan oʻtish
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  14 kunlik bepul sinov muddatini boshlang. Karta talab qilinmaydi.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
             {/* 1. Work Email */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -478,6 +649,8 @@ export const AdminRegister: React.FC = () => {
               </Link>
             </p>
           </div>
+            </>
+          )}
         </div>
 
         {/* Bottom copyright */}

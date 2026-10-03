@@ -309,7 +309,7 @@ const AdminHeader = ({ toggleSidebar }: HeaderProps) => {
                     {user?.firstName || 'Foydalanuvchi'}
                   </span>
                   <span className="text-[10px] text-[#028090] font-semibold leading-tight">
-                    {userRole === 'BUXGALTER' ? 'Bosh Buxgalter' : userRole === 'OMBOR_STROY' ? 'Rizobay Stroy' : 'Demo Admin'}
+                    {userRole === 'BUXGALTER' ? 'Bosh Buxgalter' : userRole === 'OMBOR_STROY' ? 'Omborxona & Boshqaruv' : user?.firstName || 'Foydalanuvchi'}
                   </span>
                 </div>
               </button>
@@ -345,7 +345,7 @@ const AdminHeader = ({ toggleSidebar }: HeaderProps) => {
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-base">🏗️</span>
                       <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-cyan-900 truncate">Rizobay Stroy</div>
+                        <div className="text-[11px] font-bold text-cyan-900 truncate">{user?.firstName ? `${user.firstName} ${user?.lastName || ''}`.trim() : 'Omborxona'}</div>
                         <div className="text-[10px] text-cyan-700 truncate">Omborxona & Savdo Rejimi</div>
                       </div>
                     </div>
@@ -359,7 +359,7 @@ const AdminHeader = ({ toggleSidebar }: HeaderProps) => {
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-base">🏢</span>
                       <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-[#0B2B33] truncate">Demo Admin</div>
+                        <div className="text-[11px] font-bold text-[#0B2B33] truncate">{user?.firstName ? `${user.firstName} ${user?.lastName || ''}`.trim() : 'Administrator'}</div>
                         <div className="text-[10px] text-[#028090] truncate">Barcha Huquqlar (Super Admin)</div>
                       </div>
                     </div>

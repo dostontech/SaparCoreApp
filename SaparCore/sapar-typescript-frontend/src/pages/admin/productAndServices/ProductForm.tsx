@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Constants from '../../../constants/api';
 import { toast } from "sonner";
-import { Upload, X, Package, Wrench, Barcode, Sparkles, ShieldCheck, Coins } from 'lucide-react';
+import { Upload, X, Package, Wrench, Barcode, Sparkles, ShieldCheck, Coins, Search, Tag } from 'lucide-react';
+import MxikSearchModal, { type MxikItem } from '@components/admin/MxikSearchModal';
 import { useSelector } from 'react-redux';
 import ImageCropperUpload from '@components/common/ImageCropperUpload';
 import type { RootState } from '../../../store';
@@ -133,6 +134,17 @@ export default function ProductForm({ productData }: ProductFormProps) {
     const [galleryImagePreviews, setGalleryImagePreviews] = useState<string[]>([]);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isMxikModalOpen, setIsMxikModalOpen] = useState(false);
+
+    const handleSelectMxik = (item: MxikItem) => {
+        setFormData(prev => ({
+            ...prev,
+            ikpu: item.mxikCode,
+            is_marked: item.isMarked || prev.is_marked,
+            marking_category: item.isMarked ? item.markingCategory : prev.marking_category,
+        }));
+        toast.success(`Soliq MXIK kodi tanlandi: ${item.nameUz}`);
+    };
     // Set by the "Create & Add Another" button's onClick, read once at the top
     // of handleSubmit — see the comment there for why this is a ref, not state.
     const addAnotherRef = useRef(false);
@@ -674,22 +686,74 @@ export default function ProductForm({ productData }: ProductFormProps) {
                             {formErrors.barcode && <p className="text-red-500 text-xs mt-1">{formErrors.barcode}</p>}
                         </div>
 
-                        {/* 🏷️ Asl Belgisi Digital Marking (Decree No. 296) */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-md p-3 col-span-1 md:col-span-3 mt-2">
-                            <div className="flex items-center justify-between">
+                        {/* Soliq MXIK / IKPU Classification Section */}
+                        <div className="bg-slate-50 border border-teal-200/80 rounded-xl p-4 mt-6 space-y-3 col-span-1 md:col-span-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="text-xl">🏛️</span>
+                                    <div>
+                                        <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                            Soliq MXIK / IKPU Mahsulot Kodi
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
+                                                E-Faktura & POS uchun
+                                            </span>
+                                        </h4>
+                                        <p className="text-xs text-gray-500">
+                                            Soliq elektron hisob-fakturalari (Didox) va fiscal POS cheklarida koʻrsatilishi shart
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMxikModalOpen(true)}
+                                    className="px-3.5 py-2 bg-[#028090] hover:bg-[#026d7b] text-white text-xs font-bold rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                >
+                                    <Search size={14} />
+                                    MXIK Qidirish (tasnif.soliq.uz)
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                                <div className="md:col-span-2">
+                                    <label htmlFor="ikpu" className="block text-xs font-semibold text-gray-700 mb-1">
+                                        17 xonali MXIK / IKPU Kodi *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="ikpu"
+                                        id="ikpu"
+                                        maxLength={17}
+                                        value={formData.ikpu || ''}
+                                        onChange={handleInputChange}
+                                        placeholder="01111001001000000"
+                                        className="text-xs font-mono font-bold text-teal-900 p-2.5 block w-full border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#028090] bg-white tracking-wider"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                                        Tasnif Roʻyxati
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsMxikModalOpen(true)}
+                                        className="w-full py-2.5 px-3 border border-gray-300 hover:border-teal-500 bg-white hover:bg-teal-50/50 text-gray-700 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                    >
+                                        <Tag size={13} className="text-teal-600" />
+                                        Katalogdan tanlash
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Asl Belgisi Digital Marking (Decree No. 296) */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4 col-span-1 md:col-span-3">
+                            <div className="flex items-center">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="is_marked"
                                         checked={Boolean(formData.is_marked)}
-                                        onChange={(e) => {
-                                            const checked = e.target.checked;
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                is_marked: checked,
-                                                marking_category: checked && prev.marking_category === 'NONE' ? 'WATER_BEVERAGES' : prev.marking_category,
-                                            }));
-                                        }}
+                                        onChange={handleInputChange}
                                         className="h-4 w-4 text-[#028090] border-gray-300 rounded focus:ring-[#028090]"
                                     />
                                     <span className="ml-2 text-sm font-semibold text-gray-800 flex items-center gap-1.5">
@@ -705,43 +769,35 @@ export default function ProductForm({ productData }: ProductFormProps) {
                             </p>
 
                             {formData.is_marked && (
-                                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                        <label htmlFor="marking_category" className="block text-xs font-semibold text-gray-700">
-                                            Markirovka guruhi / Toifasi
-                                        </label>
-                                        <select
-                                            name="marking_category"
-                                            id="marking_category"
-                                            value={formData.marking_category || 'WATER_BEVERAGES'}
-                                            onChange={handleInputChange}
-                                            className="mt-1 text-xs text-gray-700 p-2 block w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-[#028090] bg-white font-medium"
-                                        >
-                                            <option value="WATER_BEVERAGES">💧 Suv va salqin ichimliklar (Majburiy)</option>
-                                            <option value="PHARMACEUTICALS">💊 Dori vositalari va tibbiy buyumlar (Majburiy)</option>
-                                            <option value="TOBACCO">🚬 Tamaki mahsulotlari (Majburiy)</option>
-                                            <option value="ALCOHOL">🍾 Alkogolli ichimliklar va pivo (Majburiy)</option>
-                                            <option value="APPLIANCES">⚡ Maishiy texnika (Majburiy)</option>
-                                            <option value="OTHER">📦 Boshqa markirovkalanadigan tovarlar</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label htmlFor="ikpu" className="block text-xs font-semibold text-gray-700">
-                                            MXIK / IKPU Kodi (17 ta raqam)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="ikpu"
-                                            id="ikpu"
-                                            value={formData.ikpu || ''}
-                                            onChange={handleInputChange}
-                                            placeholder="01111001001000000"
-                                            className="mt-1 text-xs font-mono font-bold text-gray-700 p-2 block w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-[#028090] bg-white"
-                                        />
-                                    </div>
+                                <div className="mt-3">
+                                    <label htmlFor="marking_category" className="block text-xs font-semibold text-gray-700">
+                                        Markirovka guruhi / Toifasi
+                                    </label>
+                                    <select
+                                        name="marking_category"
+                                        id="marking_category"
+                                        value={formData.marking_category || 'WATER_BEVERAGES'}
+                                        onChange={handleInputChange}
+                                        className="mt-1 text-xs text-gray-700 p-2 block w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-[#028090] bg-white font-medium"
+                                    >
+                                        <option value="WATER_BEVERAGES">💧 Suv va salqin ichimliklar (Majburiy)</option>
+                                        <option value="PHARMACEUTICALS">💊 Dori vositalari va tibbiy buyumlar (Majburiy)</option>
+                                        <option value="TOBACCO">🚬 Tamaki mahsulotlari (Majburiy)</option>
+                                        <option value="ALCOHOL">🍾 Alkogolli ichimliklar va pivo (Majburiy)</option>
+                                        <option value="APPLIANCES">⚡ Maishiy texnika (Majburiy)</option>
+                                        <option value="OTHER">📦 Boshqa markirovkalanadigan tovarlar</option>
+                                    </select>
                                 </div>
                             )}
                         </div>
+
+                        {/* Mxik Search Modal */}
+                        <MxikSearchModal
+                            isOpen={isMxikModalOpen}
+                            onClose={() => setIsMxikModalOpen(false)}
+                            onSelect={handleSelectMxik}
+                            currentCode={formData.ikpu}
+                        />
 
                         {/* Track Inventory */}
                         <div className="flex items-center mt-6">

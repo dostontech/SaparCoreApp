@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
   BookOpen,
@@ -75,14 +76,38 @@ export const BhmsChartOfAccountsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/admin/accounting/1c-migration"
+            className="text-xs font-bold bg-[#F0FBF8] text-[#028090] border border-[#02C39A]/30 hover:bg-[#028090] hover:text-white px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            🚚 1C dan Koʻchirish
+          </Link>
+          <Link
+            to="/admin/accounting/account-card"
+            className="text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            📖 Schyot Kartochkasi
+          </Link>
+          <Link
+            to="/admin/accounting/month-closing"
+            className="text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            🔒 Oyni Yopish
+          </Link>
+          <Link
+            to="/admin/accounting/reports/uz-financial-statements"
+            className="text-xs font-bold bg-teal-700 text-white hover:bg-teal-800 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            📊 1/2-Shakl Balans
+          </Link>
           <Button
             variant="outline"
             className="text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
             onClick={() => window.print()}
           >
             <Download className="w-3.5 h-3.5" />
-            Chop etish / Eksport
+            Eksport
           </Button>
         </div>
       </div>
@@ -177,9 +202,13 @@ export const BhmsChartOfAccountsPage: React.FC = () => {
               {filteredAccounts.map((a) => (
                 <tr key={a.code} className="hover:bg-slate-50/70 transition">
                   <td className="py-3 px-4">
-                    <span className="font-mono font-black text-sm text-teal-800 bg-teal-50 px-2 py-1 rounded-lg border border-teal-200">
+                    <Link
+                      to={`/admin/accounting/account-card?code=${a.code}`}
+                      title="1C Schyot Kartochkasini ochish"
+                      className="font-mono font-black text-sm text-teal-800 bg-teal-50 px-2 py-1 rounded-lg border border-teal-200 hover:bg-teal-700 hover:text-white transition inline-block"
+                    >
                       {a.code}
-                    </span>
+                    </Link>
                   </td>
                   <td className="py-3 px-4">
                     <div className="font-bold text-slate-900">{a.name}</div>

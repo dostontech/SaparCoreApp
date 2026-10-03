@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 import { ShieldCheck, Server, RefreshCw, CheckCircle, AlertTriangle, Save } from 'lucide-react';
 import { Card, Button, FormField, Select, Switch } from '@components/ui';
 import { PageHeader } from '@/context/PageHeaderContext';
 import { toast } from 'sonner';
 import { eimzoService } from '../../../services/eimzoService';
+import type { RootState } from '@/store';
+import Constants from '@constants/api';
 
 export const EdiSettings: React.FC = () => {
+  const { token, user } = useSelector((state: RootState) => state.auth);
   const [provider, setProvider] = useState('DIDOX');
   const [apiKey, setApiKey] = useState('');
   const [autoSyncInbox, setAutoSyncInbox] = useState(true);
@@ -15,7 +20,19 @@ export const EdiSettings: React.FC = () => {
 
   useEffect(() => {
     checkEimzoAgent();
-  }, []);
+    if (user?.id && token) {
+      axios.get(`${Constants.FETCH_COMPANY_SETTINGS_URL}/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((res) => {
+        const data = res.data?.data;
+        if (data) {
+          if (data.ediProvider) setProvider(data.ediProvider);
+          if (data.ediApiKey) setApiKey(data.ediApiKey);
+          if (data.autoSyncInbox !== undefined) setAutoSyncInbox(Boolean(data.autoSyncInbox));
+        }
+      }).catch((err) => console.error('Error loading EDI settings:', err));
+    }
+  }, [user?.id, token]);
 
   const checkEimzoAgent = async () => {
     setCheckingEimzo(true);
@@ -29,13 +46,28 @@ export const EdiSettings: React.FC = () => {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id || !token) return;
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      await axios.put(
+        `${Constants.UPDATE_COMPANY_SETTINGS_URL}/${user.id}`,
+        {
+          ediProvider: provider,
+          ediApiKey: apiKey.trim(),
+          autoSyncInbox,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       toast.success('E-Faktura & E-IMZO sozlamalari muvaffaqiyatli saqlandi');
-    }, 500);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Sozlamalarni saqlashda xatolik yuz berdi');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

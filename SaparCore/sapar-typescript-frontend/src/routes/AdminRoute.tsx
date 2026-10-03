@@ -1,4 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@store/index";
 import AdminLogin from "@pages/admin/auth/AdminLogin";
 import AdminRegister from "@pages/admin/auth/AdminRegister";
 import AdminDashboard from "@pages/admin/AdminDashboard";
@@ -192,6 +194,9 @@ import ContactCard from "@pages/admin/contacts/ContactCard";
 import SubscriptionPlansPage from "@pages/admin/settings/SubscriptionPlansPage";
 import BhmsChartOfAccountsPage from "@pages/admin/accounting/BhmsChartOfAccountsPage";
 import UzbekistanFinancialReportsPage from "@pages/admin/accounting/UzbekistanFinancialReportsPage";
+import OneCMigrationPage from "@pages/admin/accounting/OneCMigrationPage";
+import AccountCardPage from "@pages/admin/accounting/AccountCardPage";
+import MonthClosingWizardPage from "@pages/admin/accounting/MonthClosingWizardPage";
 import BusinessLoansPage from "@pages/admin/financing/BusinessLoansPage";
 import DesignSystemPage from "@pages/admin/design-system/DesignSystemPage";
 import SaparDashboardPage from "@pages/admin/dashboard/SaparDashboardPage";
@@ -204,6 +209,39 @@ import InventoryAuditsPage from "@pages/admin/inventory/InventoryAuditsPage";
 import InventoryWriteOffsPage from "@pages/admin/inventory/InventoryWriteOffsPage";
 import ManufacturingOrdersPage from "@pages/admin/manufacturing/ManufacturingOrdersPage";
 import ManufacturingBomPage from "@pages/admin/manufacturing/ManufacturingBomPage";
+
+const AdminRootHandler = () => {
+    const { user } = useSelector((state: RootState) => state.auth);
+    const email = (user?.email || localStorage.getItem("userEmail") || "").toLowerCase();
+    const impersonating = localStorage.getItem("sapar_impersonating");
+    const isAccountingUser = email.includes("buxgalter") || email.includes("accounting");
+    // user_type === 1 is the definitive super-admin check; email fallback only when user object not yet hydrated
+    const isSuperAdmin = (user?.user_type === 1 || (!user && email.includes("admin@sapar.uz"))) && !isAccountingUser;
+
+    if (!isSuperAdmin || impersonating || isAccountingUser) {
+        // Non-admin clients or accounting clients are redirected directly to their active module URL
+        const saved = localStorage.getItem("sapar_sidebar_modules");
+        let target = isAccountingUser ? "/accounting/reports/uz-financial-statements" : "/sales";
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.accounting && !parsed.sales && !parsed.pos) target = "/accounting/reports/uz-financial-statements";
+                else if (parsed.pos) target = "/pos";
+                else if (parsed.sales) target = "/sales";
+                else if (parsed.inventory) target = "/inventory";
+                else if (parsed.accounting) target = "/accounting/bhms-chart-of-accounts";
+            } catch {}
+        }
+        return <Navigate to={target} replace />;
+    }
+
+    return (
+        <>
+            <Seo title="SaaS Mijozlar Boshqaruvi | SAPAR" />
+            <SaasClientsPage />
+        </>
+    );
+};
 
 const AdminRoute = () => {
     return (
@@ -220,32 +258,39 @@ const AdminRoute = () => {
                 <Route path="/manufacturing/orders" element={<><Seo title="Ishlab Chiqarish Buyurtmalari" /><ManufacturingOrdersPage /></>} />
                 <Route path="/manufacturing/bom" element={<><Seo title="Texnologik Xaritalar (BOM)" /><ManufacturingBomPage /></>} />
 
-                {/* Compatibility Aliases for Header & Sidebar Links */}
-                <Route path="/deals" element={<Navigate to="/admin/crm/pipeline" replace />} />
-                <Route path="/crm" element={<Navigate to="/admin/crm/pipeline" replace />} />
-                <Route path="/projects" element={<Navigate to="/admin/accounting/projects/workspace" replace />} />
-                <Route path="/bank-accounts" element={<Navigate to="/admin/settings/bank-accounts" replace />} />
-                <Route path="/reports/soliq" element={<Navigate to="/admin/accounting/reports/soliq-qqs" replace />} />
-                <Route path="/helpdesk" element={<Navigate to="/admin/helpdesk/tickets" replace />} />
-                <Route path="/company-details" element={<Navigate to="/admin/settings/company-settings" replace />} />
-                <Route path="/company-settings" element={<Navigate to="/admin/settings/company-settings" replace />} />
-                <Route path="/settings/company-details" element={<Navigate to="/admin/settings/company-settings" replace />} />
-                <Route path="/settings/company" element={<Navigate to="/admin/settings/company-settings" replace />} />
+                {/* Clean Module URL Aliases (Direct top-level without /admin) */}
+                <Route path="/deals" element={<Navigate to="/crm/pipeline" replace />} />
+                <Route path="/crm" element={<Navigate to="/crm/pipeline" replace />} />
+                <Route path="/accounting" element={<Navigate to="/accounting/bhms-chart-of-accounts" replace />} />
+                <Route path="/reports" element={<Navigate to="/accounting/reports" replace />} />
+                <Route path="/payroll" element={<Navigate to="/payroll/tabel" replace />} />
+                <Route path="/projects" element={<Navigate to="/accounting/projects/workspace" replace />} />
+                <Route path="/bank-accounts" element={<Navigate to="/settings/bank-accounts" replace />} />
+                <Route path="/reports/soliq" element={<Navigate to="/accounting/reports/soliq-qqs" replace />} />
+                <Route path="/helpdesk" element={<Navigate to="/helpdesk/tickets" replace />} />
+                <Route path="/settings" element={<Navigate to="/settings/company-settings" replace />} />
+                <Route path="/company-details" element={<Navigate to="/settings/company-settings" replace />} />
+                <Route path="/company-settings" element={<Navigate to="/settings/company-settings" replace />} />
+                <Route path="/settings/company-details" element={<Navigate to="/settings/company-settings" replace />} />
+                <Route path="/settings/company" element={<Navigate to="/settings/company-settings" replace />} />
                 <Route path="/settings/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
                 <Route path="/branches" element={<><Seo title="Filiallar va Savdo Nuqtalari | SAPAR" /><BranchesPage /></>} />
-                <Route path="/vendors" element={<Navigate to="/admin/contacts?view=suppliers" replace />} />
-                <Route path="/reports/accounts-payable" element={<Navigate to="/admin/accounting/reports/ap-aging" replace />} />
-                <Route path="/accounting/reports/profit-and-loss" element={<Navigate to="/admin/accounting/reports/uz-financial-statements" replace />} />
-                <Route path="/tax-reports" element={<Navigate to="/admin/accounting/reports/tax-summary" replace />} />
+                <Route path="/vendors" element={<Navigate to="/contacts?view=suppliers" replace />} />
+                <Route path="/reports/accounts-payable" element={<Navigate to="/accounting/reports/ap-aging" replace />} />
+                <Route path="/accounting/reports/profit-and-loss" element={<Navigate to="/accounting/reports/uz-financial-statements" replace />} />
+                <Route path="/tax-reports" element={<Navigate to="/accounting/reports/tax-summary" replace />} />
 
                 <Route path="/design-system" element={<><Seo title="Design System" /><DesignSystemPage /></>} />
-                {/* Dashboard */}
-                <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
-                    <Route
-                        index
-                        element={<><Seo title="Bosh panel" /><SaparDashboardPage /></>}
-                    />
-                </Route>
+
+                {/* Root Route: /admin displays User & Client Management Dashboard for Super Admin, or routes clients directly to module */}
+                <Route
+                    index
+                    element={<AdminRootHandler />}
+                />
+                <Route path="/clients" element={<Navigate to="/admin?tab=clients" replace />} />
+                <Route path="/plans" element={<Navigate to="/admin?tab=plans" replace />} />
+                <Route path="/integrations" element={<Navigate to="/admin?tab=integrations" replace />} />
+                <Route path="/audit" element={<Navigate to="/admin?tab=audit" replace />} />
 
                 <Route element={<ProtectedRoute moduleSlug="dashboard" action="view" />}>
                     <Route path="/dashboard" element={<><Seo title="Bosh panel" /><SaparDashboardPage /></>} />
@@ -500,6 +545,12 @@ const AdminRoute = () => {
                 <Route element={<ProtectedRoute moduleSlug="accounting" action="view" />}>
                     {/* All Reports Hub (Bukku Parity) */}
                     <Route path="/accounting/reports" element={<><Seo title="Moliyaviy Hisobotlar Markazi" /><AllReportsHub /></>} />
+                    {/* 1C:Бухгалтерия Complete Migration Hub & Initial Balances */}
+                    <Route path="/accounting/1c-migration" element={<><Seo title="1C dan Koʻchirish Markazi" /><OneCMigrationPage /></>} />
+                    {/* 1C-Style Account Card (Карточка счета) */}
+                    <Route path="/accounting/account-card" element={<><Seo title="Schyot Kartochkasi (21-BHMS)" /><AccountCardPage /></>} />
+                    {/* Month Closing Wizard (Закрытие месяца) */}
+                    <Route path="/accounting/month-closing" element={<><Seo title="Oyni Yopish Ustasi (Закрытие месяца)" /><MonthClosingWizardPage /></>} />
                     {/* Financial Statements (slice F.2 & Uzbekistan 21-son BHMS State Reports) */}
                     <Route path="/accounting/reports/uz-financial-statements" element={<><Seo title="1/2-Shakl Davlat Moliyaviy Hisobotlari" /><UzbekistanFinancialReportsPage /></>} />
                     <Route path="/accounting/reports/uz-financial-reports" element={<><Seo title="1/2-Shakl Davlat Moliyaviy Hisobotlari" /><UzbekistanFinancialReportsPage /></>} />
@@ -552,7 +603,7 @@ const AdminRoute = () => {
                     <Route path="/payments/transactions" element={<><Seo title="Transactions" /><PaymentTransactionList /></>} />
                 </Route>
                 <Route path="/settings/payment-gateways" element={<><Seo title="Payment Gateways" /><PaymentGateways /></>} />
-                <Route path="/settings/subscription-plans" element={<><Seo title="Obuna va Tariflar" /><SubscriptionPlansPage /></>} />
+                <Route path="/saas" element={<><Seo title="SaaS Boshqaruv Markazi" /><SaasClientsPage /></>} />
                 <Route path="/saas/clients" element={<><Seo title="SaaS Mijozlar Boshqaruvi" /><SaasClientsPage /></>} />
                 <Route path="/business-loans" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />
                 <Route path="/financing" element={<><Seo title="Biznes Kredit & Skoring | SAPAR" /><BusinessLoansPage /></>} />

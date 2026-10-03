@@ -12,6 +12,7 @@ import {
   User,
   Clock,
   RefreshCw,
+  ArrowLeft,
   Maximize2,
   Minimize2,
   Volume2,
@@ -86,13 +87,9 @@ export const PosTerminalPage: React.FC = () => {
   const [posViewMode, setPosViewMode] = useState<'touch' | 'table'>('touch');
   const usdRate = 12750;
 
-  // Customers Directory & Selection (Sapar Akt Sverki integration)
+  // Customers Directory & Selection (loads from real API)
   const [customers, setCustomers] = useState<CustomerOption[]>([
     { id: 'retail', name: 'Chakana Xaridor (Oddiy xaridor)', balance: 0, isRetail: true },
-    { id: 'c1', name: 'OOO "RIZOBAY STROY"', phone: '+998 90 123 45 67', balance: -14500000 },
-    { id: 'c2', name: 'Akbarjon Usta (Quruvchi brigada)', phone: '+998 94 449 94 47', balance: -2800000 },
-    { id: 'c3', name: 'Sanjarbek Savdo Uyi', phone: '+998 97 777 88 99', balance: 5400000 },
-    { id: 'c4', name: 'Sherdor Qurilish MCHJ', phone: '+998 91 555 44 33', balance: -45000000 },
   ]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('retail');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
@@ -808,20 +805,30 @@ export const PosTerminalPage: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col font-sans text-slate-900 ${isFullscreen ? 'fixed inset-0 z-50 bg-slate-100 p-3 h-screen' : 'h-[calc(100vh-5rem)] -m-6 p-4 bg-slate-100'
-        }`}
+      className={`flex flex-col font-sans text-slate-900 w-screen h-screen p-2.5 bg-slate-100 overflow-hidden ${
+        isFullscreen ? 'fixed inset-0 z-50' : 'fixed inset-0 z-40'
+      }`}
     >
       {/* 1. TOP POS HEADER BAR */}
-      <div className="bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex flex-wrap items-center justify-between gap-4 mb-2 shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-teal-500 rounded-xl text-slate-950 font-black">
-            <Package className="w-5 h-5" />
+      <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl flex flex-wrap items-center justify-between gap-3 mb-2 shadow-md shrink-0">
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => navigate('/sales')}
+            className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+            title="Kassadan chiqish (Sotuvlar paneliga qaytish)"
+          >
+            <ArrowLeft className="w-4 h-4 text-teal-400" />
+            <span className="hidden sm:inline">Chiqish</span>
+          </button>
+          <div className="p-2 bg-[#028090] rounded-xl text-white font-black shadow-xs">
+            <Package className="w-5 h-5 text-emerald-300" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white leading-tight">SAPAR POS — Kassa Terminali</h1>
-            <p className="text-xs text-teal-300 flex items-center gap-2">
+            <h1 className="text-sm md:text-base font-bold text-white leading-tight">SAPAR POS — Kassa Terminali</h1>
+            <p className="text-[11px] text-teal-300 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Soliq E-Kassa Rejimi (QQS 12%) • Sapar Standard
+              Soliq E-Kassa Rejimi (QQS 12%)
             </p>
           </div>
         </div>

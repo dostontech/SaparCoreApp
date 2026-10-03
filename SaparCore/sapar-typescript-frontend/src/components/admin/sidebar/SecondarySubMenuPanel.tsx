@@ -135,13 +135,15 @@ function resolvePath(pathname: string): string {
 
 const isRouteActive = (itemTo: string, currentPath: string, exact?: boolean): boolean => {
     const resolved = resolvePath(currentPath);
-    if (itemTo === "/admin" || itemTo === "/admin/" || itemTo === "/admin/dashboard") {
-        return resolved === "/admin" || resolved === "/admin/" || resolved === "/admin/dashboard";
+    if (itemTo === "/admin" || itemTo === "/admin/") {
+        return resolved === "/admin" || resolved === "/admin/";
     }
+    const normResolved = resolved.replace(/^\/admin/, "") || "/";
+    const normItem = itemTo.replace(/^\/admin/, "") || "/";
     if (exact) {
-        return resolved === itemTo;
+        return normResolved === normItem;
     }
-    return resolved === itemTo || resolved.startsWith(`${itemTo}/`);
+    return normResolved === normItem || normResolved.startsWith(`${normItem}/`);
 };
 
 function canViewItem(slug: string | undefined, permissions: PermissionSet[], user: any): boolean {

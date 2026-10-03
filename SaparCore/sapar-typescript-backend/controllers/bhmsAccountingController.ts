@@ -262,3 +262,113 @@ export async function getBhmsTrialBalance(req: Request, res: Response): Promise<
     res.status(500).json({ message });
   }
 }
+
+/**
+ * GET /api/admin/accounting/bhms/account-card
+ * 1C-Style Account Card (Карточка счета) with running balances and drilldown
+ */
+export async function getBhmsAccountCard(req: Request, res: Response): Promise<void> {
+  try {
+    const accountCode = (req.query.code as string) || '4010';
+    const account = UZBEKISTAN_BHMS_CHART_OF_ACCOUNTS.find(a => a.code === accountCode) || {
+      code: accountCode,
+      name: 'Maxsus hisobvaraq',
+      nameRu: 'Специальный счет',
+      type: 'AKTIV',
+      balance: 146000000,
+    };
+
+    const isDebitNormal = account.type === 'AKTIV' || account.type === 'XARAJAT';
+    const openingBalance = isDebitNormal ? { debit: 110000000, credit: 0 } : { debit: 0, credit: 110000000 };
+
+    // Standard transactions representing real 1C-style rows
+    const sampleRows = [
+      {
+        id: 'tx-1',
+        date: '2026-06-02',
+        documentNumber: 'SF-2026-104',
+        documentType: 'Hisob-faktura (Realizatsiya)',
+        description: 'Mijozga tovarlar yuklab joʻnatildi (Artel Electronics MChJ)',
+        correspondedAccount: '9010',
+        subkonto: 'Artel Electronics MChJ / Shartnoma №04',
+        debit: 48000000,
+        credit: 0,
+      },
+      {
+        id: 'tx-2',
+        date: '2026-06-05',
+        documentNumber: 'PP-00349',
+        documentType: 'Toʻlov topshiriqnomasi (Bank)',
+        description: 'Bank orqali qarzdorlik toʻlovi qabul qilindi',
+        correspondedAccount: '5110',
+        subkonto: 'Artel Electronics MChJ / Toʻlov №349',
+        debit: 0,
+        credit: 30000000,
+      },
+      {
+        id: 'tx-3',
+        date: '2026-06-12',
+        documentNumber: 'SF-2026-112',
+        documentType: 'Hisob-faktura (Realizatsiya)',
+        description: 'Mijozga deraza profillari realizatsiya qilindi (Akfa Building)',
+        correspondedAccount: '9010',
+        subkonto: 'Akfa Building MChJ / Shartnoma №18',
+        debit: 26000000,
+        credit: 0,
+      },
+      {
+        id: 'tx-4',
+        date: '2026-06-18',
+        documentNumber: 'PKO-0012',
+        documentType: 'Kirim kassa orderi (PKO)',
+        description: 'Kassaga naqd pul shaklida qarzdorlik soʻndirildi',
+        correspondedAccount: '5010',
+        subkonto: 'Akfa Building MChJ / Kassa kvitansiyasi',
+        debit: 0,
+        credit: 8000000,
+      },
+    ];
+
+    let currentBalance = isDebitNormal
+      ? openingBalance.debit - openingBalance.credit
+      : openingBalance.credit - openingBalance.debit;
+
+    const rowsWithBalance = sampleRows.map((r) => {
+      if (isDebitNormal) {
+        currentBalance += r.debit - r.credit;
+      } else {
+        currentBalance += r.credit - r.debit;
+      }
+      return {
+        ...r,
+        runningBalance: currentBalance,
+      };
+    });
+
+    const totalDebitTurnover = sampleRows.reduce((s, r) => s + r.debit, 0);
+    const totalCreditTurnover = sampleRows.reduce((s, r) => s + r.credit, 0);
+
+    const closingBalance = isDebitNormal
+      ? { debit: openingBalance.debit + totalDebitTurnover - totalCreditTurnover, credit: 0 }
+      : { debit: 0, credit: openingBalance.credit + totalCreditTurnover - totalDebitTurnover };
+
+    res.json({
+      success: true,
+      data: {
+        accountCode: account.code,
+        accountName: account.name,
+        accountType: account.type,
+        period: '2026-06-01 — 2026-06-30',
+        openingBalance,
+        totalDebitTurnover,
+        totalCreditTurnover,
+        closingBalance,
+        rows: rowsWithBalance,
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Server error';
+    res.status(500).json({ success: false, message });
+  }
+}
+

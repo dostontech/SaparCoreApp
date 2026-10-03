@@ -75,17 +75,14 @@ lerna-debug.log*
 /tc_inv_*.png
 /test_*.png
 /sale_*.png
-/module_screenshots/
-/module_screenshots_uz/
-/module_audit_screenshots/
-/final-changes-screenshots/
-/final chnages update/
+/docs/screenshots/
+/docs/audits/
+/docs/presentations/
+/assets/
+/scratch/
 /implementation_plan*
 /walkthrough.md
-/module_audit_report.json
-/generateClientPdf.js
 /*.pdf
-/sapar_vs_Sapar_complete_comparison.html
 /qa-skills/
 
 # Internal Development Plans, Agents & Scripts (Keep Local Only)
@@ -126,10 +123,26 @@ lerna-debug.log*
 /dashboard_ui.png
 /pos_terminal.png
 /sapar-logo-512.png
+/sapar-logo.svg
+/sapar-official-logo.svg
 /generate_pptx.py
 /presentation.md
-/render.yaml
 /sapar_vs_ibox_complete_comparison.html
+/capture_showcase.js
+/module_screenshots/
+/retail_store_showcase/
+/FSD/
+/upcoming/
+/SAPAR_1_TO_1.md
+/SAPAR_ACCOUNTING_1C_USE_CASES.md
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.md
+!SaparCore/sapar-typescript-backend/package.json
+!SaparCore/sapar-typescript-frontend/package.json
+**/scratch/
 
 
 # Testing & Subagent Artifacts

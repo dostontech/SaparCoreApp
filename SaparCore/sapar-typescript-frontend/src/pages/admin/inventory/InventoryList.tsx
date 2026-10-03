@@ -4,7 +4,7 @@ import TableRow from "@components/admin/TableRow";
 import Constants from "@constants/api";
 import type { RootState } from "@store/index";
 import axios from "axios";
-import { CirclePlusIcon, HistoryIcon, MinusCircle, PlusCircleIcon, Sparkles } from "lucide-react";
+import { CirclePlusIcon, HistoryIcon, MinusCircle, PlusCircleIcon, Sparkles, Boxes, TrendingUp, AlertTriangle, Layers, ArrowRightLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -52,6 +52,7 @@ const InventoryList: React.FC = () => {
     const [newInventoryModalOpen, setNewInventoryModalOpen] = useState<boolean>(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [filterStatus, setFilterStatus] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
     const [pagination, setPagination] = useState<PaginationData>({ total: 0, page: 1, limit: 10, totalPages: 1 });
     const search = searchParams.get('search') || '';
     const limit = Number(searchParams.get('limit') || 10);
@@ -195,6 +196,21 @@ const InventoryList: React.FC = () => {
     const from = (pagination.page - 1) * pagination.limit + 1;
     const to = Math.min(pagination.page * pagination.limit, pagination.total);
 
+    const totalSkus = pagination.total || inventories.length;
+    const totalUnits = inventories.reduce((sum, i) => sum + Number(i.quantity || 0), 0);
+    const totalCostValue = inventories.reduce((sum, i) => sum + (Number(i.quantity || 0) * Number(i.productDetails?.purchase_price || 0)), 0);
+    const totalRetailValue = inventories.reduce((sum, i) => sum + (Number(i.quantity || 0) * Number(i.productDetails?.selling_price || 0)), 0);
+    const lowStockCount = inventories.filter((i) => Number(i.quantity || 0) > 0 && Number(i.quantity || 0) <= 20).length;
+    const outOfStockCount = inventories.filter((i) => Number(i.quantity || 0) === 0).length;
+
+    const filteredInventories = inventories.filter((inv) => {
+        const qty = Number(inv.quantity || 0);
+        if (filterStatus === 'low_stock') return qty > 0 && qty <= 20;
+        if (filterStatus === 'out_of_stock') return qty <= 0;
+        if (filterStatus === 'in_stock') return qty > 20;
+        return true;
+    });
+
     return (
         <div className="space-y-4">
             <PageHeader title={t('inventory.title', 'Ombor qoldiqlari')}>
@@ -218,6 +234,121 @@ const InventoryList: React.FC = () => {
                     )}
                 </div>
             </PageHeader>
+
+            {/* KPI Summary Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-200/60 flex items-center justify-center text-[#028090] shrink-0">
+                        <Boxes className="w-5 h-5 text-[#028090]" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500">Jami Tovar Turlari</div>
+                        <div className="text-lg font-black text-slate-900 leading-tight">{totalSkus} <span className="text-xs font-normal text-slate-400">ta SKU</span></div>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 shrink-0">
+                        <Layers className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500">Ombor Jami Qoldigʻi</div>
+                        <div className="text-lg font-black text-slate-900 leading-tight">{totalUnits.toLocaleString()} <span className="text-xs font-normal text-slate-400">birlik</span></div>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-cyan-50 border border-cyan-200/60 flex items-center justify-center text-[#028090] shrink-0">
+                        <TrendingUp className="w-5 h-5 text-[#028090]" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500">Ombor Tannarx Qiymati</div>
+                        <div className="text-lg font-black text-slate-900 leading-tight font-mono">{formatProductPrice(totalCostValue, 'UZS')}</div>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500">Kam Qolgan / Tugagan</div>
+                        <div className="text-lg font-black text-slate-900 leading-tight">
+                            {lowStockCount + outOfStockCount} <span className="text-xs font-normal text-slate-400">tovar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filter Tabs & Quick Actions Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                    <button
+                        type="button"
+                        onClick={() => setFilterStatus('all')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            filterStatus === 'all'
+                                ? 'bg-[#028090] text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Barchasi ({inventories.length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFilterStatus('in_stock')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            filterStatus === 'in_stock'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Yetarli zaxira
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFilterStatus('low_stock')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            filterStatus === 'low_stock'
+                                ? 'bg-amber-500 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Kam qolgan ({lowStockCount})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFilterStatus('out_of_stock')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            filterStatus === 'out_of_stock'
+                                ? 'bg-rose-600 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Tugagan ({outOfStockCount})
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/inventory/transfers')}
+                        leftIcon={<ArrowRightLeft size={13} className="text-[#028090]" />}
+                        className="text-xs font-bold border-slate-300"
+                    >
+                        Omborlararo Koʻchirish
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/inventory/audits')}
+                        className="text-xs font-bold border-slate-300"
+                    >
+                        Inventarizatsiya
+                    </Button>
+                </div>
+            </div>
 
             {/* Search Input & PageLength */}
             <div className="flex justify-between items-center">
@@ -254,7 +385,7 @@ const InventoryList: React.FC = () => {
                 ]}
                 colWidths={['w-12', '', 'w-32', 'w-36', 'w-40', 'w-40', 'w-[240px]']}
             >
-                {!isLoading && inventories && inventories.map((inventory, index) => (
+                {!isLoading && filteredInventories && filteredInventories.map((inventory, index) => (
                     <TableRow
                         key={inventory.id}
                         index={(page - 1) * limit + index + 1}
@@ -266,9 +397,18 @@ const InventoryList: React.FC = () => {
                                 email={inventory.productDetails.code ?? ""}
                             />,
                             inventory?.productDetails?.unit_name,
-                            inventory.quantity,
-                            formatProductPrice(inventory.productDetails.selling_price, inventory.productDetails.currencyCode),
-                            formatProductPrice(inventory.productDetails.purchase_price, inventory.productDetails.currencyCode),
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-slate-800 font-mono text-sm">{inventory.quantity}</span>
+                                {Number(inventory.quantity) <= 0 ? (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Tugagan</span>
+                                ) : Number(inventory.quantity) <= 20 ? (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Kam qoldi</span>
+                                ) : (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Yetarli</span>
+                                )}
+                            </div>,
+                            <span className="font-bold text-slate-900 font-mono">{formatProductPrice(inventory.productDetails.selling_price, inventory.productDetails.currencyCode)}</span>,
+                            <span className="text-slate-600 font-mono">{formatProductPrice(inventory.productDetails.purchase_price, inventory.productDetails.currencyCode)}</span>,
                             <div className="flex items-center gap-1.5 whitespace-nowrap min-w-[210px]">
                                 {/* History */}
                                 <span
@@ -315,18 +455,8 @@ const InventoryList: React.FC = () => {
                                         {t('inventory.noItemsFound', 'Omborda tovarlar topilmadi')}
                                     </p>
                                     <p className="text-xs text-gray-500 leading-relaxed text-center">
-                                        Ombor hisobini toʻliq koʻrish uchun tayyor Oʻzbekiston biznes test maʼlumotlarini yuklashingiz mumkin.
+                                        Mahsulot qoʻshish uchun yuqoridagi «Mahsulot qoʻshish» tugmasini bosing.
                                     </p>
-                                    <div className="flex items-center gap-2.5 mt-2">
-                                        <Button
-                                            onClick={handleSeedDemoData}
-                                            disabled={isSeeding}
-                                            leftIcon={<Sparkles size={14} className="text-amber-300" />}
-                                            className="bg-gradient-to-r from-[#028090] to-[#02C39A] hover:opacity-95 text-white shadow text-xs font-semibold"
-                                        >
-                                            {isSeeding ? t('common.loading', 'Yuklanmoqda...') : '⚡ Test maʼlumotlarini yuklash (Rizobay Stroy)'}
-                                        </Button>
-                                    </div>
                                 </div>
                             </td>
                         </tr>

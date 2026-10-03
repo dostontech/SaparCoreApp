@@ -81,14 +81,14 @@ export const CompanySettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'legal' | 'banking' | 'management' | 'branding'>('legal');
 
   // Backend Standard Form Data
-  const [companyName, setCompanyName] = useState('OOO "RIZOBAY STROY"');
-  const [email, setEmail] = useState('info@sapar.uz');
-  const [phone, setPhone] = useState('+998 71 200-11-22');
-  const [address, setAddress] = useState('Toshkent sh., Mirobod t., Nukus koʻchasi 29');
+  const [companyName, setCompanyName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [city, setCity] = useState('Toshkent');
   const [stateName, setStateName] = useState('Toshkent shahri');
-  const [pincode, setPincode] = useState('100015');
-  const [publicBaseUrl, setPublicBaseUrl] = useState('https://sapar.uz');
+  const [pincode, setPincode] = useState('');
+  const [publicBaseUrl, setPublicBaseUrl] = useState('');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -123,6 +123,28 @@ export const CompanySettings: React.FC = () => {
           if (data.pincode) setPincode(data.pincode);
           if (data.publicBaseUrl) setPublicBaseUrl(data.publicBaseUrl);
           if (data.companyLogo) setLogoPreview(data.companyLogo);
+
+          setUzProfile((prev) => ({
+            ...prev,
+            tin: data.stir || prev.tin,
+            pinfl: data.pinfl || prev.pinfl,
+            vatRegCode: data.vatRegCode || prev.vatRegCode,
+            isVatPayer: data.isVatPayer !== undefined && data.isVatPayer !== null ? Boolean(data.isVatPayer) : prev.isVatPayer,
+            oked: data.oked || prev.oked,
+            orgType: data.orgType || prev.orgType,
+            tradeBrand: data.tradeBrand || prev.tradeBrand,
+            bankAccount: data.bankAccount || prev.bankAccount,
+            bankName: data.bankName || prev.bankName,
+            bankMfo: data.bankMfo || prev.bankMfo,
+            currencyAccount: data.currencyAccount || prev.currencyAccount,
+            taxRegime: data.taxRegime || prev.taxRegime,
+            directorName: data.directorName || prev.directorName,
+            accountantName: data.accountantName || prev.accountantName,
+            legalAddress: data.legalAddress || prev.legalAddress,
+            website: data.website || prev.website,
+            stampImageUrl: data.stampImageUrl || prev.stampImageUrl,
+            signatureImageUrl: data.signatureImageUrl || prev.signatureImageUrl,
+          }));
         }
       } catch (err) {
         console.error('Error fetching company settings:', err);
@@ -164,10 +186,10 @@ export const CompanySettings: React.FC = () => {
     setIsSaving(true);
 
     try {
-      // 1. Save Uzbekistan Requisites into localStorage
+      // 1. Cache into localStorage for offline instant preview
       localStorage.setItem('sapar_uz_company_profile', JSON.stringify(uzProfile));
 
-      // 2. Save Standard Fields to Backend
+      // 2. Save Standard & Uzbekistan Requisites to Database Backend
       if (user?.id && token) {
         const formData = new FormData();
         formData.append('companyName', companyName);
@@ -179,8 +201,25 @@ export const CompanySettings: React.FC = () => {
         formData.append('country', 'Uzbekistan');
         formData.append('pincode', pincode);
         formData.append('publicBaseUrl', publicBaseUrl);
-        formData.append('vatNumber', uzProfile.tin); // STIR acts as national tax ID
-        formData.append('taxRegime', uzProfile.taxRegime === 'QQS_12' ? 'VAT_UZ' : 'TURNOVER_UZ');
+        formData.append('vatNumber', uzProfile.tin);
+        formData.append('taxRegime', uzProfile.taxRegime === 'QQS_12' ? 'VAT_GENERIC' : 'NONE');
+
+        // National Requisites
+        formData.append('stir', uzProfile.tin);
+        formData.append('pinfl', uzProfile.pinfl);
+        formData.append('vatRegCode', uzProfile.vatRegCode);
+        formData.append('isVatPayer', String(uzProfile.isVatPayer));
+        formData.append('oked', uzProfile.oked);
+        formData.append('orgType', uzProfile.orgType);
+        formData.append('tradeBrand', uzProfile.tradeBrand);
+        formData.append('bankAccount', uzProfile.bankAccount);
+        formData.append('bankName', uzProfile.bankName);
+        formData.append('bankMfo', uzProfile.bankMfo);
+        formData.append('currencyAccount', uzProfile.currencyAccount || '');
+        formData.append('directorName', uzProfile.directorName);
+        formData.append('accountantName', uzProfile.accountantName);
+        formData.append('legalAddress', uzProfile.legalAddress);
+        formData.append('website', uzProfile.website);
 
         if (logoFile) {
           formData.append('companyLogo', logoFile);

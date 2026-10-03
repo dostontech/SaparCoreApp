@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Check,
   RefreshCw,
+  FileSpreadsheet,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -114,12 +115,36 @@ function generateFallbackDynamics(period: string, interval: string): SalesDynami
 export const SaparDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { format } = useCurrencyFormatter();
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, user } = useSelector((state: RootState) => state.auth);
 
   const [interval, setInterval] = useState<'day' | 'week' | 'month'>('day');
   const [period, setPeriod] = useState<'7d' | '15d' | '30d' | '90d' | '12m' | 'this_year'>('30d');
   const [isLoadingChart, setIsLoadingChart] = useState(false);
   const [chartData, setChartData] = useState<SalesDynamicsData>(() => generateFallbackDynamics('30d', 'day'));
+
+  const [businessModules, setBusinessModules] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('sapar_sidebar_modules');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('sapar_sidebar_modules');
+        if (saved) setBusinessModules(JSON.parse(saved));
+      } catch {}
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('sapar_modules_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('sapar_modules_updated', handleSync);
+    };
+  }, []);
 
   const activeInterval = INTERVAL_OPTIONS.find((o) => o.id === interval) || INTERVAL_OPTIONS[0];
   const activePeriod = PERIOD_OPTIONS.find((o) => o.id === period) || PERIOD_OPTIONS[2];
@@ -241,18 +266,44 @@ export const SaparDashboardPage: React.FC = () => {
         <div>
           <h1 className="text-xl font-black text-[#0B2B33]">Bosh panel</h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            OOO "RIZOBAY STROY" • Savdo, ombor va kassa koʻrsatkichlari
+            {user?.email || 'SAPAR ERP'} • {
+              businessModules.pos !== false
+                ? "Savdo, ombor va kassa ko'rsatkichlari"
+                : businessModules.accounting
+                  ? "Buxgalteriya balansi, provodkalar va moliyaviy ko'rsatkichlar"
+                  : "Boshqaruv va umumiy ko'rsatkichlar"
+            }
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/admin/pos')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#02C39A] hover:bg-[#02A683] text-[#0B2B33] font-bold text-xs shadow-xs transition"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>POS Kassa Ochish</span>
-          </button>
+          {businessModules.pos !== false ? (
+            <button
+              type="button"
+              onClick={() => navigate('/admin/pos')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#02C39A] hover:bg-[#02A683] text-[#0B2B33] font-bold text-xs shadow-xs transition"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>POS Kassa Ochish</span>
+            </button>
+          ) : businessModules.accounting ? (
+            <button
+              type="button"
+              onClick={() => navigate('/admin/accounting/reports/uz-financial-statements')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#028090] hover:bg-[#026B79] text-white font-bold text-xs shadow-xs transition"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>1/2-Shakl Davlat Hisobotlari</span>
+            </button>
+          ) : businessModules.sales ? (
+            <button
+              type="button"
+              onClick={() => navigate('/admin/sales')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#02C39A] hover:bg-[#02A683] text-[#0B2B33] font-bold text-xs shadow-xs transition"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Yangi Hisob-faktura</span>
+            </button>
+          ) : null}
         </div>
       </div>
 

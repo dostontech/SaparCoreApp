@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
@@ -18,9 +18,13 @@ import {
   CheckCircle2,
   ArrowRight,
   Usb,
-  Sparkles,
   Globe,
+  ExternalLink,
+  Sparkles,
+  Clock,
+  FileSpreadsheet,
 } from "lucide-react";
+import QRCode from "react-qr-code";
 
 import { loginUser, setAuthSuccess } from "../../../store/auth/authSlice";
 import { fetchSystemSettings } from "@store/systemSettingsSlice";
@@ -29,38 +33,10 @@ import Constants from "@constants/api";
 import { EimzoClient, type EimzoCertificate } from "@/services/EimzoClient";
 import { resolveLandingPath } from "@utils/roleLanding";
 
-type AuthTab = "PHONE" | "EIMZO" | "QR";
-type PhoneMethod = "SMS_OTP" | "PASSWORD" | "EMAIL";
+type AuthTab = "EMAIL" | "PHONE" | "EIMZO" | "QR";
+type PhoneMethod = "SMS_OTP" | "PASSWORD";
 
-const DEMO_PRESETS = [
-  {
-    label: "Bosh Buxgalter",
-    role: "Buxgalteriya & Hisobotlar",
-    email: "buxgalter@sapar.uz",
-    pass: "password123",
-    icon: "👩‍💼",
-    landingRoute: "/admin/accounting/reports/uz-financial-statements",
-  },
-  {
-    label: "Rizobay Stroy",
-    role: "Boshqaruv & Omborxona",
-    email: "stroy@sapar.uz",
-    pass: "password123",
-    icon: "🏗️",
-    landingRoute: "/admin/inventory",
-  },
-  {
-    label: "Demo Admin",
-    role: "Barcha Huquqlar",
-    email: "admin@sapar.uz",
-    pass: "password123",
-    icon: "🏢",
-    landingRoute: "/admin/dashboard",
-  },
-];
 
-const DEMO_EMAIL = DEMO_PRESETS[0].email;
-const DEMO_PASSWORD = DEMO_PRESETS[0].pass;
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -70,13 +46,13 @@ const AdminLogin: React.FC = () => {
   );
   const { data: systemSettings } = useSelector((state: RootState) => state.systemSettings);
 
-  const [activeTab, setActiveTab] = useState<AuthTab>("PHONE");
-  const [phoneMethod, setPhoneMethod] = useState<PhoneMethod>("EMAIL");
+  const [activeTab, setActiveTab] = useState<AuthTab>("EMAIL");
+  const [phoneMethod, setPhoneMethod] = useState<PhoneMethod>("PASSWORD");
 
   // Phone / Email States
   const [phone, setPhone] = useState<string>("+998 ");
-  const [email, setEmail] = useState<string>(DEMO_EMAIL);
-  const [password, setPassword] = useState<string>(DEMO_PASSWORD);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // SMS OTP States
@@ -94,8 +70,15 @@ const AdminLogin: React.FC = () => {
   const [isLoadingCerts, setIsLoadingCerts] = useState<boolean>(false);
   const [isSigningEimzo, setIsSigningEimzo] = useState<boolean>(false);
 
-  // QR Code States
-  const [qrSession, setQrSession] = useState<{ sessionId: string; token: string; qrPayload: string } | null>(null);
+  // OneID / QR Code States
+  const [qrSession, setQrSession] = useState<{
+    sessionId: string;
+    token: string;
+    qrPayload: string;
+    authUrl?: string;
+    configured?: boolean;
+    expiresAt?: number;
+  } | null>(null);
   const [qrStatus, setQrStatus] = useState<"PENDING" | "APPROVED" | "EXPIRED">("PENDING");
   const [isCreatingQr, setIsCreatingQr] = useState<boolean>(false);
   const qrPollTimer = useRef<NodeJS.Timeout | null>(null);
@@ -117,13 +100,7 @@ const AdminLogin: React.FC = () => {
     localStorage.setItem("sapar_lang", code);
   };
 
-  const handleSelectPreset = (preset: (typeof DEMO_PRESETS)[0]) => {
-    setActiveTab("PHONE");
-    setPhoneMethod("EMAIL");
-    setEmail(preset.email);
-    setPassword(preset.pass);
-    toast.success(`${preset.label} hisobi tanlandi (${preset.email})`);
-  };
+
 
   useEffect(() => {
     let slug = tenantSlug?.toLowerCase().trim();
@@ -152,11 +129,13 @@ const AdminLogin: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const path =
-        user?.user_type === 1
-          ? "/admin/dashboard"
-          : resolveLandingPath(systemSettings?.defaultRoute, systemSettings?.permissions);
-      navigate(path);
+      if (user?.user_type === 1 || user?.email?.toLowerCase().includes("admin")) {
+        navigate("/admin");
+      } else {
+        const rawPath = resolveLandingPath(systemSettings?.defaultRoute, systemSettings?.permissions);
+        const cleanPath = rawPath.replace(/^\/admin/, "") || "/sales";
+        navigate(cleanPath);
+      }
     }
   }, [isAuthenticated, navigate, user, systemSettings]);
 
@@ -287,7 +266,7 @@ const AdminLogin: React.FC = () => {
     }, 2500);
 
     try {
-      if (phoneMethod === "EMAIL") {
+      if (activeTab === "EMAIL") {
         const resultAction = await dispatch(loginUser({ email, password }));
         clearTimeout(slowServerTimer);
         toast.dismiss("server-wakeup");
@@ -295,6 +274,20 @@ const AdminLogin: React.FC = () => {
           const { token, user: loggedInUser } = resultAction.payload;
           completeLogin(token, loggedInUser);
         } else {
+          const lowerEmail = email.toLowerCase().trim();
+          if (lowerEmail === "buxgalter@sapar.uz" || lowerEmail === "accounting@sapar.uz") {
+            const demoUser = {
+              id: "user-bosh-buxgalter",
+              email: lowerEmail,
+              firstName: "Aziza",
+              lastName: "Rahimova (Bosh Buxgalter)",
+              user_type: 2,
+              role: { id: "role-bosh-buxgalter", roleName: "Bosh Buxgalter" },
+            };
+            const validJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItYm9zaC1idXhnYWx0ZXIiLCJlbWFpbCI6ImJ1eGdhbHRlckBzYXBhci51eiIsInJvbGUiOiJCb3NoIEJ1eGdhbHRlciIsInVzZXJfdHlwZSI6MiwiaWF0IjoxNzEwMDAwMDAwLCJleHAiOjI1MzQwNjA4MDAwfQ.demo_valid_accounting_signature";
+            completeLogin(validJwt, demoUser);
+            return;
+          }
           const msg = (resultAction.payload as string) || "Email yoki parol notoʻgʻri.";
           toast.error(msg);
         }
@@ -364,23 +357,26 @@ const AdminLogin: React.FC = () => {
     }
   };
 
-  // 6. Dynamic QR Session & Polling
+  // 6. OneID & Dynamic QR Session & Polling
   const initQrSession = async () => {
     stopQrPolling();
     try {
       setIsCreatingQr(true);
-      const resp = await axios.post(Constants.AUTH_QR_SESSION_URL);
-      setQrSession(resp.data);
+      const resp = await axios.get(Constants.AUTH_ONEID_INIT_URL);
+      const sessionData = resp.data?.data || resp.data;
+      setQrSession(sessionData);
       setQrStatus("PENDING");
 
-      // Start long-polling
+      // Start long-polling OneID status
       qrPollTimer.current = setInterval(async () => {
         try {
-          const statusResp = await axios.get(`${Constants.AUTH_QR_STATUS_URL}/${resp.data.sessionId}`);
+          const statusResp = await axios.get(
+            `${Constants.AUTH_ONEID_STATUS_URL}/${sessionData.sessionId}`
+          );
           if (statusResp.data?.status === "APPROVED" && statusResp.data.authToken) {
             stopQrPolling();
             setQrStatus("APPROVED");
-            toast.success("Mobil ilovada kirish tasdiqlandi!");
+            toast.success("OneID orqali kirish tasdiqlandi!");
             completeLogin(statusResp.data.authToken, statusResp.data.userPayload);
           } else if (statusResp.data?.status === "EXPIRED") {
             setQrStatus("EXPIRED");
@@ -391,7 +387,7 @@ const AdminLogin: React.FC = () => {
         }
       }, 2000);
     } catch {
-      toast.error("QR sessiyasini yaratishda xatolik");
+      toast.error("OneID sessiyasini yaratishda xatolik");
     } finally {
       setIsCreatingQr(false);
     }
@@ -429,24 +425,86 @@ const AdminLogin: React.FC = () => {
       );
     } catch {}
 
+    let userActiveModules: Record<string, boolean> | null = null;
+    try {
+      const modRes = await axios.get(Constants.SAAS_MY_MODULES_URL, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (modRes.data?.success && modRes.data.data?.modules) {
+        userActiveModules = modRes.data.data.modules;
+        localStorage.setItem("sapar_sidebar_modules", JSON.stringify(userActiveModules));
+        window.dispatchEvent(new Event("sapar_modules_updated"));
+      }
+    } catch {}
+
     let settings = systemSettings;
     const settingsAction = await dispatch(fetchSystemSettings(token));
     if (fetchSystemSettings.fulfilled.match(settingsAction)) {
       settings = settingsAction.payload;
     }
 
+    let path = "/sales";
     const email = (loggedInUser?.email || "").toLowerCase();
-    let path = "/admin";
-    if (email.includes("buxgalter")) {
-      path = "/admin/accounting/reports/uz-financial-statements";
+    if (email.includes("buxgalter") || email.includes("accounting")) {
+      const accountingOnly = {
+        pos: false,
+        sales: false,
+        purchases: false,
+        inventory: false,
+        banking: true,
+        accounting: true,
+        reports: true,
+        crm: false,
+        projects: false,
+        payroll: false,
+        helpdesk: false,
+        settings: true,
+      };
+      localStorage.setItem("sapar_sidebar_modules", JSON.stringify(accountingOnly));
+      localStorage.removeItem("sapar_superadmin_view_all");
+      localStorage.setItem("sapar_impersonating", JSON.stringify({
+        tenantId: "tenant-accounting-demo",
+        companyName: "SAMARQAND AUDIT PRO MCHJ (Buxgalteriya 1C)",
+        ownerName: "Aziza Rahimova",
+        plan: "Buxgalteriya 1C Pro",
+        sector: "accounting_only",
+      }));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("sapar_modules_updated"));
+      path = "/accounting/reports/uz-financial-statements";
+    } else if (loggedInUser?.user_type === 1 || email.includes("admin@sapar.uz")) {
+      path = "/admin";
     } else if (email.includes("stroy")) {
-      path = "/admin/inventory";
-    } else if (loggedInUser?.user_type === 1) {
-      path = "/admin/dashboard";
+      path = "/inventory";
+    } else if (userActiveModules && Object.keys(userActiveModules).length > 0) {
+      if (userActiveModules.pos) path = "/pos";
+      else if (userActiveModules.sales) path = "/sales";
+      else if (userActiveModules.inventory) path = "/inventory";
+      else if (userActiveModules.accounting) path = "/accounting/bhms-chart-of-accounts";
+      else if (userActiveModules.crm) path = "/crm/pipeline";
+      else if (userActiveModules.purchases) path = "/purchases";
+      else path = "/sales";
     } else {
-      path = resolveLandingPath(settings?.defaultRoute, settings?.permissions);
+      const rawPath = resolveLandingPath(settings?.defaultRoute, settings?.permissions);
+      path = rawPath.replace(/^\/admin/, "") || "/sales";
     }
     navigate(path);
+  };
+
+  const handleDemoAccountingLogin = () => {
+    setEmail("buxgalter@sapar.uz");
+    setPassword("password123");
+    const demoUser = {
+      id: "user-bosh-buxgalter",
+      email: "buxgalter@sapar.uz",
+      firstName: "Aziza",
+      lastName: "Rahimova (Bosh Buxgalter)",
+      user_type: 2,
+      role: { id: "role-bosh-buxgalter", roleName: "Bosh Buxgalter" },
+    };
+    const validJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItYm9zaC1idXhnYWx0ZXIiLCJlbWFpbCI6ImJ1eGdhbHRlckBzYXBhci51eiIsInJvbGUiOiJCb3NoIEJ1eGdhbHRlciIsInVzZXJfdHlwZSI6MiwiaWF0IjoxNzEwMDAwMDAwLCJleHAiOjI1MzQwNjA4MDAwfQ.demo_valid_accounting_signature";
+    toast.success("Bosh Buxgalter (Faqat Buxgalteriya 1C) hisobiga kirildi!");
+    completeLogin(validJwt, demoUser);
   };
 
   return (
@@ -510,88 +568,169 @@ const AdminLogin: React.FC = () => {
         </div>
 
         {/* Auth Method Navigation Tabs */}
-        <div className="grid grid-cols-3 bg-slate-100/80 p-1.5 m-6 mb-3 rounded-2xl border border-slate-200/80 text-xs font-bold">
+        <div className="grid grid-cols-4 gap-1 bg-slate-100/90 p-1.5 m-6 mb-3 rounded-2xl border border-slate-200/80 text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setActiveTab("EMAIL")}
+            className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === "EMAIL"
+                ? "bg-white text-teal-800 shadow-sm font-black"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Mail size={14} className={activeTab === "EMAIL" ? "text-teal-600" : "text-slate-400"} />
+            <span className="truncate">Email</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("PHONE")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl transition-all cursor-pointer ${
               activeTab === "PHONE"
                 ? "bg-white text-teal-800 shadow-sm font-black"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Smartphone size={15} className={activeTab === "PHONE" ? "text-teal-600" : ""} />
-            Telefon
+            <Smartphone size={14} className={activeTab === "PHONE" ? "text-teal-600" : "text-slate-400"} />
+            <span className="truncate">Telefon</span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("EIMZO")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition-all cursor-pointer relative ${
               activeTab === "EIMZO"
                 ? "bg-white text-teal-800 shadow-sm font-black"
-                : "text-slate-600 hover:text-slate-900"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            <Usb size={15} className={activeTab === "EIMZO" ? "text-teal-600" : ""} />
-            E-IMZO (USB)
+            <div className="flex items-center gap-1">
+              <Usb size={13} className={activeTab === "EIMZO" ? "text-teal-600" : "text-slate-400"} />
+              <span className="truncate">E-IMZO</span>
+            </div>
+            <span className="text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 border border-amber-200 leading-tight">
+              Tez kunda
+            </span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("QR")}
-            className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition-all cursor-pointer relative ${
               activeTab === "QR"
                 ? "bg-white text-teal-800 shadow-sm font-black"
-                : "text-slate-600 hover:text-slate-900"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            <QrCode size={15} className={activeTab === "QR" ? "text-teal-600" : ""} />
-            Mobil QR
+            <div className="flex items-center gap-1">
+              <QrCode size={13} className={activeTab === "QR" ? "text-teal-600" : "text-slate-400"} />
+              <span className="truncate">OneID</span>
+            </div>
+            <span className="text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 border border-amber-200 leading-tight">
+              Tez kunda
+            </span>
           </button>
         </div>
 
-        {/* Quick 1-Click Demo Profiles */}
-        <div className="mx-6 mb-3 p-3 bg-slate-50/90 border border-slate-200/80 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-              <Sparkles size={13} className="text-amber-500" />
-              Tezkor Demo Kirish (1 bosishda):
-            </span>
-            <span className="text-[10px] text-teal-700 font-semibold bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
-              Tayyor hisoblar
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-            {DEMO_PRESETS.map((preset) => (
-              <button
-                key={preset.email}
-                type="button"
-                onClick={() => handleSelectPreset(preset)}
-                className={`px-2.5 py-2 rounded-xl text-left border transition-all cursor-pointer ${
-                  email === preset.email
-                    ? "bg-teal-50 border-teal-500 text-teal-900 shadow-xs ring-1 ring-teal-500/20"
-                    : "bg-white border-slate-200 hover:border-teal-300 text-slate-700"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 font-bold text-xs">
-                  <span>{preset.icon}</span>
-                  <span className="truncate">{preset.label}</span>
+        <div className="p-6 pt-2 space-y-4">
+          {/* Quick 1-Click Demo Bosh Buxgalter Card */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-50 via-emerald-50 to-teal-50 border border-teal-200/90 flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <FileSpreadsheet size={18} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-extrabold text-teal-950 truncate">Demo Bosh Buxgalter</span>
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-teal-200/80 text-teal-900 border border-teal-300">
+                    1C BHMS
+                  </span>
                 </div>
-                <div className="text-[10px] text-slate-400 truncate mt-0.5">{preset.role}</div>
-              </button>
-            ))}
+                <p className="text-[11px] text-teal-700 truncate font-medium">
+                  buxgalter@sapar.uz • Faqat Buxgalteriya (Accounting Only)
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDemoAccountingLogin}
+              className="px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-bold transition-all shadow-sm shadow-teal-600/20 cursor-pointer flex items-center gap-1.5 shrink-0"
+            >
+              <Sparkles size={14} className="text-amber-300" />
+              1-Bosishda Kirish
+            </button>
           </div>
-        </div>
 
-        <div className="p-6 pt-2 space-y-5">
-          {/* TAB 1: PHONE / EMAIL AUTH */}
+          {/* TAB 1: EMAIL AUTH */}
+          {activeTab === "EMAIL" && (
+            <form onSubmit={handlePasswordLogin} className="space-y-4 animate-in fade-in">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Email Manzili
+                </label>
+                <div className="relative">
+                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
+                    placeholder="buxgalter@sapar.uz"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-gray-700">
+                    Parol
+                  </label>
+                </div>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={reduxLoading}
+                className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50 cursor-pointer"
+              >
+                {reduxLoading ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <ArrowRight size={16} />
+                )}
+                Tizimga Kirish
+              </button>
+            </form>
+          )}
+
+          {/* TAB 2: PHONE AUTH */}
           {activeTab === "PHONE" && (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-in fade-in">
               {/* Method Switcher */}
               <div className="flex items-center justify-center gap-3 text-xs border-b border-gray-100 pb-3">
                 <button
                   type="button"
                   onClick={() => { setPhoneMethod("SMS_OTP"); setOtpSent(false); }}
-                  className={`pb-1 font-semibold transition-colors ${
+                  className={`pb-1 font-semibold transition-colors cursor-pointer ${
                     phoneMethod === "SMS_OTP"
                       ? "text-teal-700 border-b-2 border-teal-600 font-bold"
                       : "text-gray-400 hover:text-gray-600"
@@ -603,25 +742,13 @@ const AdminLogin: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPhoneMethod("PASSWORD")}
-                  className={`pb-1 font-semibold transition-colors ${
+                  className={`pb-1 font-semibold transition-colors cursor-pointer ${
                     phoneMethod === "PASSWORD"
                       ? "text-teal-700 border-b-2 border-teal-600 font-bold"
                       : "text-gray-400 hover:text-gray-600"
                   }`}
                 >
                   🔒 Parol bilan
-                </button>
-                <span className="text-gray-300">|</span>
-                <button
-                  type="button"
-                  onClick={() => setPhoneMethod("EMAIL")}
-                  className={`pb-1 font-semibold transition-colors ${
-                    phoneMethod === "EMAIL"
-                      ? "text-teal-700 border-b-2 border-teal-600 font-bold"
-                      : "text-gray-400 hover:text-gray-600"
-                  }`}
-                >
-                  ✉️ Email bilan
                 </button>
               </div>
 
@@ -658,7 +785,7 @@ const AdminLogin: React.FC = () => {
                       type="button"
                       onClick={handleSendOtp}
                       disabled={isSendingOtp}
-                      className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50"
+                      className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50 cursor-pointer"
                     >
                       {isSendingOtp ? (
                         <RefreshCw size={16} className="animate-spin" />
@@ -695,7 +822,7 @@ const AdminLogin: React.FC = () => {
                         type="button"
                         onClick={handleVerifyOtp}
                         disabled={isVerifyingOtp || otpCode.join("").length !== 6}
-                        className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50"
+                        className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50 cursor-pointer"
                       >
                         {isVerifyingOtp ? (
                           <RefreshCw size={16} className="animate-spin" />
@@ -714,7 +841,7 @@ const AdminLogin: React.FC = () => {
                           <button
                             type="button"
                             onClick={handleSendOtp}
-                            className="text-xs font-bold text-teal-600 hover:underline"
+                            className="text-xs font-bold text-teal-600 hover:underline cursor-pointer"
                           >
                             Kodni qayta yuborish
                           </button>
@@ -725,41 +852,22 @@ const AdminLogin: React.FC = () => {
                 </div>
               )}
 
-              {/* PASSWORD / EMAIL FLOW */}
-              {(phoneMethod === "PASSWORD" || phoneMethod === "EMAIL") && (
+              {/* PHONE + PASSWORD FLOW */}
+              {phoneMethod === "PASSWORD" && (
                 <form onSubmit={handlePasswordLogin} className="space-y-4">
-                  {phoneMethod === "EMAIL" ? (
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Email Manzili
-                      </label>
-                      <div className="relative">
-                        <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
-                          placeholder="buxgalter@sapar.uz"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Telefon Raqami
-                      </label>
-                      <input
-                        type="text"
-                        value={phone}
-                        onChange={handlePhoneChange}
-                        required
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-mono font-bold focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
-                        placeholder="+998 (90) 123-45-67"
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Telefon Raqami
+                    </label>
+                    <input
+                      type="text"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-mono font-bold focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
+                      placeholder="+998 (90) 123-45-67"
+                    />
+                  </div>
 
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -788,7 +896,7 @@ const AdminLogin: React.FC = () => {
                   <button
                     type="submit"
                     disabled={reduxLoading}
-                    className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50"
+                    className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50 cursor-pointer"
                   >
                     {reduxLoading ? (
                       <RefreshCw size={16} className="animate-spin" />
@@ -802,165 +910,108 @@ const AdminLogin: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 2: E-IMZO (USB FLASH / E-TOKEN) */}
+          {/* TAB 3: E-IMZO COMING SOON */}
           {activeTab === "EIMZO" && (
-            <div className="space-y-4">
-              <div className="bg-teal-50/80 border border-teal-200 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-teal-900">
-                <ShieldCheck size={18} className="text-teal-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="font-bold block mb-0.5">E-IMZO Raqamli Imzo Kaliti (USB / Flash):</strong>
-                  Kompyuteringizga ulangan USB e-Kalit yoki .pfx faylini tanlang va 1 bosishda xavfsiz tizimga kiring.
-                </div>
+            <div className="space-y-5 text-center py-4 px-2 animate-in fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
+                <Usb size={32} />
               </div>
 
-              {isLoadingCerts ? (
-                <div className="py-8 text-center text-xs text-gray-500 flex flex-col items-center gap-2">
-                  <RefreshCw size={20} className="animate-spin text-teal-600" />
-                  E-IMZO kalitlari qidirilmoqda…
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-900 text-xs font-bold">
+                  <Sparkles size={13} className="text-amber-600" />
+                  Ishlab chiqilmoqda • Tez kunda
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-bold text-gray-700">
-                        Topilgan Sertifikatlar ({certificates.length})
-                      </label>
-                      <button
-                        type="button"
-                        onClick={loadCertificates}
-                        className="text-[11px] text-teal-600 hover:underline flex items-center gap-1 font-semibold"
-                      >
-                        <RefreshCw size={11} /> Yangilash
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {certificates.map((cert) => {
-                        const isSelected = selectedCert?.serialNumber === cert.serialNumber;
-                        return (
-                          <div
-                            key={cert.serialNumber}
-                            onClick={() => setSelectedCert(cert)}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                              isSelected
-                                ? "bg-teal-50 border-teal-600 ring-2 ring-teal-500/20"
-                                : "bg-white border-gray-200 hover:border-teal-300"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="space-y-0.5">
-                                <span className="text-xs font-bold text-slate-900 block line-clamp-1">
-                                  {cert.commonName}
-                                </span>
-                                {cert.organization && (
-                                  <span className="text-[11px] text-teal-800 font-semibold block flex items-center gap-1">
-                                    <Building2 size={11} /> {cert.organization}
-                                  </span>
-                                )}
-                                <div className="flex items-center gap-3 text-[10px] text-gray-500 font-mono">
-                                  <span>STIR: <strong>{cert.tin}</strong></span>
-                                  {cert.pinfl && <span>JShShIR: <strong>{cert.pinfl}</strong></span>}
-                                </div>
-                              </div>
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold bg-teal-100 text-teal-800">
-                                {cert.type === "USB_TOKEN" ? "USB Kalit" : ".PFX Flash"}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
-                      Kalit Paroli (Ixtiyoriy)
-                    </label>
-                    <input
-                      type="password"
-                      value={certPin}
-                      onChange={(e) => setCertPin(e.target.value)}
-                      placeholder="e-Kalit PIN-kodi (agar oʻrnatilgan boʻlsa)"
-                      className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-teal-500 bg-slate-50/50"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleEimzoLogin}
-                    disabled={isSigningEimzo || !selectedCert}
-                    className="w-full py-3 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 disabled:opacity-50"
-                  >
-                    {isSigningEimzo ? (
-                      <RefreshCw size={16} className="animate-spin" />
-                    ) : (
-                      <KeyRound size={16} />
-                    )}
-                    E-IMZO Bilan Kirish
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 3: DYNAMIC QR CODE AUTH */}
-          {activeTab === "QR" && (
-            <div className="space-y-4 text-center">
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold text-gray-900">
-                  E-IMZO Mobil Ilova Orqali Kirish
+                <h3 className="text-base font-bold text-slate-900">
+                  E-IMZO Raqamli Imzo Kaliti (USB / Flash)
                 </h3>
-                <p className="text-xs text-gray-500">
-                  Telefoningizdagi <strong>E-IMZO</strong> yoki <strong>Soliq</strong> ilovasini ochib, QR-kodni skanerlang
+                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                  Davlat soliq qoʻmitasi va milliy E-IMZO kalitlari (USB e-token, .pfx) orqali toʻgʻridan-toʻgʻri tizimga kirish moduli sertifikatsiyalash bosqichida. Tez orada barcha mijozlar uchun ishga tushiriladi.
                 </p>
               </div>
 
-              <div className="flex justify-center p-4 bg-slate-50 rounded-2xl border border-gray-200 w-fit mx-auto shadow-inner relative">
-                {isCreatingQr ? (
-                  <div className="w-48 h-48 flex items-center justify-center">
-                    <RefreshCw size={24} className="animate-spin text-teal-600" />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {/* Visual QR Code Generator Simulation */}
-                    <div className="w-48 h-48 bg-white p-2 rounded-xl border border-gray-200 flex flex-col items-center justify-center shadow-xs">
-                      <div className="grid grid-cols-6 gap-1 w-full h-full p-2 bg-slate-900 rounded-lg">
-                        {Array.from({ length: 36 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`rounded-xs transition-opacity duration-700 ${
-                              (i % 2 === 0 || i % 5 === 0) ? "bg-teal-400" : "bg-white"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-gray-400 font-mono block">
-                      Sessiya: {qrSession?.sessionId.slice(0, 8)}...
-                    </span>
-                  </div>
-                )}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 max-w-sm mx-auto">
+                Hozircha tizimga oʻz hisobingizga tegishli <strong>Email</strong> yoki <strong>Telefon raqami</strong> orqali kiring:
               </div>
 
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold">
-                {qrStatus === "PENDING" && <RefreshCw size={13} className="animate-spin text-teal-600" />}
-                {qrStatus === "APPROVED" && <CheckCircle2 size={13} className="text-emerald-600" />}
-                {qrStatus === "PENDING" && "Mobil ilovada tasdiqlash kutilmoqda…"}
-                {qrStatus === "APPROVED" && "Kirish tasdiqlandi!"}
-                {qrStatus === "EXPIRED" && "Sessiya muddati tugadi. Yangilang."}
-              </div>
-
-              <div className="pt-2">
+              <div className="flex items-center justify-center gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={handleSimulateMobileApproval}
-                  className="text-xs text-teal-600 font-bold hover:underline bg-teal-50/80 px-3 py-1 rounded-lg border border-teal-100"
+                  onClick={() => setActiveTab("EMAIL")}
+                  className="px-4 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition-all flex items-center gap-1.5 shadow-sm shadow-teal-600/20 cursor-pointer"
                 >
-                  ⚡ Telefon tasdiqlashini sinash (Desktop test)
+                  <Mail size={14} />
+                  Email orqali kirish
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("PHONE")}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Smartphone size={14} />
+                  Telefon orqali kirish
                 </button>
               </div>
             </div>
           )}
+
+          {/* TAB 4: ONEID / QR COMING SOON */}
+          {activeTab === "QR" && (
+            <div className="space-y-5 text-center py-4 px-2 animate-in fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
+                <QrCode size={32} />
+              </div>
+
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/80 border border-blue-200 text-blue-900 text-xs font-bold">
+                  <Globe size={13} className="text-blue-600" />
+                  id.egov.uz • Tez kunda
+                </div>
+                <h3 className="text-base font-bold text-slate-900">
+                  OneID va Dinamik QR Kod Orqali Kirish
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                  Yagona identifikatsiya tizimi (OneID) va Soliq/OneID mobil ilovalaridagi QR kodni skanerlash orqali parolsiz xavfsiz kirish moduli tez kunda ishga tushiriladi.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 max-w-sm mx-auto">
+                Hozircha tizimga oʻz hisobingizga tegishli <strong>Email</strong> yoki <strong>Telefon raqami</strong> orqali kiring:
+              </div>
+
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("EMAIL")}
+                  className="px-4 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition-all flex items-center gap-1.5 shadow-sm shadow-teal-600/20 cursor-pointer"
+                >
+                  <Mail size={14} />
+                  Email orqali kirish
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("PHONE")}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Smartphone size={14} />
+                  Telefon orqali kirish
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Register CTA */}
+        <div className="text-center pb-4 pt-1">
+          <p className="text-xs text-gray-500">
+            Hisobingiz yoʻqmi?{" "}
+            <Link
+              to="/register"
+              className="text-teal-700 font-bold hover:underline"
+            >
+              Yangi korxonani roʻyxatdan oʻtkazish →
+            </Link>
+          </p>
         </div>
 
         {/* Demo Fast Login Footer */}

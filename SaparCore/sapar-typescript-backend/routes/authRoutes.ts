@@ -102,12 +102,19 @@ import {
   sendPhoneOtp,
   verifyPhoneOtp,
   loginWithPhonePassword,
+  sendEmailCode,
+  verifyEmailCode,
   getEimzoChallenge,
   verifyEimzoSignature,
   createQrSession,
   getQrStatus,
   approveQrSession,
 } from '../controllers/uzAuthController';
+import { initOneId, oneIdCallback, getOneIdStatus } from '../controllers/oneIdController';
+
+// Email Verification & Activation OTP
+router.post('/email/send-code', otpLimiter, sendEmailCode);
+router.post('/email/verify-code', loginLimiter, verifyEmailCode);
 
 // Phone Auth & SMS OTP
 router.post('/phone/send-otp', otpLimiter, sendPhoneOtp);
@@ -122,6 +129,11 @@ router.post('/eimzo/verify', verifyEimzoSignature);
 router.post('/qr/session', createQrSession);
 router.get('/qr/status/:sessionId', getQrStatus);
 router.post('/qr/approve', approveQrSession);
+
+// One ID Uzbekistan — national SSO OAuth2 (id.egov.uz)
+router.get('/oneid/init', initOneId);
+router.get('/oneid/callback', oneIdCallback);
+router.get('/oneid/status/:sessionId', getOneIdStatus);
 
 /**
  * @swagger

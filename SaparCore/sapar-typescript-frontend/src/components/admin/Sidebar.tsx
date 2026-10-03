@@ -60,16 +60,23 @@ const DEFAULT_MODULE_VISIBILITY: ModuleVisibility = {
 
 export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
     const clean = pathname.toLowerCase();
-    if (clean.startsWith("/admin/design-system")) {
+    if (clean.startsWith("/admin/design-system") || clean.startsWith("/design-system")) {
         return "design_system";
     }
-    if (clean === "/admin" || clean === "/admin/" || clean.startsWith("/admin/business-loans")) {
+    if (clean === "/admin" || clean === "/admin/" || clean === "" || clean === "/" || clean.startsWith("/admin/business-loans") || clean.startsWith("/business-loans")) {
         return "dashboard";
     }
-    if (clean.startsWith("/admin/pos") || clean.startsWith("/admin/dashboard/pos")) {
+    if (clean.startsWith("/pos") || clean.startsWith("/admin/pos") || clean.startsWith("/admin/dashboard/pos")) {
         return "pos";
     }
     if (
+        clean.startsWith("/sales") ||
+        clean.startsWith("/invoices") ||
+        clean.startsWith("/e-documents") ||
+        clean.startsWith("/quotations") ||
+        clean.startsWith("/recurring-invoices") ||
+        clean.startsWith("/credit-notes") ||
+        clean.startsWith("/delivery-challans") ||
         clean.startsWith("/admin/invoices") ||
         clean.startsWith("/admin/e-documents") ||
         clean.startsWith("/admin/quotations") ||
@@ -81,6 +88,12 @@ export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
         return "sales";
     }
     if (
+        clean.startsWith("/expenses") ||
+        clean.startsWith("/purchases") ||
+        clean.startsWith("/purchase-orders") ||
+        clean.startsWith("/debit-notes") ||
+        clean.startsWith("/suppliers") ||
+        clean.startsWith("/supplier-balances") ||
         clean.startsWith("/admin/expenses") ||
         clean.startsWith("/admin/purchases") ||
         clean.startsWith("/admin/purchase-orders") ||
@@ -92,16 +105,26 @@ export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
         return "purchases";
     }
     if (
+        clean.startsWith("/products") ||
+        clean.startsWith("/inventory") ||
+        clean.startsWith("/categories") ||
+        clean.startsWith("/brands") ||
+        clean.startsWith("/units") ||
+        clean.startsWith("/warehouses") ||
         clean.startsWith("/admin/products") ||
         clean.startsWith("/admin/inventory") ||
         clean.startsWith("/admin/categories") ||
         clean.startsWith("/admin/brands") ||
         clean.startsWith("/admin/units") ||
+        clean.startsWith("/admin/warehouses") ||
         clean.startsWith("/admin/dashboard/inventory")
     ) {
         return "inventory";
     }
     if (
+        clean.startsWith("/banking") ||
+        clean.startsWith("/petty-cash") ||
+        clean.startsWith("/my-money") ||
         clean.startsWith("/admin/banking") ||
         clean.startsWith("/admin/petty-cash") ||
         clean.startsWith("/admin/my-money")
@@ -109,18 +132,25 @@ export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
         return "banking";
     }
     if (
+        clean.startsWith("/reports") ||
+        clean.startsWith("/accounting/reports") ||
+        clean.startsWith("/accounting/tax-returns") ||
         clean.startsWith("/admin/accounting/reports") ||
         clean.startsWith("/admin/accounting/tax-returns")
     ) {
         return "reports";
     }
     if (
+        clean.startsWith("/accounting") ||
         clean.startsWith("/admin/accounting") ||
         clean.startsWith("/admin/dashboard/finance")
     ) {
         return "accounting";
     }
     if (
+        clean.startsWith("/crm") ||
+        clean.startsWith("/contacts") ||
+        clean.startsWith("/deals") ||
         clean.startsWith("/admin/crm") ||
         clean.startsWith("/admin/contacts") ||
         clean.startsWith("/admin/dashboard/crm")
@@ -128,6 +158,9 @@ export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
         return "crm";
     }
     if (
+        clean.startsWith("/payroll") ||
+        clean.startsWith("/time-tracking") ||
+        clean.startsWith("/leave") ||
         clean.startsWith("/admin/payroll") ||
         clean.startsWith("/admin/time-tracking") ||
         clean.startsWith("/admin/leave") ||
@@ -136,23 +169,32 @@ export function detectModuleFromPath(pathname: string): PrimaryModuleKey {
         return "payroll";
     }
     if (
+        clean.startsWith("/projects") ||
         clean.startsWith("/admin/projects") ||
         clean.startsWith("/admin/dashboard/projects")
     ) {
         return "projects";
     }
     if (
+        clean.startsWith("/helpdesk") ||
         clean.startsWith("/admin/helpdesk") ||
         clean.startsWith("/admin/dashboard/support")
     ) {
         return "support";
     }
     if (
+        clean.startsWith("/settings") ||
+        clean.startsWith("/users") ||
+        clean.startsWith("/roles") ||
+        clean.startsWith("/activity-log") ||
+        clean.startsWith("/saas") ||
+        clean.startsWith("/branches") ||
         clean.startsWith("/admin/settings") ||
         clean.startsWith("/admin/users") ||
         clean.startsWith("/admin/roles") ||
         clean.startsWith("/admin/activity-log") ||
-        clean.startsWith("/admin/saas")
+        clean.startsWith("/admin/saas") ||
+        clean.startsWith("/admin/branches")
     ) {
         return "settings";
     }
@@ -214,7 +256,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             const saved = localStorage.getItem("sapar_sidebar_modules");
             if (!saved) return DEFAULT_MODULE_VISIBILITY;
             const parsed = JSON.parse(saved);
-            return { ...DEFAULT_MODULE_VISIBILITY, ...parsed };
+            const result: any = {};
+            Object.keys(DEFAULT_MODULE_VISIBILITY).forEach((k) => {
+                result[k] = Boolean(parsed[k]);
+            });
+            return result as ModuleVisibility;
         } catch {
             return DEFAULT_MODULE_VISIBILITY;
         }
@@ -226,10 +272,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             .then((res) => {
                 if (res.data?.success && res.data?.data?.modules) {
                     const serverModules = res.data.data.modules;
-                    setVisibility((prev) => {
-                        const merged = { ...prev, ...serverModules };
-                        localStorage.setItem("sapar_sidebar_modules", JSON.stringify(merged));
-                        return merged;
+                    setVisibility(() => {
+                        const result: any = {};
+                        Object.keys(DEFAULT_MODULE_VISIBILITY).forEach((k) => {
+                            result[k] = Boolean(serverModules[k]);
+                        });
+                        localStorage.setItem("sapar_sidebar_modules", JSON.stringify(result));
+                        return result;
                     });
                 }
             })
@@ -269,16 +318,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
         localStorage.setItem("sapar_sidebar_modules", JSON.stringify(next));
     };
 
+    const isSuperAdmin = user?.user_type === 1 || user?.email?.toLowerCase().includes("admin");
+
     // Construct SubMenu configuration for all 13 primary modules
     const moduleConfigs: Record<PrimaryModuleKey, ModuleSubMenuConfig> = useMemo(() => ({
         dashboard: {
             key: "dashboard",
-            title: t("nav.mainDashboard", "Asosiy ERP Paneli"),
-            badge: "ERP",
+            title: isSuperAdmin ? t("nav.saasClients", "👑 SaaS Mijozlar") : t("nav.mainDashboard", "Asosiy ERP Paneli"),
+            badge: isSuperAdmin ? "SaaS" : "ERP",
             icon: <Home size={16} />,
             quickAction: {
                 title: t("nav.getFinancedAction", "Moliyalashtirish"),
-                to: "/admin/business-loans",
+                to: "/business-loans",
             },
             groups: [
                 {
@@ -292,7 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                         },
                         {
                             title: t("nav.businessFinancing", "Biznesingizni moliyalashtiring"),
-                            to: "/admin/business-loans",
+                            to: "/business-loans",
                             slug: "dashboard",
                         },
                     ],
@@ -307,7 +358,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <ShoppingCart size={16} />,
             quickAction: {
                 title: t("nav.posTerminal", "Kassa Terminali"),
-                to: "/admin/pos",
+                to: "/pos",
             },
             groups: [
                 {
@@ -315,17 +366,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.posTerminal", "Kassa Terminali (Touch)"),
-                            to: "/admin/pos",
+                            to: "/pos",
                             slug: "invoices",
                         },
                         {
                             title: t("nav.posShifts", "Kassa Smenalari & X/Z"),
-                            to: "/admin/pos/shifts",
+                            to: "/pos/shifts",
                             slug: "invoices",
                         },
                         {
                             title: t("nav.posDashboard", "POS Monitoring"),
-                            to: "/admin/dashboard/pos",
+                            to: "/dashboard/pos",
                             slug: "invoices",
                         },
                     ],
@@ -335,13 +386,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.items", "Tovar & Narxlar Roʻyxati"),
-                            to: "/admin/products",
-                            addPath: "/admin/products/new",
+                            to: "/products",
+                            addPath: "/products/new",
                             slug: "product-services",
                         },
                         {
                             title: t("nav.categories", "Tovar Kategoriyalari"),
-                            to: "/admin/categories",
+                            to: "/categories",
                             slug: "product-services",
                         },
                     ],
@@ -351,12 +402,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.attendance", "Kassirlar Davomati"),
-                            to: "/admin/payroll/tabel",
+                            to: "/payroll/tabel",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.companySettings", "Kassa Sozlamalari"),
-                            to: "/admin/settings/company-settings",
+                            to: "/settings/company-settings",
                             slug: "settings",
                         },
                     ],
@@ -371,7 +422,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <Receipt size={16} />,
             quickAction: {
                 title: t("nav.createInvoice", "Yangi Faktura"),
-                to: "/admin/invoices/create-invoice",
+                to: "/invoices/create-invoice",
             },
             groups: [
                 {
@@ -379,48 +430,48 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.invoices", "Hisob-fakturalar"),
-                            to: "/admin/invoices",
-                            addPath: "/admin/invoices/create-invoice",
+                            to: "/invoices",
+                            addPath: "/invoices/create-invoice",
                             slug: "invoices",
                         },
                         {
                             title: t("nav.eDocuments", "E-Faktura (Didox & Soliq)"),
-                            to: "/admin/e-documents",
+                            to: "/e-documents",
                             slug: "invoices",
                             badge: "EDI",
                         },
                         {
                             title: t("nav.quotations", "Tijorat Takliflari (KP)"),
-                            to: "/admin/quotations",
-                            addPath: "/admin/quotations/new",
+                            to: "/quotations",
+                            addPath: "/quotations/new",
                             slug: "quotations",
                         },
                         {
                             title: t("nav.recurringInvoices", "Davriy Fakturalar"),
-                            to: "/admin/recurring-invoices",
+                            to: "/recurring-invoices",
                             slug: "recurring-invoices",
                         },
                         {
                             title: t("nav.creditNotes", "Kredit-Notalar"),
-                            to: "/admin/credit-notes",
-                            addPath: "/admin/credit-notes/new",
+                            to: "/credit-notes",
+                            addPath: "/credit-notes/new",
                             slug: "credit-notes",
                         },
                         {
                             title: t("nav.deliveryChallans", "Yuk Xatlari (TTN)"),
-                            to: "/admin/delivery-challans",
-                            addPath: "/admin/delivery-challans/new",
+                            to: "/delivery-challans",
+                            addPath: "/delivery-challans/new",
                             slug: "delivery-challans",
                         },
                         {
                             title: t("nav.contacts", "Mijozlar & Kontragentlar"),
-                            to: "/admin/contacts",
-                            addPath: "/admin/contacts/new",
+                            to: "/contacts",
+                            addPath: "/contacts/new",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.salesDashboard", "Savdo Hisobotlari & Tahlil"),
-                            to: "/admin/dashboard/sales",
+                            to: "/dashboard/sales",
                             slug: "sales",
                         },
                     ],
@@ -435,7 +486,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <ShoppingBag size={16} />,
             quickAction: {
                 title: t("nav.createExpense", "Yangi Xarid"),
-                to: "/admin/expenses/new",
+                to: "/expenses/new",
             },
             groups: [
                 {
@@ -443,41 +494,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.procurementDashboard", "Xaridlar Boshqaruv Paneli"),
-                            to: "/admin/dashboard/procurement",
+                            to: "/dashboard/procurement",
                             slug: "purchases",
                         },
                         {
                             title: t("nav.expenses", "Xarid Fakturalari & Xarajatlar"),
-                            to: "/admin/expenses",
-                            addPath: "/admin/expenses/new",
+                            to: "/expenses",
+                            addPath: "/expenses/new",
                             slug: "expenses",
                         },
                         {
                             title: t("nav.purchaseOrders", "Xarid Buyurtmalari (PO)"),
-                            to: "/admin/purchase-orders",
-                            addPath: "/admin/purchase-orders/new",
+                            to: "/purchase-orders",
+                            addPath: "/purchase-orders/new",
                             slug: "purchase-orders",
                         },
                         {
                             title: t("nav.debitNotes", "Debet-Notalar"),
-                            to: "/admin/debit-notes",
-                            addPath: "/admin/debit-notes/new",
+                            to: "/debit-notes",
+                            addPath: "/debit-notes/new",
                             slug: "debit-notes",
                         },
                         {
                             title: t("nav.suppliers", "Yetkazib Beruvchilar"),
-                            to: "/admin/suppliers",
-                            addPath: "/admin/suppliers/new",
+                            to: "/suppliers",
+                            addPath: "/suppliers/new",
                             slug: "suppliers",
                         },
                         {
                             title: t("nav.supplierBalances", "Yetkazib Beruvchilar Balansi"),
-                            to: "/admin/supplier-balances",
+                            to: "/supplier-balances",
                             slug: "purchase-list",
                         },
                         {
                             title: t("nav.supplierPayments", "Yetkazib Beruvchilarga Toʻlov"),
-                            to: "/admin/purchases/supplier-payments",
+                            to: "/purchases/supplier-payments",
                             slug: "purchases",
                         },
                     ],
@@ -492,7 +543,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <Package size={16} />,
             quickAction: {
                 title: t("nav.createProduct", "Yangi Tovar"),
-                to: "/admin/products/new",
+                to: "/products/new",
             },
             groups: [
                 {
@@ -500,30 +551,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.inventoryDashboard", "Ombor Boshqaruv Paneli"),
-                            to: "/admin/dashboard/inventory",
+                            to: "/dashboard/inventory",
                             slug: "products",
                         },
                         {
                             title: t("nav.products", "Tovarlar va Xizmatlar"),
-                            to: "/admin/products",
-                            addPath: "/admin/products/new",
+                            to: "/products",
+                            addPath: "/products/new",
                             slug: "product-services",
                         },
                         {
                             title: t("nav.stock", "Ombor Qoldiqlari"),
-                            to: "/admin/inventory",
+                            to: "/inventory",
                             exact: true,
                             slug: "inventory",
                         },
                         {
                             title: t("nav.costLayers", "FIFO Tannarx Qatlamlari"),
-                            to: "/admin/inventory/cost-layers",
+                            to: "/inventory/cost-layers",
                             slug: "inventory",
                         },
                         {
                             title: t("nav.deliveryChallans", "Yetkazib Berish (TTN)"),
-                            to: "/admin/delivery-challans",
-                            addPath: "/admin/delivery-challans/new",
+                            to: "/delivery-challans",
+                            addPath: "/delivery-challans/new",
                             slug: "invoices",
                         },
                     ],
@@ -533,17 +584,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.categories", "Tovar Kategoriyalari"),
-                            to: "/admin/categories",
+                            to: "/categories",
                             slug: "product-services",
                         },
                         {
                             title: t("nav.brands", "Brendlar"),
-                            to: "/admin/brands",
+                            to: "/brands",
                             slug: "product-services",
                         },
                         {
                             title: t("nav.units", "Oʻlchov Birliklari"),
-                            to: "/admin/units",
+                            to: "/units",
                             slug: "product-services",
                         },
                     ],
@@ -558,7 +609,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <LandmarkIcon size={16} />,
             quickAction: {
                 title: t("nav.bankAccounts", "Bank Hisoblari"),
-                to: "/admin/banking",
+                to: "/banking",
             },
             groups: [
                 {
@@ -566,28 +617,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.bankAccounts", "Bank Hisoblari"),
-                            to: "/admin/banking",
+                            to: "/banking",
                             exact: true,
                             slug: "banking",
                         },
                         {
                             title: t("nav.bankTransactions", "Bank Tranzaksiyalari (Vipiska)"),
-                            to: "/admin/banking/transactions",
+                            to: "/banking/transactions",
                             slug: "bank-transactions",
                         },
                         {
                             title: t("nav.bankReconciliation", "Bank Akt Sverka"),
-                            to: "/admin/banking/reconciliation",
+                            to: "/banking/reconciliation",
                             slug: "bank-transactions",
                         },
                         {
                             title: t("nav.pettyCash", "Kassa (Petty Cash / Naqd)"),
-                            to: "/admin/petty-cash",
+                            to: "/petty-cash",
                             slug: "petty-cash",
                         },
                         {
                             title: t("nav.myMoney", "Pul Oqimi (Cash Flow)"),
-                            to: "/admin/my-money",
+                            to: "/my-money",
                             slug: "my-money",
                         },
                     ],
@@ -602,7 +653,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <BookOpen size={16} />,
             quickAction: {
                 title: t("nav.createJournal", "Yangi Provodka"),
-                to: "/admin/accounting/journal-entries/create",
+                to: "/accounting/journal-entries/create",
             },
             groups: [
                 {
@@ -610,39 +661,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.bhmsChartOfAccounts", "21-son BHMS Standarti"),
-                            to: "/admin/accounting/bhms-chart-of-accounts",
+                            to: "/accounting/bhms-chart-of-accounts",
                             slug: "chart-of-accounts",
                         },
                         {
                             title: t("nav.chartOfAccounts", "Hisoblar Rejasi (COA)"),
-                            to: "/admin/accounting/chart-of-accounts",
+                            to: "/accounting/chart-of-accounts",
                             slug: "chart-of-accounts",
                         },
                         {
                             title: t("nav.journalEntries", "Bosh Kitob & Provodkalar"),
-                            to: "/admin/accounting/journal-entries",
-                            addPath: "/admin/accounting/journal-entries/new",
+                            to: "/accounting/journal-entries",
+                            addPath: "/accounting/journal-entries/new",
                             slug: "journal-entries",
                         },
                         {
                             title: t("nav.contras", "Oʻzaro Hisob-kitob (Contras)"),
-                            to: "/admin/accounting/contras",
-                            addPath: "/admin/accounting/contras/new",
+                            to: "/accounting/contras",
+                            addPath: "/accounting/contras/new",
                             slug: "journal-entries",
                         },
                         {
                             title: t("nav.fixedAssets", "Asosiy Vositalar va Eskirish"),
-                            to: "/admin/accounting/fixed-assets",
+                            to: "/accounting/fixed-assets",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.budgets", "Byudjetlar"),
-                            to: "/admin/accounting/budgets",
+                            to: "/accounting/budgets",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.costCenters", "Xarajat Markazlari"),
-                            to: "/admin/accounting/cost-centers",
+                            to: "/accounting/cost-centers",
                             slug: "accounting",
                         },
                     ],
@@ -661,63 +712,63 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.allFinancialReports", "Barcha Hisobotlar (Hub)"),
-                            to: "/admin/accounting/reports",
+                            to: "/accounting/reports",
                             exact: true,
                             slug: "accounting",
                         },
                         {
                             title: t("nav.balanceSheet", "Buxgalteriya Balansi (1-shakl)"),
-                            to: "/admin/accounting/reports/balance-sheet",
+                            to: "/accounting/reports/balance-sheet",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.profitLoss", "Moliyaviy Natijalar (2-shakl)"),
-                            to: "/admin/accounting/reports/profit-loss",
+                            to: "/accounting/reports/profit-loss",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.uzFinancialReports", "1/2-Shakl Davlat Hisobotlari"),
-                            to: "/admin/accounting/reports/uz-financial-statements",
+                            to: "/accounting/reports/uz-financial-statements",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.trialBalance", "Aylanma Vedomost (Oborotka)"),
-                            to: "/admin/accounting/reports/trial-balance",
+                            to: "/accounting/reports/trial-balance",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.generalLedger", "Bosh Kitob"),
-                            to: "/admin/accounting/reports/general-ledger",
+                            to: "/accounting/reports/general-ledger",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.soliqQqs", "Soliq QQS 12% Deklaratsiyasi"),
-                            to: "/admin/accounting/reports/soliq-qqs",
+                            to: "/accounting/reports/soliq-qqs",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.soliqJshods", "Soliq JShODS & Ijtimoiy Soliq"),
-                            to: "/admin/accounting/reports/soliq-jshods",
+                            to: "/accounting/reports/soliq-jshods",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.soliqAylanma", "Soliq Aylanma Soligʻi 4%"),
-                            to: "/admin/accounting/reports/soliq-aylanma",
+                            to: "/accounting/reports/soliq-aylanma",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.arAging", "Debitorlik Qarzdorlik Tahlili"),
-                            to: "/admin/accounting/reports/ar-aging",
+                            to: "/accounting/reports/ar-aging",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.apAging", "Kreditorlik Qarzdorlik Tahlili"),
-                            to: "/admin/accounting/reports/ap-aging",
+                            to: "/accounting/reports/ap-aging",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.eDocuments", "E-Hujjatlar & Akt Sverki"),
-                            to: "/admin/e-documents",
+                            to: "/e-documents",
                             slug: "invoices",
                         },
                     ],
@@ -732,7 +783,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <Target size={16} />,
             quickAction: {
                 title: t("nav.createContact", "Yangi Kontakt"),
-                to: "/admin/contacts/new",
+                to: "/contacts/new",
             },
             groups: [
                 {
@@ -740,24 +791,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.crmDashboard", "CRM Boshqaruv Paneli"),
-                            to: "/admin/dashboard/crm",
+                            to: "/dashboard/crm",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.crmPipeline", "Bitimlar Quvuri (Kanban)"),
-                            to: "/admin/crm/pipeline",
+                            to: "/crm/pipeline",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.contacts", "Mijozlar & Kontragentlar"),
-                            to: "/admin/contacts",
-                            addPath: "/admin/contacts/new",
+                            to: "/contacts",
+                            addPath: "/contacts/new",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.quotations", "Tijorat Takliflari (KP)"),
-                            to: "/admin/quotations",
-                            addPath: "/admin/quotations/new",
+                            to: "/quotations",
+                            addPath: "/quotations/new",
                             slug: "quotations",
                         },
                     ],
@@ -772,7 +823,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             icon: <Users size={16} />,
             quickAction: {
                 title: t("nav.createEmployee", "Yangi Xodim"),
-                to: "/admin/payroll/employees/new",
+                to: "/payroll/employees/new",
             },
             groups: [
                 {
@@ -780,43 +831,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.hrmDashboard", "HRM Boshqaruv Paneli"),
-                            to: "/admin/dashboard/hrm",
+                            to: "/dashboard/hrm",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.employees", "Xodimlar Roʻyxati"),
-                            to: "/admin/payroll/employees",
-                            addPath: "/admin/payroll/employees/new",
+                            to: "/payroll/employees",
+                            addPath: "/payroll/employees/new",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.payrollProfiles", "Xodimlar & Maosh Profillari"),
-                            to: "/admin/payroll/profiles",
+                            to: "/payroll/profiles",
                             slug: "payroll",
                         },
                         {
                             title: t("nav.payRuns", "Oylik Hisob-kitob (Pay Runs)"),
-                            to: "/admin/payroll/runs",
+                            to: "/payroll/runs",
                             slug: "payroll",
                         },
                         {
                             title: t("nav.attendanceTabel", "Ish Vaqti Hisobi (Tabel)"),
-                            to: "/admin/payroll/tabel",
+                            to: "/payroll/tabel",
                             slug: "payroll",
                         },
                         {
                             title: t("nav.timeTracking", "Vaqt Hisobi (Timesheet)"),
-                            to: "/admin/time-tracking/my-timesheet",
+                            to: "/time-tracking/my-timesheet",
                             slug: "time-tracking",
                         },
                         {
                             title: t("nav.leaves", "Taʼtillar & Ruxsatnomalar"),
-                            to: "/admin/leave/my-leave",
+                            to: "/leave/my-leave",
                             slug: "time-tracking",
                         },
                         {
                             title: t("nav.roles", "Rollar & Ruxsatlar"),
-                            to: "/admin/roles",
+                            to: "/roles",
                             slug: "manage-users",
                         },
                     ],
@@ -835,17 +886,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.projectsDashboard", "Loyihalar Boshqaruv Paneli"),
-                            to: "/admin/dashboard/projects",
+                            to: "/dashboard/projects",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.projects", "Loyihalar Doskasi (Kanban)"),
-                            to: "/admin/accounting/projects",
+                            to: "/accounting/projects",
                             slug: "accounting",
                         },
                         {
                             title: t("nav.timesheet", "Vaqt Hisobi (Timesheet)"),
-                            to: "/admin/payroll/tabel",
+                            to: "/payroll/tabel",
                             slug: "manage-users",
                         },
                     ],
@@ -864,17 +915,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.supportDashboard", "Yordam Boshqaruv Paneli"),
-                            to: "/admin/dashboard/support",
+                            to: "/dashboard/support",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.helpdesk", "Murojaatlar & Tiketlar"),
-                            to: "/admin/helpdesk",
+                            to: "/helpdesk",
                             slug: "contacts",
                         },
                         {
                             title: t("nav.activityLog", "Audit Jurnali"),
-                            to: "/admin/activity-log",
+                            to: "/activity-log",
                             slug: "manage-users",
                         },
                     ],
@@ -893,22 +944,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.saasClients", "👑 SaaS Mijozlar (Tenants)"),
-                            to: "/admin/saas/clients",
+                            to: "/saas/clients",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.users", "Foydalanuvchilar"),
-                            to: "/admin/users",
+                            to: "/users",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.roles", "Rollar va Ruxsatlar"),
-                            to: "/admin/roles",
+                            to: "/roles",
                             slug: "manage-users",
                         },
                         {
                             title: t("nav.activityLog", "Audit Jurnali"),
-                            to: "/admin/activity-log",
+                            to: "/activity-log",
                             slug: "activity-log",
                         },
                     ],
@@ -918,37 +969,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                     items: [
                         {
                             title: t("nav.ediSettings", "E-IMZO & E-Faktura sozlamalari"),
-                            to: "/admin/settings/edi-settings",
+                            to: "/settings/edi-settings",
                             slug: "settings",
                         },
                         {
                             title: t("nav.paymentGateways", "Toʻlov tizimlari"),
-                            to: "/admin/settings/uz-gateways",
+                            to: "/settings/uz-gateways",
                             slug: "settings",
                         },
                         {
                             title: t("nav.subscriptionPlans", "Obuna va Tariflar"),
-                            to: "/admin/settings/subscription-plans",
+                            to: "/settings/subscription-plans",
                             slug: "settings",
                         },
                         {
                             title: t("nav.companySettings", "Korxona rekvizitlari"),
-                            to: "/admin/settings/company-settings",
+                            to: "/settings/company-settings",
                             slug: "settings",
                         },
                         {
                             title: t("nav.localization", "Valyuta va Lokalizatsiya"),
-                            to: "/admin/settings/localization",
+                            to: "/settings/localization",
                             slug: "settings",
                         },
                         {
                             title: t("nav.banking", "Bank hisoblari"),
-                            to: "/admin/settings/bank-accounts",
+                            to: "/settings/bank-accounts",
                             slug: "settings",
                         },
                         {
                             title: t("nav.translations", "Tarjimalar va Matnlar"),
-                            to: "/admin/settings/translations",
+                            to: "/settings/translations",
                             slug: "settings",
                         },
                     ],

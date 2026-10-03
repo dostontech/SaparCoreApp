@@ -3,12 +3,13 @@ import { COUNTRY_PACKS, getPack, COUNTRY_CODES } from './index';
 import { LEDGER_ROLES } from '../roles';
 
 describe('country packs', () => {
-  it('exposes all six jurisdictions', () => {
-    expect([...COUNTRY_CODES].sort()).toEqual(['AU', 'EU', 'GB', 'IN', 'NZ', 'US']);
+  it('exposes all seven jurisdictions including Uzbekistan', () => {
+    expect([...COUNTRY_CODES].sort()).toEqual(['AU', 'EU', 'GB', 'IN', 'NZ', 'US', 'UZ']);
   });
 
   it('each pack maps every role and uses the right currency + fiscal start', () => {
     const expected: Record<string, { ccy: string; fy: number }> = {
+      UZ: { ccy: 'UZS', fy: 1 },
       IN: { ccy: 'INR', fy: 4 }, GB: { ccy: 'GBP', fy: 4 }, EU: { ccy: 'EUR', fy: 1 },
       US: { ccy: 'USD', fy: 1 }, AU: { ccy: 'AUD', fy: 7 }, NZ: { ccy: 'NZD', fy: 4 },
     };

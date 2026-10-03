@@ -75,7 +75,7 @@ function buildBaseUrl(req: Request): string {
   return `${req.protocol}://${req.get('host')}`;
 }
 
-const IMAGE_FIELDS = ['siteLogo', 'favicon', 'companyLogo', 'companyBanner'] as const;
+const IMAGE_FIELDS = ['siteLogo', 'favicon', 'companyLogo', 'companyBanner', 'stampImageUrl', 'signatureImageUrl'] as const;
 type ImageField = (typeof IMAGE_FIELDS)[number];
 
 interface CompanySettingsResponse extends Omit<CompanySettings, never> {
@@ -471,6 +471,29 @@ export async function updateCompanySettings(req: Request, res: Response): Promis
       'itemPickerShowRate',
       'itemPickerShowStock',
       'itemPickerShowImage',
+      // Uzbekistan National Requisites & Corporate Profile
+      'stir',
+      'pinfl',
+      'vatRegCode',
+      'isVatPayer',
+      'oked',
+      'orgType',
+      'tradeBrand',
+      'bankAccount',
+      'bankName',
+      'bankMfo',
+      'currencyAccount',
+      'directorName',
+      'accountantName',
+      'legalAddress',
+      'website',
+      'stampImageUrl',
+      'signatureImageUrl',
+      'customModules',
+      // Uzbekistan E-Faktura (Didox / Factura.uz / Soliq) & E-IMZO Config
+      'ediProvider',
+      'ediApiKey',
+      'autoSyncInbox',
     ]);
     for (const key of Object.keys(updates)) {
       if (!ALLOWED_FIELDS.has(key)) {
@@ -505,6 +528,21 @@ export async function updateCompanySettings(req: Request, res: Response): Promis
     if ('itemPickerShowImage' in updates) {
       const v = updates.itemPickerShowImage;
       updates.itemPickerShowImage = v === true || v === 'true' || v === '1' || v === 1;
+    }
+    if ('isVatPayer' in updates) {
+      const v = updates.isVatPayer;
+      updates.isVatPayer = v === true || v === 'true' || v === '1' || v === 1;
+    }
+    if ('autoSyncInbox' in updates) {
+      const v = updates.autoSyncInbox;
+      updates.autoSyncInbox = v === true || v === 'true' || v === '1' || v === 1;
+    }
+    if ('customModules' in updates && typeof updates.customModules === 'string') {
+      try {
+        updates.customModules = JSON.parse(updates.customModules as string);
+      } catch {
+        // keep as is or ignore
+      }
     }
 
     // Validate tax identifier formats (after whitelist, before persist).

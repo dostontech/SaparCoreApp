@@ -1051,6 +1051,23 @@ router.get('/accounting/bhms/chart-of-accounts', protect, requirePermission('acc
 router.get('/accounting/bhms/form1-balance-sheet', protect, requirePermission('accounting-reports', 'view'), bhmsAccountingController.getBhmsForm1BalanceSheet);
 router.get('/accounting/bhms/form2-profit-loss', protect, requirePermission('accounting-reports', 'view'), bhmsAccountingController.getBhmsForm2ProfitLoss);
 router.get('/accounting/bhms/oborotka-trial-balance', protect, requirePermission('accounting-reports', 'view'), bhmsAccountingController.getBhmsTrialBalance);
+router.get('/accounting/bhms/account-card', protect, requirePermission('accounting-reports', 'view'), bhmsAccountingController.getBhmsAccountCard);
+
+// 🚚 1C:Enterprise (1C:Бухгалтерия для Узбекистана) Complete Migration Hub
+const oneCMigrationController = require('../controllers/oneCMigrationController');
+router.get('/accounting/1c-migration/status', protect, requirePermission('accounting', 'view'), oneCMigrationController.getMigrationStatus);
+router.post('/accounting/1c-migration/import-osv', protect, requirePermission('accounting', 'edit'), oneCMigrationController.importOsvBalances);
+router.post('/accounting/1c-migration/import-counterparties', protect, requirePermission('accounting', 'edit'), oneCMigrationController.importCounterparties);
+router.post('/accounting/1c-migration/import-inventory', protect, requirePermission('accounting', 'edit'), oneCMigrationController.importInventory);
+router.post('/accounting/1c-migration/import-fixed-assets', protect, requirePermission('accounting', 'edit'), oneCMigrationController.importFixedAssets);
+router.post('/accounting/1c-migration/commit', protect, requirePermission('accounting', 'edit'), oneCMigrationController.commitMigration);
+
+// 🔒 Month Closing Wizard (Закрытие месяца) — 21-BHMS
+const monthClosingController = require('../controllers/monthClosingController');
+router.get('/accounting/month-closing/status', protect, requirePermission('accounting', 'view'), monthClosingController.getMonthClosingStatus);
+router.post('/accounting/month-closing/execute', protect, requirePermission('accounting', 'edit'), monthClosingController.executeMonthClosing);
+router.post('/accounting/month-closing/toggle-lock', protect, requirePermission('accounting', 'edit'), monthClosingController.togglePeriodLock);
+
 
 // Time Tracking — Phase 1 (Task 4): project members + project billing settings.
 // Sub-router (TS) mounted here so its routes live under /api/admin alongside the
@@ -1082,6 +1099,7 @@ router.delete('/saas/clients/:id', protect, requirePermission('users', 'delete')
 router.post('/saas/clients/:id/impersonate', protect, requirePermission('users', 'edit'), saasClientController.impersonateSaasClient);
 router.put('/saas/clients/:id/modules', protect, requirePermission('users', 'edit'), saasClientController.updateSaasClientModules);
 router.get('/saas/my-modules', protect, /* self */ saasClientController.getMyModules);
+router.post('/saas/onboarding/complete', protect, saasClientController.completeOnboarding);
 
 // Employee Tabel Attendance routes & aliases
 router.get('/tabel/attendance', protect, requirePermission('employees', 'view'), tabelController.getTabelMatrix);

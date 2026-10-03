@@ -35,6 +35,30 @@ const REPORT_CATEGORIES: ReportCategory[] = [
         color: "teal",
         reports: [
             {
+                title: "1C dan Koʻchirish Markazi",
+                titleUz: "1C:Бухгалтерия qoldiqlarini koʻchirish",
+                description: "1C OSV, kontragentlar saldosi, tovarlar va asosiy vositalar qoldiqlarini 0000 schyot orqali kiritish.",
+                href: "/admin/accounting/1c-migration",
+                isUzNational: true,
+                badge: "1C UZ",
+            },
+            {
+                title: "Schyot Kartochkasi (Карточка счета)",
+                titleUz: "Schyot kartochkasi va uzluksiz qoldiq",
+                description: "21-BHMS schyotlari boʻyicha barcha operatsiyalar, korrespondensiyalar va batafsil tahlil (drill-down).",
+                href: "/admin/accounting/account-card",
+                isUzNational: true,
+                badge: "1C UZ",
+            },
+            {
+                title: "Oyni Yopish Ustasi (Закрытие месяца)",
+                titleUz: "Oyni yopish va 9000-schyotlar",
+                description: "Amortizatsiya, kurs farqlari, tannarx va davr xarajatlarini 9910 ga yopish hamda davrni qulflash.",
+                href: "/admin/accounting/month-closing",
+                isUzNational: true,
+                badge: "1C UZ",
+            },
+            {
                 title: "1-shakl Buxgalteriya Balansi",
                 titleUz: "Buxgalteriya balansi — 1-shakl",
                 description: "Korxonaning maʼlum sanadagi aktivlari, majburiyatlari va xususiy kapitali holati.",

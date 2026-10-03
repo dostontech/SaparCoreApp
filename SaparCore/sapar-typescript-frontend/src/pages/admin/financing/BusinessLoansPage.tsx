@@ -146,7 +146,8 @@ interface LoanApplication {
 export default function BusinessLoansPage() {
   const { user } = useSelector((state: RootState) => state.auth);
   const systemSettings = useSelector((state: RootState) => state.systemSettings);
-  const companyName = systemSettings?.company?.companyName || user?.firstName || 'OOO "RIZOBAY STROY"';
+  const companyName = systemSettings?.company?.companyName || user?.firstName || '';
+
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<'portal' | 'scoring' | 'calculator' | 'history'>('portal');

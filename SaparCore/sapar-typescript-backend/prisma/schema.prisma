@@ -1892,6 +1892,31 @@ model CompanySettings {
   abn         String? // Australia Business Number
   nzGstNumber String? // New Zealand GST registration number
 
+  // Uzbekistan National Requisites & Corporate Profile
+  stir              String?  // STIR / ИНН (9 digits)
+  pinfl             String?  // PINFL / ПИНФЛ (14 digits)
+  vatRegCode        String?  // QQS roʻyxat raqami
+  isVatPayer        Boolean  @default(true)
+  oked              String?  // OKED / IFUT (5 digits)
+  orgType           String?  @default("MChJ")
+  tradeBrand        String?  // Brend nomi / Savdo belgisi
+  bankAccount       String?  // 20 xonali hisob-kitob schyoti
+  bankName          String?  // Bank nomi
+  bankMfo           String?  // Bank MFO kodi (5 digits)
+  currencyAccount   String?  // Valyuta hisob-raqami
+  directorName      String?  // Rahbar (Direktor) F.I.O.
+  accountantName    String?  // Bosh buxgalter F.I.O.
+  legalAddress      String?  // Yuridik manzil
+  website           String?  // Rasmiy sayt
+  stampImageUrl     String?  // Dumaloq muhr (pechat)
+  signatureImageUrl String?  // Rahbar faksimile imzosi
+  customModules     Json?    // Per-tenant tailored module configuration
+
+  // Uzbekistan E-Faktura (Didox / Factura.uz / Soliq) & E-IMZO Config
+  ediProvider       String?  @default("DIDOX")
+  ediApiKey         String?
+  autoSyncInbox     Boolean  @default(true)
+
   reminders Reminder[] @relation("CompanySettingsReminders")
 }
 

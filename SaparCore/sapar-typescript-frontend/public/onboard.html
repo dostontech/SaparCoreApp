@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPAR ERP — Yangi Korxona Ulash So'rovnomasi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #028090;
+      --primary-hover: #026875;
+      --accent: #02C39A;
+      --dark: #0B2B33;
+      --bg: #F4FBF9;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --text: #1E293B;
+      --muted: #64748B;
+      --success: #10B981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; align-items: center; }
+    .container { max-width: 640px; width: 100%; background: var(--card-bg); border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(2, 128, 144, 0.12); padding: 36px 32px; border: 1px solid #E6F4F1; }
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: #E0F7F4; color: var(--primary); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    h1 { font-size: 24px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+    p.subtitle { font-size: 14px; color: var(--muted); line-height: 1.5; }
+    .section-title { font-size: 15px; font-weight: 700; color: var(--dark); margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    label span.req { color: #EF4444; }
+    input[type="text"], input[type="email"], input[type="tel"], select {
+      width: 100%; height: 46px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 14px; color: var(--text); background: #FAFAFA; transition: all 0.2s ease;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); background: #FFF; box-shadow: 0 0 0 3px rgba(2, 128, 144, 0.15); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .grid-2 { grid-template-columns: 1fr; } }
+    .stir-box { position: relative; }
+    .stir-badge { display: none; margin-top: 8px; padding: 10px 12px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; font-size: 12px; color: #065F46; }
+    .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .checkbox-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
+    .checkbox-card:hover { border-color: var(--primary); background: #F0FAF8; }
+    .checkbox-card input { width: 16px; height: 16px; accent-color: var(--primary); }
+    .checkbox-card span { font-size: 13px; font-weight: 600; color: var(--dark); }
+    .btn-submit { width: 100%; height: 50px; background: linear-gradient(135deg, var(--primary) 0%, #02A499 100%); color: #FFF; font-size: 15px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; margin-top: 24px; box-shadow: 0 10px 20px -5px rgba(2, 128, 144, 0.35); }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -5px rgba(2, 128, 144, 0.45); }
+    .footer-note { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
+    .success-screen { display: none; text-align: center; padding: 40px 10px; }
+    .success-icon { width: 64px; height: 64px; background: #ECFDF5; color: #10B981; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="formContainer">
+      <div class="header">
+        <div class="badge">🇺🇿 SAPAR ERP Onboarding</div>
+        <h1>Yangi Korxona Ulash So'rovi</h1>
+        <p class="subtitle">Tizimda korxonangiz uchun alohida bulutli baza ochish uchun ma'lumotlarni kiriting. 1 daqiqa vaqt oladi.</p>
+      </div>
+
+      <!-- Form sends directly via FormSubmit.co to dvekk1i@gmail.com -->
+      <form id="onboardingForm" action="https://formsubmit.co/dvekk1i@gmail.com" method="POST">
+        <!-- Anti-spam & redirect settings -->
+        <input type="hidden" name="_subject" value="🚀 Yangi SAPAR ERP Mijoz Ulash So'rovi!">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+
+        <div class="section-title">🏢 1. Korxona Rekvizitlari</div>
+
+        <div class="form-group stir-box">
+          <label>Korxona STIR (INN) raqami <span class="req">*</span></label>
+          <input type="text" id="stir" name="STIR_INN" maxlength="9" placeholder="Masalan: 301234567" required oninput="handleStirChange(this.value)">
+          <div id="stirBadge" class="stir-badge">
+            ✅ <b>Davlat Soliq reestri:</b> <span id="companyDetected">Kompaniya nomi aniqlandi</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Korxona nomi (MCHJ / XK / YaTT) <span class="req">*</span></label>
+          <input type="text" id="companyName" name="Korxona_Nomi" placeholder="«BEST TRADE EXPORT» MCHJ" required>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Faoliyat yo'nalishi (Sektor) <span class="req">*</span></label>
+            <select name="Faoliyat_Sektori" required>
+              <option value="Ulgurji savdo va distribyutsiya">Ulgurji savdo (Optom / Distribyutsiya)</option>
+              <option value="Chakana savdo (Retail / Do'konlar)">Chakana savdo (Do'kon / Supermarket)</option>
+              <option value="Ishlab chiqarish (Zavod / Fabrika)">Ishlab chiqarish</option>
+              <option value="Xizmat ko'rsatish va Servis">Xizmat ko'rsatish / Servis</option>
+              <option value="Qurilish va ta'mirlash">Qurilish va ta'mirlash</option>
+              <option value="Umumiy ovqatlanish (Restoran / Kafe)">Umumiy ovqatlanish (Restoran / Kafe)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Viloyat / Shahar</label>
+            <input type="text" id="city" name="Viloyat_Shahar" placeholder="Toshkent shahri">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Bank MFO (5 ta raqam)</label>
+            <input type="text" id="mfo" name="Bank_MFO" maxlength="5" placeholder="00873 (Kapitalbank)">
+          </div>
+          <div class="form-group">
+            <label>Hisob raqam (h/r - 20 ta raqam)</label>
+            <input type="text" name="Hisob_Raqam" maxlength="20" placeholder="20208000...">
+          </div>
+        </div>
+
+        <div class="section-title">👤 2. Mas'ul Shaxs (Admin) Ma'lumotlari</div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Mas'ul shaxs F.I.Sh <span class="req">*</span></label>
+            <input type="text" name="Masul_FIO" placeholder="Rustamov Anvar" required>
+          </div>
+          <div class="form-group">
+            <label>Lavozimi</label>
+            <input type="text" name="Lavozimi" placeholder="Direktor / Bosh buxgalter">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Telefon raqam <span class="req">*</span></label>
+            <input type="tel" name="Telefon_Raqam" placeholder="+998 90 123 45 67" required>
+          </div>
+          <div class="form-group">
+            <label>Elektron pochta (Email) <span class="req">*</span></label>
+            <input type="email" name="Email_Manzil" placeholder="anvar@kompaniya.uz" required>
+          </div>
+        </div>
+
+        <div class="section-title">⚙️ 3. Kerakli Tizim Modullari</div>
+        <div class="modules-grid">
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="POS_Kassa" checked>
+            <span>Chakana POS Kassa</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="Ombor_Sklad" checked>
+            <span>Ombor & Inventarizatsiya</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="Buxgalteriya" checked>
+            <span>Buxgalteriya & QQS</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="CRM_Savdo" checked>
+            <span>CRM & Mijozlar bazasi</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="E_Faktura_Didox" checked>
+            <span>E-Faktura (Didox/Soliq)</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="Modullar[]" value="HR_Oylik" checked>
+            <span>Xodimlar & Oylik maosh</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit">So'rovni Yuborish 🚀</button>
+        <p class="footer-note">Ma'lumotlar xavfsiz himoyalangan va to'g'ridan-to'g'ri SAPAR ERP ma'muriyatiga yuboriladi.</p>
+      </form>
+    </div>
+
+    <div id="successScreen" class="success-screen">
+      <div class="success-icon">✓</div>
+      <h2 style="font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 8px;">So'rovingiz Qabul Qilindi!</h2>
+      <p style="color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 420px; margin: 0 auto 20px;">
+        Rahmat! Ma'lumotlaringiz muvaffaqiyatli qabul qilindi. Mutaxassislarimiz 15 daqiqa ichida siz bilan bog'lanib, shaxsiy ERP bazangizga kirish yo'riqnomasini yuborishadi.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function handleStirChange(val) {
+      const clean = val.replace(/\D/g, '');
+      const badge = document.getElementById('stirBadge');
+      const companyInput = document.getElementById('companyName');
+      const cityInput = document.getElementById('city');
+
+      if (clean.length === 9) {
+        badge.style.display = 'block';
+        document.getElementById('companyDetected').innerText = 'STIR ' + clean + ' tasdiqlandi';
+        if (!companyInput.value) {
+          companyInput.value = 'MCHJ (STIR: ' + clean + ')';
+        }
+        if (!cityInput.value) {
+          cityInput.value = 'Toshkent shahri';
+        }
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

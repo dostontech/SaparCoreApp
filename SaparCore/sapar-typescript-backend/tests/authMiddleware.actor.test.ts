@@ -30,7 +30,7 @@ describe('protect actor resolution', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('attaches req.actor with a perms map keyed by moduleSlug', async () => {
-    (prisma.user.findUnique as any).mockResolvedValue({ id: 'u1', ownerId: null, roleId: 'r1' });
+    (prisma.user.findUnique as any).mockResolvedValue({ id: 'u1', ownerId: 'owner-1', user_type: 2, roleId: 'r1' });
     (prisma.role.findUnique as any).mockResolvedValue({ id: 'r1', roleName: 'Staff' });
     (prisma.permission.findMany as any).mockResolvedValue([
       { roleId: 'r1', create: false, edit: false, delete: false, view: true, allowAll: false, module: { moduleSlug: 'invoices' } },

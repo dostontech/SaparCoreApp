@@ -3,6 +3,15 @@ import rateLimit from 'express-rate-limit';
 
 import { prisma } from '../lib/prisma';
 import { resolveDisplayName } from '../lib/contacts/contactIdentity';
+import {
+  getCompanyByTin,
+  listBanks,
+  getBankByMfo,
+  getCbuRates,
+  searchMxik,
+  getMxikCategories,
+  getMxikByCode,
+} from '../controllers/uzRegistryController';
 
 const router = Router();
 
@@ -303,5 +312,16 @@ router.get('/tenant/resolve', limiter, async (req: Request, res: Response): Prom
     res.status(500).json({ success: false, message: 'Failed to resolve tenant', error: err?.message || String(err) });
   }
 });
+
+// ---------------------------------------------------------------------------
+// 🇺🇿 Uzbekistan Digital Government & Soliq Open Registry Routes
+// ---------------------------------------------------------------------------
+router.get('/registry/company/:tin', getCompanyByTin);
+router.get('/registry/banks', listBanks);
+router.get('/registry/bank/:mfo', getBankByMfo);
+router.get('/registry/rates', getCbuRates);
+router.get('/registry/mxik', searchMxik);
+router.get('/registry/mxik/categories', getMxikCategories);
+router.get('/registry/mxik/:code', getMxikByCode);
 
 module.exports = router;

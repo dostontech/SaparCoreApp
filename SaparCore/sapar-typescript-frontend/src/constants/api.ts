@@ -489,6 +489,19 @@ const Constants = {
   AUTH_QR_SESSION_URL: `${API_BASE_URL}/auth/qr/session`,
   AUTH_QR_STATUS_URL: `${API_BASE_URL}/auth/qr/status`,
   AUTH_QR_APPROVE_URL: `${API_BASE_URL}/auth/qr/approve`,
+  AUTH_ONEID_INIT_URL: `${API_BASE_URL}/auth/oneid/init`,
+  AUTH_ONEID_STATUS_URL: `${API_BASE_URL}/auth/oneid/status`,
+  AUTH_EMAIL_SEND_CODE_URL: `${API_BASE_URL}/auth/email/send-code`,
+  AUTH_EMAIL_VERIFY_CODE_URL: `${API_BASE_URL}/auth/email/verify-code`,
+  SAAS_ONBOARDING_COMPLETE_URL: `${API_BASE_URL}/admin/saas/onboarding/complete`,
+  SAAS_MY_MODULES_URL: `${API_BASE_URL}/admin/saas/my-modules`,
+  // Uzbekistan Open Registry & CBU Rates
+  REGISTRY_COMPANY_LOOKUP_URL: `${API_BASE_URL}/public/registry/company`,
+  REGISTRY_BANKS_URL: `${API_BASE_URL}/public/registry/banks`,
+  REGISTRY_BANK_MFO_URL: `${API_BASE_URL}/public/registry/bank`,
+  REGISTRY_RATES_URL: `${API_BASE_URL}/public/registry/rates`,
+  REGISTRY_MXIK_SEARCH_URL: `${API_BASE_URL}/public/registry/mxik`,
+  REGISTRY_MXIK_CATEGORIES_URL: `${API_BASE_URL}/public/registry/mxik/categories`,
 };
 
 export default Constants;

@@ -41,9 +41,25 @@ if (typeof window !== 'undefined') {
 
 store.dispatch(initializeAuth());
 
-// Request interceptor: automatically attach Authorization header when token is present
+import Constants from './constants/api';
+
+// Configure default base URL when running in production/hosted environment
+if (Constants.BASE_URL) {
+  axios.defaults.baseURL = Constants.BASE_URL;
+}
+
+// Request interceptor: automatically resolve backend URL for relative /api paths and attach token
 axios.interceptors.request.use((config) => {
-  const token = Cookies.get('authToken') || localStorage.getItem('authToken') || localStorage.getItem('token');
+  // If the URL is relative like "/api/..." and BASE_URL is set, route directly to the backend API host
+  if (Constants.BASE_URL && config.url && config.url.startsWith('/api') && !config.url.startsWith('http')) {
+    config.url = `${Constants.BASE_URL}${config.url}`;
+  }
+
+  const token =
+    Cookies.get('authToken') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('sapar_token');
   const authHeader = config.headers.Authorization as string | undefined;
   if (token && (!authHeader || authHeader === 'Bearer ' || authHeader === 'Bearer undefined' || authHeader === 'Bearer null')) {
     config.headers.Authorization = `Bearer ${token}`;

@@ -251,3 +251,67 @@ export async function approveQrSession(req: Request, res: Response): Promise<voi
     res.status(500).json({ message: 'Server xatoligi.' });
   }
 }
+
+/**
+ * 7. Send Real Email Verification / Activation Code
+ */
+export async function sendEmailCode(req: Request, res: Response): Promise<void> {
+  const { email, name } = req.body as { email: string; name?: string };
+  if (!email) {
+    res.status(400).json({ message: 'Email manzilini kiritish majburiy.' });
+    return;
+  }
+
+  try {
+    const { EmailVerificationService } = await import('../services/emailVerificationService');
+    const result = await EmailVerificationService.sendActivationCode(email, name);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ message: err.message || 'Email kodini yuborishda xatolik yuz berdi.' });
+  }
+}
+
+/**
+ * 8. Verify Email Code and Activate / Authenticate
+ */
+export async function verifyEmailCode(req: Request, res: Response): Promise<void> {
+  const { email, code } = req.body as { email: string; code: string };
+  if (!email || !code) {
+    res.status(400).json({ message: 'Email va tasdiqlash kodi talab qilinadi.' });
+    return;
+  }
+
+  try {
+    const { EmailVerificationService } = await import('../services/emailVerificationService');
+    const isValid = EmailVerificationService.verifyCode(email, code);
+    if (!isValid) {
+      res.status(400).json({ message: 'Tasdiqlash kodi notoʻgʻri yoki muddati tugagan.' });
+      return;
+    }
+
+    // Find existing user by email
+    let user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+
+    if (!user) {
+      // If user doesn't exist yet, return success code token so registration can finalize
+      res.json({
+        success: true,
+        verified: true,
+        message: 'Email muvaffaqiyatli tasdiqlandi.',
+      });
+      return;
+    }
+
+    const session = buildUserSession(req, user);
+    res.json({
+      success: true,
+      message: 'Email orqali muvaffaqiyatli kirildi.',
+      ...session,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Server xatoligi.' });
+  }
+}
+

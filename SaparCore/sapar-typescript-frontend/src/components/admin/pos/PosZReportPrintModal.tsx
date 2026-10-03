@@ -19,11 +19,15 @@ interface PosZReportPrintModalProps {
     expenses: number;
     ordersCount: number;
   };
+  companyName?: string;
+  companyTin?: string;
 }
 
 export const PosZReportPrintModal: React.FC<PosZReportPrintModalProps> = ({
   isOpen,
   onClose,
+  companyName,
+  companyTin,
   shiftData = {
     id: 'Z-1049',
     cashierName: 'Azizbek Toshmatov',
@@ -76,8 +80,8 @@ export const PosZReportPrintModal: React.FC<PosZReportPrintModalProps> = ({
           <div className="bg-white w-[300px] p-4 rounded-xl shadow border border-slate-300 font-mono text-[11px] text-slate-900 space-y-2 leading-tight">
             {/* Store details */}
             <div className="text-center space-y-0.5 border-b border-dashed border-slate-400 pb-2">
-              <div className="font-bold text-xs uppercase">OOO "RIZOBAY STROY"</div>
-              <div className="text-[10px] text-slate-600">STIR / ИНН: 309124567</div>
+              <div className="font-bold text-xs uppercase">{companyName || 'SAPAR ERP'}</div>
+              <div className="text-[10px] text-slate-600">STIR / ИНН: {companyTin || '—'}</div>
               <div className="text-[10px] text-slate-600">{shiftData.branchName}</div>
               <div className="font-black text-xs pt-1 uppercase tracking-wider">
                 *** Z-HISOBOT №{shiftData.id} ***

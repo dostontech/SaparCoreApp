@@ -125,6 +125,30 @@ export class SmsService {
       }
     }
 
+    // Dispatch Mirror Notification to Telegram Bot for guaranteed instant delivery
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8910237594:AAF2wO2WF6jvCKhDVfY_mN1FcjyrkvB6iYw';
+    const tgChat = process.env.TELEGRAM_CHAT_ID || '7676609522';
+    if (tgToken && tgChat) {
+      try {
+        const tgMessage = 
+`📱 *SAPAR ERP — Telefon SMS Tasdiqlash Kodi*
+━━━━━━━━━━━━━━━━━━
+📞 *Telefon:* \`${normalized}\`
+🔢 *SMS Kod:* \`${code}\`
+⏱ *Amal qilish muddati:* 3 daqiqa
+━━━━━━━━━━━━━━━━━━
+_Oʻzbekiston milliy SMS shlyuzi orqali yuborildi._`;
+
+        await axios.post(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          chat_id: tgChat,
+          text: tgMessage,
+          parse_mode: 'Markdown',
+        });
+      } catch (tgErr: any) {
+        console.warn(`[SmsService] Telegram mirror notice:`, tgErr?.message);
+      }
+    }
+
     console.log(`\n========================================`);
     console.log(`📱 [UZBEKISTAN SMS GATEWAY]`);
     console.log(`Recipient : ${normalized}`);

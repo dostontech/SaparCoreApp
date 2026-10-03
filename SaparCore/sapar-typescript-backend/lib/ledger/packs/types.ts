@@ -2,7 +2,7 @@ import type { AccountType } from '@prisma/client';
 import type { LedgerRole } from '../roles';
 
 export type TaxRegime =
-  | 'GST_INDIA' | 'VAT_UK' | 'VAT_EU' | 'SALES_TAX_US' | 'GST_AU' | 'GST_NZ';
+  | 'GST_INDIA' | 'VAT_UK' | 'VAT_EU' | 'SALES_TAX_US' | 'GST_AU' | 'GST_NZ' | 'VAT_GENERIC';
 
 export interface PackAccount {
   code: string;

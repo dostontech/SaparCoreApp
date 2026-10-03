@@ -24,31 +24,6 @@ const EIMZO_API_KEYS = [
   '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F',
 ];
 
-const MOCK_CERTIFICATES: EimzoCertificate[] = [
-  {
-    serialNumber: '7A8F9C0123456789',
-    tin: '309876543',
-    pinfl: '31204956780012',
-    commonName: 'RAHIMOVA AZIZA BOTIROVNA (Bosh Buxgalter)',
-    organization: 'OOO "SAPAR LOGISTICS & TRADE"',
-    validFrom: '2025-01-01',
-    validTo: '2027-01-01',
-    type: 'USB_TOKEN',
-    diskOrPath: 'USB Flash / E-Token (e-Kalit)',
-  },
-  {
-    serialNumber: '5B4E3D9988776655',
-    tin: '301234567',
-    pinfl: '32005911230045',
-    commonName: 'ABDUQODIROV ANVAR SHOKIROVICH (Direktor)',
-    organization: 'OOO "SAPAR LOGISTICS & TRADE"',
-    validFrom: '2024-06-15',
-    validTo: '2026-06-15',
-    type: 'PFX',
-    diskOrPath: 'F:\\E-IMZO_KEYS\\301234567.pfx',
-  },
-];
-
 export class EimzoClient {
   private static ws: WebSocket | null = null;
   private static wsConnected = false;
@@ -116,7 +91,7 @@ export class EimzoClient {
     try {
       const socket = await this.connectWebSocket();
       return new Promise((resolve) => {
-        const timeout = setTimeout(() => resolve(MOCK_CERTIFICATES), 1200);
+        const timeout = setTimeout(() => resolve([]), 1200);
 
         const onMessage = (event: MessageEvent) => {
           try {
@@ -138,7 +113,7 @@ export class EimzoClient {
                 keyId: c.keyId,
               }));
 
-              resolve(parsed.length > 0 ? parsed : MOCK_CERTIFICATES);
+              resolve(parsed);
             }
           } catch {
             // ignore
@@ -155,7 +130,7 @@ export class EimzoClient {
         }));
       });
     } catch {
-      return MOCK_CERTIFICATES;
+      return [];
     }
   }
 
