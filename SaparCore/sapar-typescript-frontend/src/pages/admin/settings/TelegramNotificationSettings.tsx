@@ -385,7 +385,7 @@ export default function TelegramNotificationSettings() {
                     type="text"
                     value={form.botToken}
                     onChange={(e) => update('botToken', e.target.value)}
-                    placeholder="Masalan: 7412345678:AAFakeTokenForSaparManagementBot"
+                    placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
                     className={controlClass}
                   />
                 </FormField>

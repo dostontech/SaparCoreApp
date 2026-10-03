@@ -26,9 +26,9 @@ export interface TelegramSettings {
 }
 
 export const DEFAULT_TELEGRAM_SETTINGS: TelegramSettings = {
-  enabled: true,
-  botToken: process.env.TELEGRAM_BOT_TOKEN || '7412345678:AAFakeTokenForSaparManagementBot',
-  chatId: process.env.TELEGRAM_CHAT_ID || '-1001234567890',
+  enabled: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
+  botToken: process.env.TELEGRAM_BOT_TOKEN || '',
+  chatId: process.env.TELEGRAM_CHAT_ID || '',
   dailySummaryEnabled: true,
   dailySummaryTime: '21:00',
   shiftZReportEnabled: true,

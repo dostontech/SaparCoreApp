@@ -25,7 +25,7 @@ import { OWNER_ROLE_NAME, ensureRole } from '../lib/defaultRoles';
 const prisma = new PrismaClient();
 
 const DEMO_EMAIL = 'admin@demo.sapar.local';
-const DEMO_PASSWORD = 'Demo123$';
+const DEMO_PASSWORD = process.env.DEMO_ADMIN_PASSWORD || 'DEMO_PASSWORD_CHANGE_ME';
 const DEMO_USER_ID = 'demo-admin-1';
 const DEMO_ROLE_ID = 'seed-role-administrator';
 const DEMO_COMPANY_ID = 'demo-company-1';

@@ -6,7 +6,7 @@ import { registerRenderCustomDomain } from '../lib/renderDomainManager';
 
 export async function createOrUpdateRizaboyCompany() {
   const email = 'rizaboy@sapar.uz';
-  const passwordRaw = 'Sapar123!';
+  const passwordRaw = process.env.RIZABOY_DEMO_PASSWORD || 'DEMO_PASSWORD_CHANGE_ME';
   const companyName = 'Rizaboy Test MCHJ';
   const subdomain = 'rizaboy';
   const publicBaseUrl = `https://${subdomain}.sapar.uz`;

